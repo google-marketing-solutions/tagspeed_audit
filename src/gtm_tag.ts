@@ -29,13 +29,13 @@ import {onTTFB, onFCP, onLCP, onFID, onCLS, Metric} from 'web-vitals';
 const PLATFORM_ORIGIN = 'FILL ME IN';
 
 /**
-   postToAnalysisPlatform uses postMessage to send the given metric to the
-   analysis platform.
+  postToAnalysisPlatform uses postMessage to send the given metric to the
+  analysis platform.
 
-   It is assumed that the analysis platform is the page's opener.
+  It is assumed that the analysis platform is the page's opener.
 
-   @param metric - The metric to send back to the platform.
- */
+  @param metric - The metric to send back to the platform.
+*/
 function postToAnalysisPlatform(metric: Metric) {
   const data = JSON.stringify(metric);
   window.opener.postMessage(data, PLATFORM_ORIGIN);
