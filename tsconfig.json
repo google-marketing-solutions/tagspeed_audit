@@ -4,10 +4,14 @@
     "rootDir": ".",
     "outDir": "build",
     "lib": [
-      "DOM"
-    ]
+      "DOM",
+      "es2020"
+    ],
+    "target": "es2020"
   },
   "include": [
+    "src/*.ts",
+    "test/*.ts",
     "src/**/*.ts",
     "test/**/*.ts"
   ]

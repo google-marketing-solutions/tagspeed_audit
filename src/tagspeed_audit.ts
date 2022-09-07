@@ -12,12 +12,7 @@ import 'gapi';
  */
 let TARGET_WINDOW: Window | null = null;
 
-const CLIENT_ID = '';
-const GTM_API_KEY = '';
-
-
-
-/**
+/*
  * Sets up a listener for window.postMessage messages.
  * The messages listened for will only be processed if they originate from the
  * target origin, provided by the origin parameter.
