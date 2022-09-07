@@ -10,8 +10,6 @@
     "target": "es2020"
   },
   "include": [
-    "src/*.ts",
-    "test/*.ts",
     "src/**/*.ts",
     "test/**/*.ts"
   ]
