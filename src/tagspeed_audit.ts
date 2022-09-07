@@ -39,7 +39,7 @@ function createMessageListener(origin: string) {
     if (event.origin !== origin) return;
     const metric = JSON.parse(event.data) as Metric;
     const resultsTable = document.getElementById('results-table');
-    if (!resultsTable) return;
+    if (resultsTable === null) return;
     resultsTable.innerHTML = `<tr><td>${metric.name}</td><td>${metric.delta}</td></tr>`;
   }
   removeEventListener('message', messageEventListener);
@@ -56,7 +56,7 @@ function openTargetWindow() {
   const targetURL = new URL(urlInput.value);
   if (TARGET_WINDOW === null || TARGET_WINDOW.closed) {
     TARGET_WINDOW = window.open(targetURL.toString());
-    if (!TARGET_WINDOW) return;
+    if (TARGET_WINDOW === null) return;
     TARGET_WINDOW.focus();
     createMessageListener(targetURL.origin);
   } else {
