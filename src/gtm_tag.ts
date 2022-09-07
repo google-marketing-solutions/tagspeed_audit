@@ -22,6 +22,8 @@
  *
  */
 
+import {onTTFB, onFCP, onLCP, onFID, onCLS, Metric} from 'web-vitals';
+
 // this needs to be provided, as opener.origin isn't available
 // TODO (b/238839377): find a way to fill in the platform's origin
 const PLATFORM_ORIGIN = 'FILL ME IN';
@@ -32,16 +34,16 @@ const PLATFORM_ORIGIN = 'FILL ME IN';
 
    It is assumed that the analysis platform is the page's opener.
 
-   @param {!webVitals.Metric} metric The metric to send.
+   @param metric - The metric to send back to the platform.
  */
-function postToAnalysisPlatform(metric) {
+function postToAnalysisPlatform(metric: Metric) {
   const data = JSON.stringify(metric);
   window.opener.postMessage(data, PLATFORM_ORIGIN);
 }
 
 // set up webVitals to send all metrics to the analysis platform
-webVitals.getTTFB(postToAnalysisPlatform);
-webVitals.getFCP(postToAnalysisPlatform);
-webVitals.getLCP(postToAnalysisPlatform);
-webVitals.getFID(postToAnalysisPlatform);
-webVitals.getCLS(postToAnalysisPlatform);
+onTTFB(postToAnalysisPlatform);
+onFCP(postToAnalysisPlatform);
+onLCP(postToAnalysisPlatform);
+onFID(postToAnalysisPlatform);
+onCLS(postToAnalysisPlatform);
