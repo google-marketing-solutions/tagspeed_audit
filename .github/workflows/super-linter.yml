@@ -20,6 +20,12 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
+          
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.4.1
+        with:
+          node-version: 16
+          # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.
 
       - name: Lint Code Base
         uses: github/super-linter/slim@v4
