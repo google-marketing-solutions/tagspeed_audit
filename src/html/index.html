@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tagspeed Audit</title>
+    <link rel="stylesheet" href="tagspeed_audit.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <div class="index-top">
+      <h1>Tagspeed Audit</h1>
+      <h2>Evaluate the Performance of your GTM-powered third party tags</h2>
+    </div>
+    <div class="index-bottom">
+      <!-- TODO: update the client id and redirect URL -->
+      <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID"
+         data-login_uri="https://your.domain/your_login_endpoint"
+         data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline"
+         data-text="sign_in_with"
+         data-shape="rectangular"
+         data-logo_alignment="left">
+      </div>
+      <p class="index_about_link"><a href="about.html">More Information</a></p>
+    </div>
+  </body>
+</html>

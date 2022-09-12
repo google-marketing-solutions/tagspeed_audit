@@ -1,0 +1,46 @@
+body {
+  margin: 0%;
+  font-family: system-ui, sans-serif;
+}
+
+.index-top {
+  background-color: #AECBFA;
+  color:  white;
+  text-align: center;
+  margin-bottom: 5%;
+  padding: 10% 10% 10% 10%;
+}
+
+h1 {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin: 0%;
+}
+
+h2 {
+  font-family: Roboto, sans-serif;
+  font-size: larger;
+  margin: 0%;
+  padding-top: 1vh;
+}
+
+.index-bottom {
+  display: grid;
+  grid-template-columns: repeat(4, lfr);
+  gap: 2em;
+  grid-auto-rows: 2vh;
+  grid-template-areas:
+    ". a ."
+    ". b .";
+}
+
+.g_id_signin {
+  grid-area: a;
+  align-self: center;
+  justify-self: center;
+}
+
+p.index_about_link {
+  grid-area: b;
+  align-self: center;
+  justify-self: center;
+}
