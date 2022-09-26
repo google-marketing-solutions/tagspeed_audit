@@ -9,7 +9,9 @@
   ],
   "license": "Apache-2.0",
   "keywords": [],
-  "engines": {"node": ">=16.0.0"},
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "gts lint",
@@ -27,6 +29,7 @@
   },
   "dependencies": {
     "@types/gapi": "^0.0.42",
+    "jose": "^4.9.3",
     "web-vitals": "^3.0.1"
   }
 }
