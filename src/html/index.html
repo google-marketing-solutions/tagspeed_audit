@@ -7,6 +7,12 @@
     <title>Tagspeed Audit</title>
     <link rel="stylesheet" href="tagspeed_audit.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="/dist/bundle.js"></script>
+    <script>
+      function handleCredentialResponse(response) {
+        TagspeedAudit.handleCredentialResponse(response);
+      }
+    </script>
   </head>
   <body>
     <div class="index-top">
@@ -14,10 +20,9 @@
       <h2>Evaluate the Performance of your GTM-powered third party tags</h2>
     </div>
     <div class="index-bottom">
-      <!-- TODO: update the client id and redirect URL -->
       <div id="g_id_onload"
          data-client_id="681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com"
-         data-login_uri="https://your.domain/your_login_endpoint"
+         data-callback="handleCredentialResponse"
          data-auto_prompt="false">
       </div>
       <div class="g_id_signin"

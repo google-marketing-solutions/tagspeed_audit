@@ -6,3 +6,6 @@ package-lock.json
 .DS_Store
 .AppleDouble
 .LSOverride
+
+#Webpack gitignore
+dist
