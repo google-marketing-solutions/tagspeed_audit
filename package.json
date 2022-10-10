@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@types/gapi": "^0.0.42",
+    "@types/google.accounts": "^0.0.2",
     "jwt-decode": "^3.1.2",
     "web-vitals": "^3.0.1"
   }

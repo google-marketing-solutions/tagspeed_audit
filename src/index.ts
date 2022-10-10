@@ -23,7 +23,9 @@
 // }
 // // TODO: more examples
 
-import { handleUserCredentialResponse } from "./user-controller";
+// TODO: Load libraries from here rather than the html
+
+import { handleUserCredentialResponse } from "./controllers/user-controller";
 
 module.exports = {
   handleCredentialResponse: handleUserCredentialResponse
