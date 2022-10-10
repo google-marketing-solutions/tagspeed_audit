@@ -9,6 +9,8 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="/dist/bundle.js"></script>
     <script>
+      // TODO: Figure out a better way to either invoke this,
+      // or move the instantiation of the GIS button to 
       function handleCredentialResponse(response) {
         TagspeedAudit.handleCredentialResponse(response);
       }
