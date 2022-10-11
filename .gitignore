@@ -1,3 +1,11 @@
 node_modules
 build
 package-lock.json
+
+# MacOS Specific gitignore
+.DS_Store
+.AppleDouble
+.LSOverride
+
+#Webpack gitignore
+dist
