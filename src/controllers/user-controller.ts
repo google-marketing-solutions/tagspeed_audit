@@ -21,7 +21,6 @@
 
 import jwtDecode from 'jwt-decode';
 import { User } from '../models/user';
-import { loadAccounts } from './tagmanager-controller';
 
 //Defined globally to simplify invocation
 const localStorage = window.localStorage;
