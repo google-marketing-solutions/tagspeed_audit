@@ -22,5 +22,5 @@
 import {handleUserCredentialResponse} from './controllers/user-controller';
 
 module.exports = {
-  handleCredentialResponse : handleUserCredentialResponse,
+  handleCredentialResponse: handleUserCredentialResponse,
 };

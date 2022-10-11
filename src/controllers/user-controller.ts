@@ -56,8 +56,9 @@ export function logoutUser(): void {
   localStorage.removeItem('logged-in');
   const accessToken = localStorage.getItem('access_token')!;
   if (accessToken !== null) {
-    google.accounts.oauth2.revoke(
-        accessToken, () => {console.log('access token revoked')});
+    google.accounts.oauth2.revoke(accessToken, () => {
+      console.log('access token revoked');
+    });
   }
   localStorage.removeItem('access_token');
 }
@@ -80,14 +81,16 @@ function hideAuthenticationShowAuthorisation(user: User): void {
   const bottomFlow = document.getElementById('bottom-flow')!;
   bottomFlow.innerHTML = '';
   const p = document.createElement('p');
-  p.innerHTML = 'Welcome ' + user.name +
-      ', please authorise the app to continue. <br/>' +
-      'You will have to do this only once. <br/>';
+  p.innerHTML =
+    'Welcome ' +
+    user.name +
+    ', please authorise the app to continue. <br/>' +
+    'You will have to do this only once. <br/>';
 
   const authorisationButton = document.createElement('button');
   authorisationButton.id = 'auth-button';
   authorisationButton.type = 'submit';
-  authorisationButton.innerHTML = 'Authorize Tagspeed Audit'
+  authorisationButton.innerHTML = 'Authorize Tagspeed Audit';
   authorisationButton.onclick = () => authoriseUser(user);
 
   bottomFlow.appendChild(p);
@@ -110,7 +113,7 @@ function hideAuthenticationShowAuthorisation(user: User): void {
  */
 function authoriseUser(user: User): void {
   const clientId =
-      '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com';
+    '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com';
   const scopes = 'https://www.googleapis.com/auth/tagmanager.readonly';
 
   tokenClient = google.accounts.oauth2.initTokenClient({
@@ -141,7 +144,7 @@ export function requestToken() {
 }
 
 module.exports = {
-  handleUserCredentialResponse : handleUserCredentialResponse,
-  isUserLoggedIn : isUserLoggedIn,
-  logoutUser : logoutUser,
+  handleUserCredentialResponse: handleUserCredentialResponse,
+  isUserLoggedIn: isUserLoggedIn,
+  logoutUser: logoutUser,
 };
