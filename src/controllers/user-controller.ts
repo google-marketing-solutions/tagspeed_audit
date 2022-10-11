@@ -21,6 +21,7 @@
 
 import jwtDecode from 'jwt-decode';
 import { User } from '../models/user';
+import { loadAccounts } from './tagmanager-controller';
 
 //Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -31,8 +32,6 @@ let tokenClient:google.accounts.oauth2.TokenClient;
 /**
  * Handles the response from GIS button, including JWT decoding
  */
-// TODO: Add or find type declaration for the response 
-// object instead of 'any'
 export function handleUserCredentialResponse(response: any): void {
     // TODO: Error handling in case there's no credential
     const decodedUserdata:any = jwtDecode(response.credential);
@@ -47,7 +46,7 @@ export function handleUserCredentialResponse(response: any): void {
     // To-do: Use localStorage wrapper? 
     const userJson = JSON.stringify(user);
     localStorage.setItem('logged-in', userJson);
-    hideAuthenticationShowAuthorisation();
+    hideAuthenticationShowAuthorisation(user);
 }
 
 /**
@@ -77,12 +76,7 @@ export function isUserLoggedIn():Boolean {
  * process by removing the GIS auth button and displaying a step
  * that allows users to prompt authorisation to the APIs
  */
-function hideAuthenticationShowAuthorisation():void {
-    // TODO: Error handling in case there isn't a logged in user?
-    // Worth passing user as param?
-    const userJson:string = localStorage.getItem('logged-in')!;
-    const user:User = JSON.parse(userJson) as User;
-
+function hideAuthenticationShowAuthorisation(user:User):void {
     const bottomFlow = document.getElementById('bottom-flow')!;
     bottomFlow.innerHTML = "";
     const p = document.createElement('p');
@@ -94,7 +88,7 @@ function hideAuthenticationShowAuthorisation():void {
     authorisationButton.id = 'auth-button';
     authorisationButton.type = 'submit';
     authorisationButton.innerHTML = 'Authorize Tagspeed Audit'
-    authorisationButton.onclick = authoriseUser;
+    authorisationButton.onclick = () => authoriseUser(user);
 
     bottomFlow.appendChild(p);
     bottomFlow.appendChild(authorisationButton);
@@ -114,11 +108,7 @@ function hideAuthenticationShowAuthorisation():void {
  * initialisation, this has been encapsulated in a separate, exported
  * function.
  */
-function authoriseUser():void {
-    // TODO: Error handling in case there isn't a logged in user?
-    // Although same as above, worth passing as param?
-    const userJson:string = localStorage.getItem('logged-in')!;
-    const user:User = JSON.parse(userJson) as User;
+function authoriseUser(user:User):void {
     const clientId = '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com';
     const scopes = 'https://www.googleapis.com/auth/tagmanager.readonly';
 
