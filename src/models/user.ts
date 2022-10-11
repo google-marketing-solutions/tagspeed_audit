@@ -15,12 +15,15 @@
  */
 
 /**
- * @fileoverview Entry point for exposing methods from the bundle to the views
- * and orchestration if required.
+ * @fileoverview Type declaration for User model
  */
 
-import { handleUserCredentialResponse } from "./controllers/user-controller";
+export interface User {
+    id: string;
+    given_name: string;
+    family_name: string;
+    name: string;
+    email: string;
+    picture: string;
+}
 
-module.exports = {
-  handleCredentialResponse: handleUserCredentialResponse
-};
