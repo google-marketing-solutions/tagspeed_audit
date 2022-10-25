@@ -19,8 +19,10 @@
  * and orchestration if required.
  */
 
-import {handleUserCredentialResponse} from './controllers/user-controller';
+import { handleUserCredentialResponse } from './controllers/user-controller';
+import { AuthoriseBox } from './components/authorise-box'
 
 module.exports = {
   handleCredentialResponse: handleUserCredentialResponse,
+  AuthoriseBox: AuthoriseBox
 };
