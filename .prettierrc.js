@@ -1,4 +1,3 @@
 module.exports = {
-  ...require('gts/.prettierrc.json'),
-  bracketSpacing: false
+  ...require('gts/.prettierrc.json')
 }
