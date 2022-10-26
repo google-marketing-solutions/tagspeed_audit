@@ -25,7 +25,7 @@
  * be fired for the component to know it shoud update.
  */
 
-import {LitElement, html} from 'lit';
+import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {handleUserCredentialResponse, isUserLoggedIn, authoriseUser} from '../controllers/user-controller';
 import {User} from '../models/user';
@@ -42,6 +42,12 @@ export class AuthoriseBox extends LitElement {
 
   private _user: User | null = null;
   @state() private _isLoggedIn = false;
+
+  static styles = css`
+    .authorise {
+      text-align: center;
+    }
+  `;
 
   constructor() {
     super();
@@ -125,8 +131,11 @@ export class AuthoriseBox extends LitElement {
     }
     else if (this._isLoggedIn) {
       return html`
-      Thanks, ${this._user?.name}! Please click the button to authorise Tagspeed Audit for your GA properties.
-      <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
+      <p class="authorise">
+        Thanks, ${this._user?.name}! Please click the button to authorise
+        Tagspeed Audit for your GA properties.<br/><br/>
+        <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
+      </p>
       `;
     }
     else {
