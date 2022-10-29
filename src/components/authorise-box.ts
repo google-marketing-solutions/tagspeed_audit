@@ -30,7 +30,7 @@ import {customElement, state} from 'lit/decorators.js';
 import {
   handleUserCredentialResponse,
   isUserLoggedIn,
-  authoriseUser
+  authoriseUser,
 } from '../controllers/user-controller';
 import {User} from '../models/user';
 
@@ -43,7 +43,6 @@ declare global {
 
 @customElement('authorise-box')
 export class AuthoriseBox extends LitElement {
-
   private _user: User | null = null;
   @state() private _isLoggedIn = false;
 
@@ -82,14 +81,14 @@ export class AuthoriseBox extends LitElement {
   renderGISButton(): void {
     google.accounts.id.initialize({
       client_id: '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com',
-      callback: handleUserCredentialResponse
+      callback: handleUserCredentialResponse,
     });
     const gisButtonDiv = document.getElementById('gis-button-div');
 
     if (gisButtonDiv) {
       google.accounts.id.renderButton(
         gisButtonDiv,
-        {theme: 'outline', size: 'large', type: 'standard'}  // customization attributes
+        {theme: 'outline', size: 'large', type: 'standard'} // customization attributes
       );
       google.accounts.id.prompt();
     }
@@ -130,20 +129,18 @@ export class AuthoriseBox extends LitElement {
   render() {
     if (!this._isLoggedIn) {
       return html`<slot></slot>`;
-    }
-    else if (this._isLoggedIn) {
+    } else if (this._isLoggedIn) {
       return html`
-      <p class="authorise">
-        Thanks, ${this._user?.name}! Please click the button to authorise
-        Tagspeed Audit for your GA properties.<br /><br />
-        <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
-      </p>
+         <p class="authorise">
+           Thanks, ${this._user?.name}! Please click the button to authorise
+           Tagspeed Audit for your GA properties.<br /><br />
+           <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
+         </p>
       `;
-    }
-    else {
+    } else {
       return html`
-<p>There seems to have been an error. Please refresh the page.</p>
-`;
+       <p>There seems to have been an error. Please refresh the page.</p>
+      `;
     }
   }
 }

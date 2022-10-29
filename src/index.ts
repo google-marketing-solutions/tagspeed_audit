@@ -20,9 +20,9 @@
  */
 
 import {handleUserCredentialResponse} from './controllers/user-controller';
-import {AuthoriseBox} from './components/authorise-box'
+import {AuthoriseBox} from './components/authorise-box';
 
 module.exports = {
   handleCredentialResponse: handleUserCredentialResponse,
-  AuthoriseBox: AuthoriseBox
+  AuthoriseBox: AuthoriseBox,
 };
