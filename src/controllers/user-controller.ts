@@ -48,7 +48,7 @@ export function handleUserCredentialResponse(response: any): void {
   localStorage.setItem('logged-in', userJson);
   const event = new CustomEvent<User>('gis-logged-in', {detail: user});
   // We need to let the authorise-box know that the login is complete
-  const authBox = (document.getElementsByTagName('authorise-box'))[0];
+  const authBox = document.getElementsByTagName('authorise-box')[0];
   authBox.dispatchEvent(event);
 }
 

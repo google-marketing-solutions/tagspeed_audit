@@ -27,7 +27,11 @@
 
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
-import {handleUserCredentialResponse, isUserLoggedIn, authoriseUser} from '../controllers/user-controller';
+import {
+  handleUserCredentialResponse,
+  isUserLoggedIn,
+  authoriseUser
+} from '../controllers/user-controller';
 import {User} from '../models/user';
 
 // The event type used to signal that the user has been logged in.
@@ -85,7 +89,7 @@ export class AuthoriseBox extends LitElement {
     if (gisButtonDiv) {
       google.accounts.id.renderButton(
         gisButtonDiv,
-        {theme: "outline", size: "large", type: "standard"}  // customization attributes
+        {theme: 'outline', size: 'large', type: 'standard'}  // customization attributes
       );
       google.accounts.id.prompt();
     }
@@ -125,21 +129,21 @@ export class AuthoriseBox extends LitElement {
    */
   render() {
     if (!this._isLoggedIn) {
-      return html`
-        <slot></slot>
-      `;
+      return html`<slot></slot>`;
     }
     else if (this._isLoggedIn) {
       return html`
       <p class="authorise">
         Thanks, ${this._user?.name}! Please click the button to authorise
-        Tagspeed Audit for your GA properties.<br/><br/>
+        Tagspeed Audit for your GA properties.<br /><br />
         <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
       </p>
       `;
     }
     else {
-      return html`<p>There seems to have been an error. Please refresh the page.</p>`;
+      return html`
+<p>There seems to have been an error. Please refresh the page.</p>
+`;
     }
   }
 }
