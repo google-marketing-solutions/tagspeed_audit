@@ -80,7 +80,8 @@ export class AuthoriseBox extends LitElement {
    */
   renderGISButton(): void {
     google.accounts.id.initialize({
-      client_id: '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com',
+      client_id:
+              '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com',
       callback: handleUserCredentialResponse,
     });
     const gisButtonDiv = document.getElementById('gis-button-div');
@@ -131,15 +132,15 @@ export class AuthoriseBox extends LitElement {
       return html`<slot></slot>`;
     } else if (this._isLoggedIn) {
       return html`
-         <p class="authorise">
-           Thanks, ${this._user?.name}! Please click the button to authorise
-           Tagspeed Audit for your GA properties.<br /><br />
-           <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
-         </p>
+        <p class="authorise">
+          Thanks, ${this._user?.name}! Please click the button to authorise
+          Tagspeed Audit for your GA properties.<br /><br />
+          <button @click=${this.authorise}>Authorise Tagspeed Audit</button>
+        </p>
       `;
     } else {
       return html`
-       <p>There seems to have been an error. Please refresh the page.</p>
+        <p>There seems to have been an error. Please refresh the page.</p>
       `;
     }
   }

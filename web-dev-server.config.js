@@ -6,5 +6,5 @@ export default {
   nodeResolve: {
     exportConditions: ['development'],
     dedupe: true,
-  }
+  },
 };
