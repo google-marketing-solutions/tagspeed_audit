@@ -81,7 +81,7 @@ export class AuthoriseBox extends LitElement {
   renderGISButton(): void {
     google.accounts.id.initialize({
       client_id:
-              '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com',
+        '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com',
       callback: handleUserCredentialResponse,
     });
     const gisButtonDiv = document.getElementById('gis-button-div');
