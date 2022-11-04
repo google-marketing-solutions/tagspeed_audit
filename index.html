@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tagspeed Audit</title>
+  <link rel="preload" href="/dist/bundle.js" as="script" />
+  <script src="https://accounts.google.com/gsi/client" defer></script>
+  <script src="/dist/bundle.js" defer></script>
+  <style>
+    body {
+      margin: 0%;
+      font-family: system-ui, sans-serif;
+      text-align: center;
+    }
+
+    .index-top {
+      background-color: #AECBFA;
+      color: white;
+      text-align: center;
+      margin-bottom: 5%;
+      padding: 3vh;
+    }
+
+
+    h1 {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      margin: 0%;
+    }
+
+    h2 {
+      font-family: Roboto, sans-serif;
+      font-size: larger;
+      margin: 0%;
+      padding-top: 1vh;
+    }
+
+    #gis-button-div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="index-top">
+    <h1>Tagspeed Audit</h1>
+    <h2>Evaluate the Performance of your GTM-powered third party tags</h2>
+  </div>
+  <div class="index-bottom" id="bottom-flow">
+    <authorise-box class="authorise-box">
+      <div id="gis-button-div"></div>
+    </authorise-box>
+    <p class="index_about_link"><a href="about.html">More Information</a></p>
+  </div>
+</body>
+
+</html>

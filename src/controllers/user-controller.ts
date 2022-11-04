@@ -46,7 +46,10 @@ export function handleUserCredentialResponse(response: any): void {
   // To-do: Use localStorage wrapper?
   const userJson = JSON.stringify(user);
   localStorage.setItem('logged-in', userJson);
-  hideAuthenticationShowAuthorisation(user);
+  const event = new CustomEvent<User>('gis-logged-in', {detail: user});
+  // We need to let the authorise-box know that the login is complete
+  const authBox = document.getElementsByTagName('authorise-box')[0];
+  authBox.dispatchEvent(event);
 }
 
 /**
@@ -68,33 +71,8 @@ export function logoutUser(): void {
  *
  * @returns {boolean}
  */
-export function isUserLoggedIn(): Boolean {
+export function isUserLoggedIn(): boolean {
   return localStorage.getItem('logged-in') !== null;
-}
-
-/**
- * Handles the second step of the authentication and authorisation
- * process by removing the GIS auth button and displaying a step
- * that allows users to prompt authorisation to the APIs
- */
-function hideAuthenticationShowAuthorisation(user: User): void {
-  const bottomFlow = document.getElementById('bottom-flow')!;
-  bottomFlow.innerHTML = '';
-  const p = document.createElement('p');
-  p.innerHTML =
-    'Welcome ' +
-    user.name +
-    ', please authorise the app to continue. <br/>' +
-    'You will have to do this only once. <br/>';
-
-  const authorisationButton = document.createElement('button');
-  authorisationButton.id = 'auth-button';
-  authorisationButton.type = 'submit';
-  authorisationButton.innerHTML = 'Authorize Tagspeed Audit';
-  authorisationButton.onclick = () => authoriseUser(user);
-
-  bottomFlow.appendChild(p);
-  bottomFlow.appendChild(authorisationButton);
 }
 
 /**
@@ -111,7 +89,7 @@ function hideAuthenticationShowAuthorisation(user: User): void {
  * initialisation, this has been encapsulated in a separate, exported
  * function.
  */
-function authoriseUser(user: User): void {
+export function authoriseUser(user: User): void {
   const clientId =
     '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com';
   const scopes = 'https://www.googleapis.com/auth/tagmanager.readonly';
@@ -145,6 +123,7 @@ export function requestToken() {
 
 module.exports = {
   handleUserCredentialResponse: handleUserCredentialResponse,
+  authoriseUser: authoriseUser,
   isUserLoggedIn: isUserLoggedIn,
   logoutUser: logoutUser,
 };
