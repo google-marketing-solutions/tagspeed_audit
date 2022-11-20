@@ -18,157 +18,125 @@
  * @fileoverview Type declaration for Account model
  */
 
- export interface Account {
-  path: string,
-  accountId: string,
-  name: string,
-  shareData: boolean,
-  fingerprint: string,
-  tagManagerUrl: string,
+export interface Account {
+  path: string;
+  accountId: string;
+  name: string;
+  shareData: boolean;
+  fingerprint: string;
+  tagManagerUrl: string;
   features: {
-    supportUserPermissions: boolean,
-    supportMultipleContainers: boolean,
-  },
+    supportUserPermissions: boolean;
+    supportMultipleContainers: boolean;
+  };
 }
 
 export interface Container {
-  path: string,
-  accountId: string,
-  containerId: string,
-  name: string,
-  domainName: [
-    string
-  ],
-  publicId: string,
-  tagIds: [
-    string
-  ],
+  path: string;
+  accountId: string;
+  containerId: string;
+  name: string;
+  domainName: [string];
+  publicId: string;
+  tagIds: [string];
   features: {
-    supportUserPermissions: boolean,
-    supportEnvironments: boolean,
-    supportWorkspaces: boolean,
-    supportGtagConfigs: boolean,
-    supportBuiltInVariables: boolean,
-    supportClients: boolean,
-    supportFolders: boolean,
-    supportTags: boolean,
-    supportTemplates: boolean,
-    supportTriggers: boolean,
-    supportVariables: boolean,
-    supportVersions: boolean,
-    supportZones: boolean,
-  },
-  notes: string,
-  usageContext: [
-    string
-  ],
-  fingerprint: string,
-  tagManagerUrl: string,
-  taggingServerUrls: [
-    string
-  ]
+    supportUserPermissions: boolean;
+    supportEnvironments: boolean;
+    supportWorkspaces: boolean;
+    supportGtagConfigs: boolean;
+    supportBuiltInVariables: boolean;
+    supportClients: boolean;
+    supportFolders: boolean;
+    supportTags: boolean;
+    supportTemplates: boolean;
+    supportTriggers: boolean;
+    supportVariables: boolean;
+    supportVersions: boolean;
+    supportZones: boolean;
+  };
+  notes: string;
+  usageContext: [string];
+  fingerprint: string;
+  tagManagerUrl: string;
+  taggingServerUrls: [string];
 }
 
 export interface Workspace {
-  path: string,
-  accountId: string,
-  containerId: string,
-  workspaceId: string,
-  name: string,
-  description: string,
-  fingerprint: string,
-  tagManagerUrl: string,
+  path: string;
+  accountId: string;
+  containerId: string;
+  workspaceId: string;
+  name: string;
+  description: string;
+  fingerprint: string;
+  tagManagerUrl: string;
 }
 
 export interface Tag {
-  path: string,
-  accountId: string,
-  containerId: string,
-  workspaceId: string,
-  tagId: string,
-  name: string,
-  type: string,
-  firingRuleId: [
-    string
-  ],
-  blockingRuleId: [
-    string
-  ],
-  liveOnly: boolean,
+  path: string;
+  accountId: string;
+  containerId: string;
+  workspaceId: string;
+  tagId: string;
+  name: string;
+  type: string;
+  firingRuleId: [string];
+  blockingRuleId: [string];
+  liveOnly: boolean;
   priority: {
-    type: string,
-    key: string,
-    value: string,
-    list: [
-      (any)
-    ],
-    map: [
-      (any)
-    ]
-  },
-  notes: string,
-  scheduleStartMs: number,
-  scheduleEndMs: number,
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  notes: string;
+  scheduleStartMs: number;
+  scheduleEndMs: number;
   any: [
     {
-      type: string,
-      key: string,
-      value: string,
-      list: [
-        (any)
-      ],
-      map: [
-        (any)
-      ]
+      type: string;
+      key: string;
+      value: string;
+      list: [any];
+      map: [any];
     }
-  ],
-  fingerprint: string,
-  firingTriggerId: [
-    string
-  ],
-  blockingTriggerId: [
-    string
-  ],
+  ];
+  fingerprint: string;
+  firingTriggerId: [string];
+  blockingTriggerId: [string];
   setupTag: [
     {
-      tagName: string,
-      stopOnSetupFailure: boolean
+      tagName: string;
+      stopOnSetupFailure: boolean;
     }
-  ],
+  ];
   teardownTag: [
     {
-      tagName: string,
-      stopTeardownOnFailure: boolean
+      tagName: string;
+      stopTeardownOnFailure: boolean;
     }
-  ],
-  parentFolderId: string,
-  tagFiringOption: string,
-  tagManagerUrl: string,
-  paused: boolean,
+  ];
+  parentFolderId: string;
+  tagFiringOption: string;
+  tagManagerUrl: string;
+  paused: boolean;
   monitoringMetadata: {
-    type: string,
-    key: string,
-    value: string,
-    list: [
-      (any)
-    ],
-    map: [
-      (any)
-    ],
-  },
-  monitoringMetadataTagNameKey: string,
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  monitoringMetadataTagNameKey: string;
   consentSettings: {
-    consentStatus: string,
+    consentStatus: string;
     consentType: {
-      type: string,
-      key: string,
-      value: string,
-      list: [
-        (any)
-      ],
-      map: [
-        (any)
-      ],
-    }
-  }
+      type: string;
+      key: string;
+      value: string;
+      list: [any];
+      map: [any];
+    };
+  };
 }
