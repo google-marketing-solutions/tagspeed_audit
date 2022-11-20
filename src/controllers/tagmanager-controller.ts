@@ -32,13 +32,13 @@ const localStorage = window.localStorage;
  */
 export async function listAccounts() {
   await authorizedXhr('https://www.googleapis.com/tagmanager/v2/accounts')
-      .then((xhr: any) => {
-        const responseJson = JSON.parse(xhr.responseText);
-        localStorage.setItem('accounts', JSON.stringify(responseJson.account));
-      })
-      .catch((xhr: any) => {
-        console.log('failed ' + xhr.status);
-      });
+    .then((xhr: any) => {
+      const responseJson = JSON.parse(xhr.responseText);
+      localStorage.setItem('accounts', JSON.stringify(responseJson.account));
+    })
+    .catch((xhr: any) => {
+      console.log('failed ' + xhr.status);
+    });
 }
 
 /**
@@ -49,16 +49,19 @@ export async function listAccounts() {
  */
 export async function listContainers(parentPath: string) {
   await authorizedXhr(
-      'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/containers')
-      .then((xhr: any) => {
-        console.log()
-        const responseJson = JSON.parse(xhr.responseText);
-        localStorage.setItem(
-            'containers', JSON.stringify(responseJson.container));
-      })
-      .catch((xhr: any) => {
-        console.log('failed ' + xhr.status);
-      });
+    'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/containers'
+  )
+    .then((xhr: any) => {
+      console.log();
+      const responseJson = JSON.parse(xhr.responseText);
+      localStorage.setItem(
+        'containers',
+        JSON.stringify(responseJson.container)
+      );
+    })
+    .catch((xhr: any) => {
+      console.log('failed ' + xhr.status);
+    });
 }
 
 /**
@@ -69,15 +72,18 @@ export async function listContainers(parentPath: string) {
  */
 export async function listWorkspaces(parentPath: string) {
   await authorizedXhr(
-      'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/workspaces')
-      .then((xhr: any) => {
-        const responseJson = JSON.parse(xhr.responseText);
-        localStorage.setItem(
-            'workspaces', JSON.stringify(responseJson.workspace));
-      })
-      .catch((xhr: any) => {
-        console.log('failed ' + xhr.status);
-      });
+    'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/workspaces'
+  )
+    .then((xhr: any) => {
+      const responseJson = JSON.parse(xhr.responseText);
+      localStorage.setItem(
+        'workspaces',
+        JSON.stringify(responseJson.workspace)
+      );
+    })
+    .catch((xhr: any) => {
+      console.log('failed ' + xhr.status);
+    });
 }
 
 /**
@@ -88,14 +94,15 @@ export async function listWorkspaces(parentPath: string) {
  */
 export async function listTags(parentPath: string) {
   await authorizedXhr(
-      'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/tags')
-      .then((xhr: any) => {
-        const responseJson = JSON.parse(xhr.responseText);
-        localStorage.setItem('tags', JSON.stringify(responseJson.tag));
-      })
-      .catch((xhr: XMLHttpRequest) => {
-        console.log('failed ' + xhr.status);
-      });
+    'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/tags'
+  )
+    .then((xhr: any) => {
+      const responseJson = JSON.parse(xhr.responseText);
+      localStorage.setItem('tags', JSON.stringify(responseJson.tag));
+    })
+    .catch((xhr: any) => {
+      console.log('failed ' + xhr.status);
+    });
 }
 
 /**
@@ -110,7 +117,7 @@ function authorizedXhr(endpoint: string) {
   return new Promise((resolve, reject) => {
     const accessToken = localStorage.getItem('access_token')!;
     const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
       if (this.readyState === 4 && this.status === 200) {
         resolve(this);
       } else if (this.readyState === 4 && /^4|5/.test(String(this.status))) {
@@ -127,31 +134,31 @@ function authorizedXhr(endpoint: string) {
 }
 
 /**
-  * This function exemplifies the chained usage of the above functions,
-  * used for development, meant to be deleted.
-  */
- function requestGtmObjects() {
+ * This function exemplifies the chained usage of the above functions,
+ * used for development, meant to be deleted.
+ */
+function requestGtmObjects() {
   listAccounts()
-      .then(() => {
-        const accountsStr = localStorage.getItem('accounts');
-        const accounts: Account[] = JSON.parse(accountsStr!);
-        listContainers(accounts[0].path).then(() => {
-          console.log(localStorage.getItem('containers'));
-          const containerStr = localStorage.getItem('containers');
-          const containers: Container[] = JSON.parse(containerStr!);
-          listWorkspaces(containers[0].path).then(() => {
-            console.log(localStorage.getItem('workspaces'));
-            const workspacesStr = localStorage.getItem('workspaces');
-            const workspaces: Workspace[] = JSON.parse(workspacesStr!);
-            listTags(workspaces[0].path).then(() => {
-              console.log(localStorage.getItem('tags'));
-            });
+    .then(() => {
+      const accountsStr = localStorage.getItem('accounts');
+      const accounts: Account[] = JSON.parse(accountsStr!);
+      listContainers(accounts[0].path).then(() => {
+        console.log(localStorage.getItem('containers'));
+        const containerStr = localStorage.getItem('containers');
+        const containers: Container[] = JSON.parse(containerStr!);
+        listWorkspaces(containers[0].path).then(() => {
+          console.log(localStorage.getItem('workspaces'));
+          const workspacesStr = localStorage.getItem('workspaces');
+          const workspaces: Workspace[] = JSON.parse(workspacesStr!);
+          listTags(workspaces[0].path).then(() => {
+            console.log(localStorage.getItem('tags'));
           });
         });
-      })
-      .catch((reason) => {
-        console.log(reason);
       });
+    })
+    .catch(reason => {
+      console.log(reason);
+    });
 }
 
 module.exports = {
