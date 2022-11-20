@@ -15,7 +15,8 @@
  */
 
 /**
- * @fileoverview Type declaration for Account model
+ * @fileoverview Type declaration for the models used by GTM API
+ * related operations.
  */
 
 export interface Account {

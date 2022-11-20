@@ -30,7 +30,7 @@ const localStorage = window.localStorage;
  * @return Promise<void> Resolves whenever the API request has finished
  * and the response has been stored into localStorage
  */
-export async function listAccounts() {
+export async function fetchAccounts() {
   await authorizedXhr('https://www.googleapis.com/tagmanager/v2/accounts')
     .then((xhr: any) => {
       const responseJson = JSON.parse(xhr.responseText);
@@ -47,7 +47,7 @@ export async function listAccounts() {
  * @return Promise<void> Resolves whenever the API request has finished
  * and the response has been stored into localStorage
  */
-export async function listContainers(parentPath: string) {
+export async function fetchContainers(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/containers'
   )
@@ -70,7 +70,7 @@ export async function listContainers(parentPath: string) {
  * @return Promise<void> Resolves whenever the API request has finished
  * and the response has been stored into localStorage
  */
-export async function listWorkspaces(parentPath: string) {
+export async function fetchWorkspaces(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/workspaces'
   )
@@ -92,7 +92,7 @@ export async function listWorkspaces(parentPath: string) {
  * @return Promise<void> Resolves whenever the API request has finished
  * and the response has been stored into localStorage
  */
-export async function listTags(parentPath: string) {
+export async function fetchTags(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/tags'
   )
@@ -138,19 +138,19 @@ function authorizedXhr(endpoint: string) {
  * used for development, meant to be deleted.
  */
 function requestGtmObjects() {
-  listAccounts()
+  fetchAccounts()
     .then(() => {
       const accountsStr = localStorage.getItem('accounts');
       const accounts: Account[] = JSON.parse(accountsStr!);
-      listContainers(accounts[0].path).then(() => {
+      fetchContainers(accounts[0].path).then(() => {
         console.log(localStorage.getItem('containers'));
         const containerStr = localStorage.getItem('containers');
         const containers: Container[] = JSON.parse(containerStr!);
-        listWorkspaces(containers[0].path).then(() => {
+        fetchWorkspaces(containers[0].path).then(() => {
           console.log(localStorage.getItem('workspaces'));
           const workspacesStr = localStorage.getItem('workspaces');
           const workspaces: Workspace[] = JSON.parse(workspacesStr!);
-          listTags(workspaces[0].path).then(() => {
+          fetchTags(workspaces[0].path).then(() => {
             console.log(localStorage.getItem('tags'));
           });
         });
@@ -162,8 +162,8 @@ function requestGtmObjects() {
 }
 
 module.exports = {
-  listAccounts,
-  listContainers,
-  listWorkspaces,
-  listTags,
+  fetchAccounts,
+  fetchContainers,
+  fetchWorkspaces,
+  fetchTags,
 };
