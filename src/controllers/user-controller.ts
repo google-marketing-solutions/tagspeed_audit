@@ -20,7 +20,6 @@
  */
 
 import jwtDecode from 'jwt-decode';
-
 import {User} from '../models/user';
 
 // Defined globally to simplify invocation
@@ -112,7 +111,7 @@ export function authoriseUser(user: User): void {
 }
 
 /**
- * Encapsulated the request to the token client to obtain a new
+ * Encapsulates the request to the token client to obtain a new
  * token in case that the current one has expired.
  * Handling the token itself is defined on the callback of the
  * token client's initialisation.
