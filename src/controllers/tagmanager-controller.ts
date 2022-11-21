@@ -31,14 +31,12 @@ const localStorage = window.localStorage;
  * and the response has been stored into localStorage
  */
 export async function fetchAccounts() {
-  await authorizedXhr('https://www.googleapis.com/tagmanager/v2/accounts')
-    .then((xhr: any) => {
+  await authorizedXhr('https://www.googleapis.com/tagmanager/v2/accounts').then(
+    (xhr: any) => {
       const responseJson = JSON.parse(xhr.responseText);
       localStorage.setItem('accounts', JSON.stringify(responseJson.account));
-    })
-    .catch((xhr: any) => {
-      console.log('failed ' + xhr.status);
-    });
+    }
+  );
 }
 
 /**
@@ -50,18 +48,11 @@ export async function fetchAccounts() {
 export async function fetchContainers(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/containers'
-  )
-    .then((xhr: any) => {
-      console.log();
-      const responseJson = JSON.parse(xhr.responseText);
-      localStorage.setItem(
-        'containers',
-        JSON.stringify(responseJson.container)
-      );
-    })
-    .catch((xhr: any) => {
-      console.log('failed ' + xhr.status);
-    });
+  ).then((xhr: any) => {
+    console.log();
+    const responseJson = JSON.parse(xhr.responseText);
+    localStorage.setItem('containers', JSON.stringify(responseJson.container));
+  });
 }
 
 /**
@@ -73,17 +64,10 @@ export async function fetchContainers(parentPath: string) {
 export async function fetchWorkspaces(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/workspaces'
-  )
-    .then((xhr: any) => {
-      const responseJson = JSON.parse(xhr.responseText);
-      localStorage.setItem(
-        'workspaces',
-        JSON.stringify(responseJson.workspace)
-      );
-    })
-    .catch((xhr: any) => {
-      console.log('failed ' + xhr.status);
-    });
+  ).then((xhr: any) => {
+    const responseJson = JSON.parse(xhr.responseText);
+    localStorage.setItem('workspaces', JSON.stringify(responseJson.workspace));
+  });
 }
 
 /**
@@ -95,14 +79,10 @@ export async function fetchWorkspaces(parentPath: string) {
 export async function fetchTags(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/tags'
-  )
-    .then((xhr: any) => {
-      const responseJson = JSON.parse(xhr.responseText);
-      localStorage.setItem('tags', JSON.stringify(responseJson.tag));
-    })
-    .catch((xhr: any) => {
-      console.log('failed ' + xhr.status);
-    });
+  ).then((xhr: any) => {
+    const responseJson = JSON.parse(xhr.responseText);
+    localStorage.setItem('tags', JSON.stringify(responseJson.tag));
+  });
 }
 
 /**
