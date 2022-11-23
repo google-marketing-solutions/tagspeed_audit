@@ -15,8 +15,7 @@
  */
 
 /**
- * @fileoverview Code related to user flow management: Authentication,
- * authoriszation, logout, user change, and JWT token decoding
+ * @fileoverview Code related accessing the Google Tag Manager API
  */
 
 import {Account, Container, Workspace} from '../models/tag-manager';
@@ -88,12 +87,22 @@ export async function fetchTags(parentPath: string) {
 /**
  * Handles network requests with authentication, which is obtained from
  * localStorage as an access token and used as an Authorization Bearer header.
+ * 
+ * It uses an optional parameter to include a body in case of being a POST request.
+ * Following the MDN specification for XMLHttpRequest, if the body is empty,
+ * it sends a null value.
  *
  * @return Promise<XMLHttpRequest> Resolves with the fulfilled request if
  *     successful, and rejects with the status and error message whenever
  *     there's been a failure.
  */
-function authorizedXhr(endpoint: string) {
+function authorizedXhr(endpoint: string, body?: any) {
+  let method = 'GET';
+  if (body) {
+    method = 'POST';
+  } else {
+    body = null;
+  }
   return new Promise((resolve, reject) => {
     const accessToken = localStorage.getItem('access_token')!;
     const xhr = new XMLHttpRequest();
@@ -107,9 +116,9 @@ function authorizedXhr(endpoint: string) {
         });
       }
     };
-    xhr.open('GET', endpoint);
+    xhr.open(method, endpoint);
     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-    xhr.send();
+    xhr.send(body);
   });
 }
 
