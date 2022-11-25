@@ -21,6 +21,7 @@
 
 import jwtDecode from 'jwt-decode';
 import {User} from '../models/user';
+import { requestGtmObjects } from './tagmanager-controller';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -91,7 +92,8 @@ export function isUserLoggedIn(): boolean {
 export function authoriseUser(user: User): void {
   const clientId =
     '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com';
-  const scopes = 'https://www.googleapis.com/auth/tagmanager.readonly';
+  const scopes = 'https://www.googleapis.com/auth/tagmanager.readonly \
+                  https://www.googleapis.com/auth/tagmanager.edit.containers';
 
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: clientId,
@@ -104,6 +106,7 @@ export function authoriseUser(user: User): void {
       }
       console.log(response);
       localStorage.setItem('access_token', response.access_token);
+      requestGtmObjects();
     },
   });
 

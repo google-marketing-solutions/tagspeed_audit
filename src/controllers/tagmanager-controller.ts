@@ -23,6 +23,8 @@ import {Account, Container, Workspace} from '../models/tag-manager';
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
 
+// GTM Read functions
+
 /**
  * Lists all GTM Accounts that a user has access to via the GTM API.
  *
@@ -84,10 +86,26 @@ export async function fetchTags(parentPath: string) {
   });
 }
 
+// GTM Write functions
+
+export async function createWorkspace(parentPath: string) {
+  const body = {name: 'tagspeed'};
+  await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${parentPath}/workspaces`,
+    body
+  ).then((xhr: any) => {
+    console.log(xhr);
+    // const responseJson = JSON.parse(xhr.responseText);
+    // localStorage.setItem('tags', JSON.stringify(responseJson.tag));
+  });
+}
+
+// Underlying XHR Helper
+
 /**
  * Handles network requests with authentication, which is obtained from
  * localStorage as an access token and used as an Authorization Bearer header.
- * 
+ *
  * It uses an optional parameter to include a body in case of being a POST request.
  * Following the MDN specification for XMLHttpRequest, if the body is empty,
  * it sends a null value.
@@ -110,9 +128,11 @@ function authorizedXhr(endpoint: string, body?: any) {
       if (this.readyState === 4 && this.status === 200) {
         resolve(this);
       } else if (this.readyState === 4 && /^4|5/.test(String(this.status))) {
+        const error = JSON.parse(this.responseText);
         reject({
-          status: this.status,
-          statusText: this.statusText,
+          code: this.status,
+          message: error.message,
+          status: error.status,
         });
       }
     };
@@ -126,9 +146,9 @@ function authorizedXhr(endpoint: string, body?: any) {
  * This function exemplifies the chained usage of the above functions,
  * used for development, meant to be deleted.
  */
-function requestGtmObjects() {
-  fetchAccounts()
-    .then(() => {
+export function requestGtmObjects() {
+  try {
+    fetchAccounts().then(() => {
       const accountsStr = localStorage.getItem('accounts');
       const accounts: Account[] = JSON.parse(accountsStr!);
       fetchContainers(accounts[0].path).then(() => {
@@ -141,13 +161,16 @@ function requestGtmObjects() {
           const workspaces: Workspace[] = JSON.parse(workspacesStr!);
           fetchTags(workspaces[0].path).then(() => {
             console.log(localStorage.getItem('tags'));
+            createWorkspace(containers[0].path).catch((e: any) => {
+              console.log(e);
+            });
           });
         });
       });
-    })
-    .catch(reason => {
-      console.log(reason);
     });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 module.exports = {
@@ -155,4 +178,5 @@ module.exports = {
   fetchContainers,
   fetchWorkspaces,
   fetchTags,
+  requestGtmObjects,
 };
