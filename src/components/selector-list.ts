@@ -18,9 +18,9 @@
  * option from.
  */
 
-import { LitElement, html, css } from 'lit';
-import { customElement, state } from 'lit/decorators';
-import { map } from 'lit/directives/map';
+import {LitElement, html, css} from 'lit';
+import {customElement, state} from 'lit/decorators';
+import {map} from 'lit/directives/map';
 
 interface Account {
   path: string;
@@ -32,8 +32,8 @@ interface Account {
   features: {
     supportUserPermissions: boolean;
     supportMultipleContainers: boolean;
-  }
-};
+  };
+}
 
 interface Container {
   path: string;
@@ -63,7 +63,7 @@ interface Container {
   fingerprint: string;
   tagManagerUrl: string;
   taggingServerUrls: [string];
-};
+}
 
 interface Workspace {
   path: string;
@@ -74,25 +74,24 @@ interface Workspace {
   description: string;
   fingerprint: string;
   tagManagerUrl: string;
-};
+}
 
 @customElement('selector-list')
 export class SelectorList extends LitElement {
-
   @state() currentAccount = '';
   @state() currentContainer = '';
   @state() currentWorkspace = '';
 
   static styles = css`
     .card {
-      margin: .75em;
-      padding: .75em;
+      margin: 0.75em;
+      padding: 0.75em;
       border-radius: 3px;
       border: 2px #ccc solid;
-      border-radius: .6em;
+      border-radius: 0.6em;
       background-color: white;
     }
-`;
+  `;
 
   accountList() {
     const accountString = localStorage.getItem('accounts') ?? '';
@@ -100,13 +99,15 @@ export class SelectorList extends LitElement {
 
     return html`
       <ul>
-      ${map(accounts, (acc) => html`
-        <li>
-          <div class="card" @click=${this.fetchContainers(acc.path)}>
-            <span class="account-name">${acc.name}</span>
-            <span>${acc.accountId}</span>
-          </div>
-        </li>`)}
+        ${map(
+          accounts,
+          acc => html` <li>
+            <div class="card" @click=${this.fetchContainers(acc.path)}>
+              <span class="account-name">${acc.name}</span>
+              <span>${acc.accountId}</span>
+            </div>
+          </li>`
+        )}
       </ul>
     `;
   }
@@ -117,12 +118,14 @@ export class SelectorList extends LitElement {
 
     return html`
       <ul>
-        ${map(containers, (c) => html`
-          <li>
+        ${map(
+          containers,
+          c => html` <li>
             <div class="card" @click=${this.fetchWorkspaces(c.path)}>
               ${c.name} ${c.publicId} ${c.notes}
             </div>
-          </li>`)}
+          </li>`
+        )}
       </ul>
     `;
   }
@@ -133,23 +136,23 @@ export class SelectorList extends LitElement {
 
     return html`
       <ul>
-        ${map(workspaces, (ws) => html`
-          <li>
-            <div class="card" @click=${this.currentWorkspace = ws.workspaceId}>
-            ${ws.name} ${ws.description}
-            </div>
-          </li>
-        `)}
+        ${map(
+          workspaces,
+          ws => html`
+            <li>
+              <div
+                class="card"
+                @click=${(this.currentWorkspace = ws.workspaceId)}
+              >
+                ${ws.name} ${ws.description}
+              </div>
+            </li>
+          `
+        )}
       </ul>
       <button>Select Workspace</button>
     `;
-
-
   }
 
-
-
-  render() {
-
-  }
+  render() {}
 }
