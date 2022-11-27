@@ -3,6 +3,7 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
+    "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
     "lib": [
