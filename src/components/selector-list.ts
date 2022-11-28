@@ -21,60 +21,8 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators';
 import {map} from 'lit/directives/map';
-
-interface Account {
-  path: string;
-  accountId: string;
-  name: string;
-  shareData: boolean;
-  fingerprint: string;
-  tagManagerUrl: string;
-  features: {
-    supportUserPermissions: boolean;
-    supportMultipleContainers: boolean;
-  };
-}
-
-interface Container {
-  path: string;
-  accountId: string;
-  containerId: string;
-  name: string;
-  domainName: [string];
-  publicId: string;
-  tagIds: [string];
-  features: {
-    supportUserPermissions: boolean;
-    supportEnvironments: boolean;
-    supportWorkspaces: boolean;
-    supportGtagConfigs: boolean;
-    supportBuiltInVariables: boolean;
-    supportClients: boolean;
-    supportFolders: boolean;
-    supportTags: boolean;
-    supportTemplates: boolean;
-    supportTriggers: boolean;
-    supportVariables: boolean;
-    supportVersions: boolean;
-    supportZones: boolean;
-  };
-  notes: string;
-  usageContext: [string];
-  fingerprint: string;
-  tagManagerUrl: string;
-  taggingServerUrls: [string];
-}
-
-interface Workspace {
-  path: string;
-  accountId: string;
-  containerId: string;
-  workspaceId: string;
-  name: string;
-  description: string;
-  fingerprint: string;
-  tagManagerUrl: string;
-}
+import {Account, Container, Workspace} from '../models/tag-manager';
+import {fetchContainers} from '../controllers/tagmanager-controller';
 
 @customElement('selector-list')
 export class SelectorList extends LitElement {
@@ -93,6 +41,19 @@ export class SelectorList extends LitElement {
     }
   `;
 
+  async getContainers(path: string) {
+    const containers = fetchContainers(path)
+      .then(() => {
+        const containerString = localStorage.getItem('containers') ?? '';
+        return JSON.parse(containerString) as Container[];
+      })
+      .catch(() => {
+        console.log('Error getting the containers.');
+      });
+
+    return containers;
+  }
+
   accountList() {
     const accountString = localStorage.getItem('accounts') ?? '';
     const accounts = JSON.parse(accountString) as Account[];
@@ -102,7 +63,7 @@ export class SelectorList extends LitElement {
         ${map(
           accounts,
           acc => html` <li>
-            <div class="card" @click=${this.fetchContainers(acc.path)}>
+            <div class="card" @click=${this.getContainers(acc.path)}>
               <span class="account-name">${acc.name}</span>
               <span>${acc.accountId}</span>
             </div>
@@ -121,7 +82,7 @@ export class SelectorList extends LitElement {
         ${map(
           containers,
           c => html` <li>
-            <div class="card" @click=${this.fetchWorkspaces(c.path)}>
+            <div class="card" @click=${this.getWorkspaces(c.path)}>
               ${c.name} ${c.publicId} ${c.notes}
             </div>
           </li>`

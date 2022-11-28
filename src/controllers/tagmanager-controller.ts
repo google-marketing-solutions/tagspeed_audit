@@ -140,10 +140,3 @@ function requestGtmObjects() {
       console.log(reason);
     });
 }
-
-module.exports = {
-  fetchAccounts,
-  fetchContainers,
-  fetchWorkspaces,
-  fetchTags,
-};
