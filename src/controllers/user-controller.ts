@@ -102,8 +102,11 @@ export function authoriseUser(user: User): void {
         // TODO: Error handling
         console.log('failed');
       }
-      console.log(response);
       localStorage.setItem('access_token', response.access_token);
+      const event = new CustomEvent<User>('gis-authorised', {detail: user});
+      // We need to let the authorise-box know that the auth is complete before continuing.
+      const authBox = document.getElementsByTagName('authorise-box')[0];
+      authBox.dispatchEvent(event);
     },
   });
 

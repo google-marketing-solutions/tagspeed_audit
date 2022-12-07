@@ -38,6 +38,7 @@ import {User} from '../models/user';
 declare global {
   interface HTMLElementEventMap {
     'gis-logged-in': CustomEvent<{detail: User}>;
+    'gis-authorised': CustomEvent<{detail: User}>;
   }
 }
 
@@ -55,6 +56,7 @@ export class AuthoriseBox extends LitElement {
   constructor() {
     super();
     this.addEventListener('gis-logged-in', this.handleGISLoggedIn);
+    this.addEventListener('gis-authorised', this.handleGISAuthorised);
   }
 
   /**
@@ -110,6 +112,10 @@ export class AuthoriseBox extends LitElement {
     if (this._isLoggedIn) {
       this.requestUpdate();
     }
+  }
+
+  handleGISAuthorised(event: CustomEvent): void {
+    document.location.href = '/dist/account_list.html';
   }
 
   /**
