@@ -28,12 +28,25 @@ const localStorage = window.localStorage;
 // Defined for decoupled use
 let tokenClient: google.accounts.oauth2.TokenClient;
 
+interface GISResponse {
+  credential: string;
+}
+
+interface GISCredential {
+  sub: string;
+  given_name: string;
+  family_name: string;
+  name: string;
+  email: string;
+  picture: string;
+}
+
 /**
  * Handles the response from GIS button, including JWT decoding
  */
-export function handleUserCredentialResponse(response: any): void {
+export function handleUserCredentialResponse(response: GISResponse): void {
   // TODO: Error handling in case there's no credential
-  const decodedUserdata: any = jwtDecode(response.credential);
+  const decodedUserdata = jwtDecode(response.credential) as GISCredential;
   const user: User = {
     id: decodedUserdata.sub,
     given_name: decodedUserdata.given_name,

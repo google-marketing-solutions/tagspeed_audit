@@ -1,7 +1,6 @@
 import {SelectorList} from './selector-list';
 import {expect, fixture, html} from '@open-wc/testing';
 import {fake, replace, restore} from 'sinon';
-import {inspect} from 'util';
 
 describe('selector-list component', () => {
   it('should only show no account text without accounts', async () => {
@@ -30,7 +29,7 @@ describe('selector-list component', () => {
   });
 
   it('should only show account list before an account is chosen', async () => {
-    replace(localStorage, 'getItem', fakeLocalStorage);
+    replace(localStorage, 'getItem', fake(fakeLocalStorage));
     const selectorList = new SelectorList();
 
     const accountList = await fixture(html`
@@ -67,7 +66,7 @@ describe('selector-list component', () => {
   });
 
   it('should show the accounts and containers once an account is chosen', async () => {
-    replace(localStorage, 'getItem', fakeLocalStorage);
+    replace(localStorage, 'getItem', fake(fakeLocalStorage));
     const selectorList = new SelectorList();
     selectorList.currentAccount = testAccounts[0];
     selectorList.accountList = testAccounts;
@@ -108,7 +107,7 @@ describe('selector-list component', () => {
   });
 
   it('shows all three sections when a container is selected', async () => {
-    replace(localStorage, 'getItem', fakeLocalStorage);
+    replace(localStorage, 'getItem', fake(fakeLocalStorage));
     const selectorList = new SelectorList();
     selectorList.currentAccount = testAccounts[0];
     selectorList.accountList = testAccounts;
@@ -155,7 +154,7 @@ function fakeLocalStorage(key: string): string {
     case 'containers':
       return JSON.stringify(testContainers);
     case 'workspaces':
-      return JSON.stringify(testContainers);
+      return JSON.stringify(testWorkspaces);
     default:
       return '';
   }

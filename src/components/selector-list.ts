@@ -23,7 +23,6 @@ import {customElement, state} from 'lit/decorators.js';
 import {map} from 'lit/directives/map.js';
 import {Account, Container, Workspace} from '../models/tag-manager';
 import {
-  fetchAccounts,
   fetchContainers,
   fetchWorkspaces,
 } from '../controllers/tagmanager-controller';
@@ -76,7 +75,6 @@ export class SelectorList extends LitElement {
     .note {
       font-size: 0.8rem;
       font-weight: lighter;
-
     }
   `;
 
