@@ -63,31 +63,32 @@ export class SelectorList extends LitElement {
       border-radius: 0.6em;
       background-color: white;
     }
+
+    .name {
+      font-weight: bold;
+    }
+
+    .id {
+      font-weight: lighter;
+      font-style: italic;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      font-weight: lighter;
+
+    }
   `;
 
   constructor() {
     super();
+    const accountString = localStorage.getItem('accounts') ?? '[]';
+    this.accountList = JSON.parse(accountString) as Account[];
     this.currentAccount = null;
     this.currentContainer = null;
     this.currentWorkspace = null;
-    this.accountList = [];
     this.containerList = [];
     this.workspaceList = [];
-  }
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.getAccounts(); // We show accounts as soon as the component connects.
-  }
-
-  async getAccounts() {
-    try {
-      await fetchAccounts();
-    } catch {
-      this.updateAuthorisation();
-    }
-    const accountString = localStorage.getItem('accounts') ?? '';
-    this.accountList = JSON.parse(accountString) as Account[];
   }
 
   async getContainers(path: string) {
@@ -100,7 +101,7 @@ export class SelectorList extends LitElement {
     } catch {
       this.updateAuthorisation();
     }
-    const containerString = localStorage.getItem('containers') ?? '';
+    const containerString = localStorage.getItem('containers') ?? '[]';
     this.containerList = JSON.parse(containerString) as Container[];
     this.renderRoot.querySelector('#container-list')?.scrollIntoView(true);
   }
@@ -113,7 +114,7 @@ export class SelectorList extends LitElement {
     } catch {
       this.updateAuthorisation();
     }
-    const workspaceString = localStorage.getItem('containers') ?? '';
+    const workspaceString = localStorage.getItem('workspaces') ?? '[]';
     this.workspaceList = JSON.parse(workspaceString) as Workspace[];
     this.renderRoot.querySelector('#workspace-list')?.scrollIntoView(true);
   }
@@ -128,6 +129,15 @@ export class SelectorList extends LitElement {
   }
 
   accountListContent() {
+    if (this.accountList.length === 0) {
+      return html`
+        <h3>You have no GTM accounts</h3>
+        <p>
+          Please log in with an account with access to a GTM property or create
+          a GTM property with this account to continue.
+        </p>
+      `;
+    }
     return html`
       <section id="acccount-list">
         <h3>Choose an account</h3>
@@ -142,8 +152,8 @@ export class SelectorList extends LitElement {
                   this.getContainers(acc.path);
                 }}
               >
-                <span class="account-name">${acc.name}</span>
-                <span>${acc.accountId}</span>
+                <span class="name">${acc.name}</span>
+                <span class="id">(${acc.accountId})</span>
               </div>
             </li>`
           )}
@@ -168,7 +178,9 @@ export class SelectorList extends LitElement {
                     this.getWorkspaces(c.path);
                   }}
                 >
-                  ${c.name} ${c.publicId} ${c.notes}
+                  <span class="name">${c.name}</span>
+                  <span class="id">${c.publicId}</span>
+                  <span class="note">${c.notes}</span>
                 </div>
               </li>`
             )}
@@ -195,7 +207,8 @@ export class SelectorList extends LitElement {
                     this.currentWorkspace = ws;
                   }}
                 >
-                  ${ws.name} ${ws.description}
+                  <span class="name">${ws.name}</span>
+                  <span class="note">${ws.description}</span>
                 </div>
               </li>`
             )}

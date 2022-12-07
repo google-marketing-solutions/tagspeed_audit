@@ -32,6 +32,7 @@ import {
   isUserLoggedIn,
   authoriseUser,
 } from '../controllers/user-controller';
+import {fetchAccounts} from '../controllers/tagmanager-controller';
 import {User} from '../models/user';
 
 // The event type used to signal that the user has been logged in.
@@ -114,7 +115,8 @@ export class AuthoriseBox extends LitElement {
     }
   }
 
-  handleGISAuthorised(event: CustomEvent): void {
+  async handleGISAuthorised(event: CustomEvent) {
+    await fetchAccounts();
     document.location.href = '/dist/account_list.html';
   }
 
