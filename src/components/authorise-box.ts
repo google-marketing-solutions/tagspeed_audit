@@ -43,7 +43,7 @@ declare global {
 
 @customElement('authorise-box')
 export class AuthoriseBox extends LitElement {
-  private _user: User | null = null;
+  _user: User | null = null;
   @state() private _isLoggedIn = false;
 
   static styles = css`

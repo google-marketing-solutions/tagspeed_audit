@@ -119,10 +119,3 @@ export function authoriseUser(user: User): void {
 export function requestToken() {
   tokenClient.requestAccessToken({prompt: ''});
 }
-
-module.exports = {
-  handleUserCredentialResponse: handleUserCredentialResponse,
-  authoriseUser: authoriseUser,
-  isUserLoggedIn: isUserLoggedIn,
-  logoutUser: logoutUser,
-};
