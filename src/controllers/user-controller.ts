@@ -48,7 +48,9 @@ export function handleUserCredentialResponse(response: GISResponse): void {
   const event = new CustomEvent<User>('gis-logged-in', {detail: user});
   // We need to let the authorise-box know that the login is complete
   const authBox = document.getElementsByTagName('authorise-box')[0];
-  authBox.dispatchEvent(event);
+  if (authBox) {
+    authBox.dispatchEvent(event);
+  }
 }
 
 /**
