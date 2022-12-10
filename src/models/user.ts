@@ -26,3 +26,16 @@ export interface User {
   email: string;
   picture: string;
 }
+
+export interface GISResponse {
+  credential: string;
+}
+
+export interface GISCredential {
+  sub: string;
+  given_name: string;
+  family_name: string;
+  name: string;
+  email: string;
+  picture: string;
+}

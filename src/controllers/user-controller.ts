@@ -20,26 +20,13 @@
  */
 
 import jwtDecode from 'jwt-decode';
-import {User} from '../models/user';
+import {User, GISResponse, GISCredential} from '../models/user';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
 
 // Defined for decoupled use
 let tokenClient: google.accounts.oauth2.TokenClient;
-
-interface GISResponse {
-  credential: string;
-}
-
-interface GISCredential {
-  sub: string;
-  given_name: string;
-  family_name: string;
-  name: string;
-  email: string;
-  picture: string;
-}
 
 /**
  * Handles the response from GIS button, including JWT decoding
