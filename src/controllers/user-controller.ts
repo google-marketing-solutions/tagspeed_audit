@@ -20,7 +20,7 @@
  */
 
 import jwtDecode from 'jwt-decode';
-import {User} from '../models/user';
+import {User, GISResponse, GISCredential} from '../models/user';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -31,9 +31,9 @@ let tokenClient: google.accounts.oauth2.TokenClient;
 /**
  * Handles the response from GIS button, including JWT decoding
  */
-export function handleUserCredentialResponse(response: any): void {
+export function handleUserCredentialResponse(response: GISResponse): void {
   // TODO: Error handling in case there's no credential
-  const decodedUserdata: any = jwtDecode(response.credential);
+  const decodedUserdata = jwtDecode(response.credential) as GISCredential;
   const user: User = {
     id: decodedUserdata.sub,
     given_name: decodedUserdata.given_name,
@@ -102,8 +102,11 @@ export function authoriseUser(user: User): void {
         // TODO: Error handling
         console.log('failed');
       }
-      console.log(response);
       localStorage.setItem('access_token', response.access_token);
+      const event = new CustomEvent<User>('gis-authorised', {detail: user});
+      // We need to let the authorise-box know that the auth is complete before continuing.
+      const authBox = document.getElementsByTagName('authorise-box')[0];
+      authBox.dispatchEvent(event);
     },
   });
 

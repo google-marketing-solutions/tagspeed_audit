@@ -32,12 +32,14 @@ import {
   isUserLoggedIn,
   authoriseUser,
 } from '../controllers/user-controller';
+import {fetchAccounts} from '../controllers/tagmanager-controller';
 import {User} from '../models/user';
 
 // The event type used to signal that the user has been logged in.
 declare global {
   interface HTMLElementEventMap {
     'gis-logged-in': CustomEvent<{detail: User}>;
+    'gis-authorised': CustomEvent<{detail: User}>;
   }
 }
 
@@ -55,6 +57,7 @@ export class AuthoriseBox extends LitElement {
   constructor() {
     super();
     this.addEventListener('gis-logged-in', this.handleGISLoggedIn);
+    this.addEventListener('gis-authorised', this.handleGISAuthorised);
   }
 
   /**
@@ -110,6 +113,11 @@ export class AuthoriseBox extends LitElement {
     if (this._isLoggedIn) {
       this.requestUpdate();
     }
+  }
+
+  async handleGISAuthorised(event: CustomEvent) {
+    await fetchAccounts();
+    document.location.href = '/dist/account_list.html';
   }
 
   /**
