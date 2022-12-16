@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@open-wc/testing": "^3.1.7",
+    "@types/google.accounts": "^0.0.4",
     "@types/mocha": "^10.0.0",
     "@types/node": "^14.11.2",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
@@ -45,7 +46,6 @@
   "dependencies": {
     "@types/estree": "^1.0.0",
     "@types/gapi": "^0.0.42",
-    "@types/google.accounts": "^0.0.2",
     "jwt-decode": "^3.1.2",
     "lit": "^2.4.0",
     "web-vitals": "^3.0.1"
