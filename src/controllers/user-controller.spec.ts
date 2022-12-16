@@ -7,7 +7,6 @@ import {
 import {expect} from '@open-wc/testing';
 import {User} from '../models/user';
 import {InvalidTokenError} from 'jwt-decode';
-import {fake, replace, restore} from 'sinon';
 
 describe('testing user-controller.handleUserCredentialResponse', () => {
   it('handleUserCredentialResponse saved a user to localstorage on success', async () => {
@@ -32,7 +31,7 @@ describe('testing user-controller.handleUserCredentialResponse', () => {
   });
 
   it('throws an error when the response contains no credential', async () => {
-    // @ts-expect-error
+    // @ts-expect-error Passing a bad response to the function.
     expect(() => handleUserCredentialResponse({error: 'Error'})).to.throw(
       InvalidTokenError
     );
