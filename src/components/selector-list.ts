@@ -24,6 +24,7 @@ import {map} from 'lit/directives/map.js';
 import {Account, Container, Workspace} from '../models/tag-manager';
 import {
   fetchContainers,
+  fetchTags,
   fetchWorkspaces,
 } from '../controllers/tagmanager-controller';
 import {User} from '../models/user';
@@ -115,6 +116,21 @@ export class SelectorList extends LitElement {
     const workspaceString = localStorage.getItem('workspaces') ?? '[]';
     this.workspaceList = JSON.parse(workspaceString) as Workspace[];
     this.renderRoot.querySelector('#workspace-list')?.scrollIntoView(true);
+  }
+
+  async getTags(path: string|undefined) {
+    if (!path) {
+      return;
+    }
+    localStorage.setItem('current-account', JSON.stringify(this.currentAccount));
+    localStorage.setItem('current-container', JSON.stringify(this.currentContainer));
+    localStorage.setItem('current-workspace', JSON.stringify(this.currentWorkspace));
+    try {
+      await fetchTags(path);
+    } catch {
+      this.updateAuthorisation();
+    }
+    document.location.href = '/dist/tag_list.html';
   }
 
   updateAuthorisation() {
@@ -211,7 +227,7 @@ export class SelectorList extends LitElement {
               </li>`
             )}
           </ul>
-          <button>Select Workspace</button>
+<button @click=${this.getTags(this.currentWorkspace?.path)}>Select Workspace</button>
         </section>
       `;
     } else {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tagspeed Audit - Account List</title>
+    <link rel="preload" href="/dist/bundle.js" as="script" />
+    <script src="https://accounts.google.com/gsi/client" defer></script>
+    <style>
+      body {
+        margin: 0%;
+        font-family: system-ui, sans-serif;
+      }
+
+      header {
+        background-color: #AECBFA;
+        color: white;
+        text-align: center;
+        margin-bottom: 5%;
+        padding: 3vh;
+      }
+
+      h1 {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        margin: 0%;
+      }
+
+      h2 {
+        font-family: Roboto, sans-serif;
+        font-size: larger;
+        margin: 4%;
+        padding-top: 1vh;
+      }
+
+      p {
+        margin: 4%;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Tagspeed Audit</h1>
+    </header>
+    <h2>Tag Selection</h2>
+    <p>Please select the tags you'd like to include in the test:</p>
+    <tag-list></tag-list>
+  </body>
+</html>
