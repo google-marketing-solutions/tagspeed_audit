@@ -118,13 +118,22 @@ export class SelectorList extends LitElement {
     this.renderRoot.querySelector('#workspace-list')?.scrollIntoView(true);
   }
 
-  async getTags(path: string|undefined) {
+  async getTags(path: string | undefined) {
     if (!path) {
       return;
     }
-    localStorage.setItem('current-account', JSON.stringify(this.currentAccount));
-    localStorage.setItem('current-container', JSON.stringify(this.currentContainer));
-    localStorage.setItem('current-workspace', JSON.stringify(this.currentWorkspace));
+    localStorage.setItem(
+      'current-account',
+      JSON.stringify(this.currentAccount)
+    );
+    localStorage.setItem(
+      'current-container',
+      JSON.stringify(this.currentContainer)
+    );
+    localStorage.setItem(
+      'current-workspace',
+      JSON.stringify(this.currentWorkspace)
+    );
     try {
       await fetchTags(path);
     } catch {
@@ -227,7 +236,9 @@ export class SelectorList extends LitElement {
               </li>`
             )}
           </ul>
-<button @click=${this.getTags(this.currentWorkspace?.path)}>Select Workspace</button>
+          <button @click=${this.getTags(this.currentWorkspace?.path)}>
+            Select Workspace
+          </button>
         </section>
       `;
     } else {

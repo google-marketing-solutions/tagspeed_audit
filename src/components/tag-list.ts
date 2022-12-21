@@ -148,14 +148,14 @@ export class TagList extends LitElement {
     }
 
     return html`<div class="tag-list-container">
-        <div class="info-area">
-          <h3>${this.currentAccount.name}</h3>
-          <strong>${this.currentContainer.name}</strong>
-          <br />
-          <em>${this.currentWorkspace.name}</em>
-          <button class="run-button">Run Test</button>
-        </div>
-        <div class="tag-list">${tagTable}</div>
-      </div>`;
+      <div class="info-area">
+        <h3>${this.currentAccount.name}</h3>
+        <strong>${this.currentContainer.name}</strong>
+        <br />
+        <em>${this.currentWorkspace.name}</em>
+        <button class="run-button">Run Test</button>
+      </div>
+      <div class="tag-list">${tagTable}</div>
+    </div>`;
   }
 }
