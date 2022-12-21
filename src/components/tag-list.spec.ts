@@ -101,7 +101,7 @@ describe('tag-list compontent', () => {
     const tagList = new TagList();
 
     // Nothing is set
-    let got = await tagList.render();
+    const got = await tagList.render();
     expect(got).to.include(want);
 
     // One item is set
