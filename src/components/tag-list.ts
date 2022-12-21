@@ -37,21 +37,43 @@ export class TagList extends LitElement {
   private currentAccount: Account;
   private currentContainer: Container;
   private currentWorkspace: Workspace;
-  private tagList: Array<SelectableTag>;
+  private tagList: Array<SelectableTag> = [];
 
   static styles = css`
     .tag-list-container {
-      display: inline-grid;
-      grid-template-columns: 20% auto;
+      display: grid;
+      grid-template-columns: 30% auto;
       grid-template-areas: 'info tag-list';
     }
 
     .info-area {
       gird-area: info;
+      padding-left: 2em;
+      border-right: thin solid gainsboro;
     }
 
     .tag-list {
       grid-area: tag-list;
+      margin-left: 1em;
+      margin-right: 1em;
+    }
+
+    .run-button {
+      margin-left: 4em;
+      margin-top: 2vh;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 20px;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #d5e2f7;
     }
   `;
 
@@ -66,53 +88,74 @@ export class TagList extends LitElement {
     this.currentWorkspace = JSON.parse(
       localStorage.getItem('current-workspace') ?? '{}'
     ) as Workspace;
-    const tags = JSON.parse(
-      localStorage.getItem('tags') ?? '{[]}'
-    ) as Array<Tag>;
-    this.tagList = [];
-    for (const t of tags) {
-      this.tagList.push(new SelectableTag(t));
+    try {
+      const tags = JSON.parse(
+        localStorage.getItem('tags') ?? '{[]}'
+      ) as Array<Tag>;
+      this.tagList = [];
+      for (const t of tags) {
+        this.tagList.push(new SelectableTag(t));
+      }
+    } catch (error) {
+      console.error('Selected workspace has no tags.');
     }
   }
 
   render() {
-    return html`
-      <div class="tag-list-container">
+    if (
+      !(
+        this.currentAccount.name &&
+        this.currentContainer.name &&
+        this.currentWorkspace.name
+      )
+    ) {
+      return html`<p>
+        The workspace is not properly selected.
+        <a href="./index.html">Please start from the beginning.</a>
+      </p>`;
+    }
+    let tagTable;
+    if (this.tagList.length === 0) {
+      tagTable = html`<p>This workspace has no tags.</p>`;
+    } else {
+      tagTable = html` <table>
+        <thead>
+          <tr>
+            <th>In Test</th>
+            <th>Tag ID</th>
+            <th>Tag Name</th>
+            <th>Type</th>
+            <th>Paused</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${map(
+            this.tagList,
+            t => html`
+              <tr>
+                <td>
+                  <input type="checkbox" name="${t.tag.tagId}" checked />
+                </td>
+                <td>${t.tag.tagId}</td>
+                <td>${t.tag.name}</td>
+                <td>${t.tag.type}</td>
+                <td>${t.tag.paused ? 'yes' : 'no'}</td>
+              </tr>
+            `
+          )}
+        </tbody>
+      </table>`;
+    }
+
+    return html`<div class="tag-list-container">
         <div class="info-area">
           <h3>${this.currentAccount.name}</h3>
           <strong>${this.currentContainer.name}</strong>
+          <br />
           <em>${this.currentWorkspace.name}</em>
+          <button class="run-button">Run Test</button>
         </div>
-        <div class="tag-list">
-          <table>
-            <thead>
-              <tr>
-                <th>Selected</th>
-                <th>Tag ID</th>
-                <th>Tag Name</th>
-                <th>Type</th>
-                <th>Paused</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${map(
-                this.tagList,
-                t => html`
-                  <tr>
-                    <td>
-                      <input type="checkbox" name="${t.tag.tagId}" checked />
-                    </td>
-                    <td>${t.tag.tagId}</td>
-                    <td>${t.tag.name}</td>
-                    <td>${t.tag.type}</td>
-                    <td>${t.tag.paused}</td>
-                  </tr>
-                `
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
+        <div class="tag-list">${tagTable}</div>
+      </div>`;
   }
 }
