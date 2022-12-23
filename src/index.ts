@@ -22,9 +22,11 @@
 import {handleUserCredentialResponse} from './controllers/user-controller';
 import {AuthoriseBox} from './components/authorise-box';
 import {SelectorList} from './components/selector-list';
+import {TagList} from './components/tag-list';
 
 module.exports = {
   handleCredentialResponse: handleUserCredentialResponse,
   AuthoriseBox: AuthoriseBox,
   SelectorList: SelectorList,
+  TagList: TagList,
 };
