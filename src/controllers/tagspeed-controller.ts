@@ -14,32 +14,64 @@
  * limitations under the License.
  */
 
-import {Tag, Workspace} from '../models/tag-manager';
+import {Container, Tag, Workspace} from '../models/tag-manager';
+import {createTag, createTrigger, createWorkspace, deleteWorkspace, fetchTags, getTrigger} from './tagmanager-controller';
 
-import {createTag, createWorkspace, deleteWorkspace, fetchTags, syncWorkspace} from './tagmanager-controller';
 
 /**
  * @fileoverview Code related to the execution of the tagspeed tests
  */
 
+type TriggerMap = {[key: string|number] : string};
 
 /**
  * Runs a Tagspeed test for a set of tags.
  * This will be ran in a new workspace
  */
-export async function runTestForTags(containerPath: string, tags: Tag[]) {
+export async function runTestForTags(testedWorkspace: Workspace, parentContainer: Container, tags: Tag[]) {
   try {
-    //await createWorkspace(containerPath);
-    const tagspeedWorkspaceString =
-        localStorage.getItem('tagspeed-workspace') ?? '';
-    const tagspeedWorkspace = JSON.parse(tagspeedWorkspaceString) as Workspace;
-    await syncWorkspace(tagspeedWorkspace.path);
-    for (let testTag of tags) {
-      createTag(tagspeedWorkspace.path, testTag);
-    }
-    await fetchTags(tagspeedWorkspace.path);
+    const tagspeedWorkspace = await createWorkspaceForTest(testedWorkspace, parentContainer, tags);
+    const tagspeedTagList = await fetchTags(tagspeedWorkspace.path);
     deleteWorkspace(tagspeedWorkspace.path);
   } catch (error) {
     console.log(error);
+  }
+}
+
+
+//Workspace creation seems to fail without a specific error if the number of workspaces has reached a certain limit.
+//TODO: Check logic behind this
+async function createWorkspaceForTest(testedWorkspace: Workspace, parentContainer: Container, tags: Tag[]): Promise<Workspace> {
+  const tagspeedWorkspace = await createWorkspace(parentContainer.path);
+  await updateTriggersForTags(tagspeedWorkspace, testedWorkspace, tags);
+  for (let testTag of tags) {
+    let tag = await createTag(tagspeedWorkspace.path, testTag);
+    console.log(tag.tagId);
+  }
+  return tagspeedWorkspace;
+}
+
+async function updateTriggersForTags(tagspeedWorkspace: Workspace, testedWorkspace: Workspace, tags: Tag[]) {
+  const tagMap:TriggerMap = {}
+  for (let tag of tags) {
+    let currentFiringTriggerIdList = tag.firingTriggerId || [];
+    let currentBlockingTriggerIdList = tag.blockingTriggerId || [];
+    updateTriggerListForTag(testedWorkspace, tagspeedWorkspace, tag, currentFiringTriggerIdList, tagMap);
+    updateTriggerListForTag(testedWorkspace, tagspeedWorkspace, tag, currentBlockingTriggerIdList, tagMap);
+  }
+}
+
+async function updateTriggerListForTag(testedWorkspace: Workspace, tagspeedWorkspace: Workspace, tag: Tag, triggerIdList: [string], tagMap:TriggerMap) {
+  for (let firingId of triggerIdList) {
+    let idIndex = tag.firingTriggerId.indexOf(firingId);
+    if (Object.keys(tagMap).includes(firingId)) {
+      tag.firingTriggerId[idIndex] = tagMap[firingId];
+    } else {
+      let originalTriggerPath = testedWorkspace.path + '/triggers/' + firingId;
+      let originalTrigger = await getTrigger(originalTriggerPath);
+      let newTriggerInTagspeedWorkspace = await createTrigger(tagspeedWorkspace.path, originalTrigger);
+      tagMap[firingId] = newTriggerInTagspeedWorkspace.triggerId;
+      tag.firingTriggerId[idIndex] = tagMap[firingId];
+    }
   }
 }

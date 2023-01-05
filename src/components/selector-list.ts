@@ -130,7 +130,7 @@ export class SelectorList extends LitElement {
       await fetchTags(this.currentWorkspace!.path);
       const tagsString = localStorage.getItem('tags') ?? '[]';
       const tagList = JSON.parse(tagsString) as Tag[];
-      runTestForTags(this.currentContainer!.path, tagList);
+      runTestForTags(this.currentWorkspace!, this.currentContainer!, tagList);
     } catch (error) {
       console.log(error);
     }

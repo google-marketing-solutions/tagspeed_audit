@@ -18,7 +18,6 @@
  * @fileoverview Code related accessing the Google Tag Manager API
  */
 
-import { resolve } from 'path';
 import {Account, Container, Tag, Trigger, Workspace} from '../models/tag-manager';
 
 // Defined globally to simplify invocation
@@ -80,10 +79,25 @@ export async function fetchWorkspaces(containerPath: string) {
  */
 export async function fetchTriggers(workspacePath: string) {
   await authorizedXhr(
-    'https://www.googleapis.com/tagmanager/v2/' + workspacePath + '/tags'
+    'https://www.googleapis.com/tagmanager/v2/' + workspacePath + '/triggers'
   ).then(xhr => {
     const responseJson = JSON.parse(xhr.responseText);
-    localStorage.setItem('tags', JSON.stringify(responseJson.tag));
+    localStorage.setItem('triggers', JSON.stringify(responseJson.trigger));
+  });
+}
+
+/**
+ * Retrieves a GTM Trigger of a Container via the GTM API.
+ *
+ * @return Promise<void> Resolves whenever the API request has finished
+ * and the response has been stored into localStorage
+ */
+export async function getTrigger(triggerPath: string): Promise<Trigger> {
+  return await authorizedXhr(
+    'https://www.googleapis.com/tagmanager/v2/' + triggerPath
+  ).then(xhr => {
+    const responseJson = JSON.parse(xhr.responseText);
+    return responseJson as Trigger;
   });
 }
 
@@ -103,15 +117,37 @@ export async function fetchTags(workspacePath: string) {
 }
 
 // GTM Write functions
-export async function createWorkspace(containerPath: string) {
-  const body = {name: 'tagspeed'};
+export async function createWorkspace(containerPath: string): Promise<Workspace> {
+  const body = {name: 'tagspeed' + Date.now()};
   const bodyString = JSON.stringify(body);
-  await authorizedXhr(
+  return await authorizedXhr(
     `https://www.googleapis.com/tagmanager/v2/${containerPath}/workspaces`,
     bodyString
   ).then(xhr => {
     const responseJson = JSON.parse(xhr.responseText);
-    localStorage.setItem('tagspeed-workspace', JSON.stringify(responseJson));
+    return responseJson as Workspace;
+  });
+}
+
+export async function createTrigger(workspacePath: string, trigger: Trigger): Promise<Trigger> {
+  const bodyJson = JSON.stringify(trigger);
+  return await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${workspacePath}/triggers`,
+    bodyJson
+  ).then(xhr => {
+    const responseJson = JSON.parse(xhr.responseText);
+    return responseJson as Trigger;
+  });
+}
+
+export async function createTag(workspacePath: string, tag: Tag): Promise<Tag> {
+  const bodyJson = JSON.stringify(tag);
+  return await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${workspacePath}/tags`,
+    bodyJson
+  ).then(xhr => {
+    const responseJson = JSON.parse(xhr.responseText);
+    return responseJson as Tag;
   });
 }
 
@@ -120,26 +156,6 @@ export async function syncWorkspace(workspacePath: string) {
   await authorizedXhr(
     `https://www.googleapis.com/tagmanager/v2/${workspacePath}:sync`,
     '{}'
-  ).then(xhr => {
-    console.log(xhr);
-  });
-}
-
-export async function createTrigger(workspacePath: string, trigger: Trigger) {
-  const bodyJson = JSON.stringify(trigger);
-  await authorizedXhr(
-    `https://www.googleapis.com/tagmanager/v2/${workspacePath}/triggers`,
-    bodyJson
-  ).then(xhr => {
-    console.log(xhr);
-  });
-}
-
-export async function createTag(workspacePath: string, tag: Tag) {
-  const bodyJson = JSON.stringify(tag);
-  await authorizedXhr(
-    `https://www.googleapis.com/tagmanager/v2/${workspacePath}/tags`,
-    bodyJson
   ).then(xhr => {
     console.log(xhr);
   });
@@ -205,9 +221,12 @@ module.exports = {
   fetchAccounts,
   fetchContainers,
   fetchWorkspaces,
+  fetchTriggers,
   fetchTags,
+  getTrigger,
   createWorkspace,
+  createTrigger,
+  createTag,
   syncWorkspace,
   deleteWorkspace,
-  createTag,
 };
