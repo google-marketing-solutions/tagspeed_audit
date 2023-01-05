@@ -33,7 +33,7 @@ const localStorage = window.localStorage;
  */
 export async function fetchAccounts() {
   await authorizedXhr('https://www.googleapis.com/tagmanager/v2/accounts').then(
-    (xhr: any) => {
+    xhr => {
       const responseJson = JSON.parse(xhr.responseText);
       localStorage.setItem('accounts', JSON.stringify(responseJson.account));
     }
@@ -49,7 +49,7 @@ export async function fetchAccounts() {
 export async function fetchContainers(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/containers'
-  ).then((xhr: any) => {
+  ).then(xhr => {
     console.log();
     const responseJson = JSON.parse(xhr.responseText);
     localStorage.setItem('containers', JSON.stringify(responseJson.container));
@@ -65,7 +65,7 @@ export async function fetchContainers(parentPath: string) {
 export async function fetchWorkspaces(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/workspaces'
-  ).then((xhr: any) => {
+  ).then(xhr => {
     const responseJson = JSON.parse(xhr.responseText);
     localStorage.setItem('workspaces', JSON.stringify(responseJson.workspace));
   });
@@ -80,7 +80,7 @@ export async function fetchWorkspaces(parentPath: string) {
 export async function fetchTags(parentPath: string) {
   await authorizedXhr(
     'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/tags'
-  ).then((xhr: any) => {
+  ).then(xhr => {
     const responseJson = JSON.parse(xhr.responseText);
     localStorage.setItem('tags', JSON.stringify(responseJson.tag));
   });
@@ -114,13 +114,12 @@ export async function createWorkspace(parentPath: string) {
  *     successful, and rejects with the status and error message whenever
  *     there's been a failure.
  */
-function authorizedXhr(endpoint: string, body?: any) {
+function authorizedXhr(endpoint: string, body?: any): Promise<XMLHttpRequest> {
   let method = 'GET';
   if (body) {
     method = 'POST';
   } else {
     body = null;
-  }
   return new Promise((resolve, reject) => {
     const accessToken = localStorage.getItem('access_token')!;
     const xhr = new XMLHttpRequest();
@@ -178,5 +177,4 @@ module.exports = {
   fetchContainers,
   fetchWorkspaces,
   fetchTags,
-  requestGtmObjects,
 };

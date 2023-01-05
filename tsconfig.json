@@ -3,8 +3,10 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
+    "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
+    "sourceMap": true,
     "lib": [
       "ES2020",
       "DOM"
