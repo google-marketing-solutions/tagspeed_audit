@@ -21,7 +21,6 @@
 
 import jwtDecode from 'jwt-decode';
 import {User, GISResponse, GISCredential} from '../models/user';
-import { requestGtmObjects } from './tagmanager-controller';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -93,7 +92,8 @@ export function authoriseUser(user: User): void {
   const clientId =
     '681592349170-8vulgnsvd5bhko6lc9veb41m0pqbi1ld.apps.googleusercontent.com';
   const scopes = 'https://www.googleapis.com/auth/tagmanager.readonly \
-                  https://www.googleapis.com/auth/tagmanager.edit.containers';
+                  https://www.googleapis.com/auth/tagmanager.edit.containers \
+                  https://www.googleapis.com/auth/tagmanager.delete.containers';
 
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: clientId,
@@ -109,10 +109,8 @@ export function authoriseUser(user: User): void {
       // We need to let the authorise-box know that the auth is complete before continuing.
       const authBox = document.getElementsByTagName('authorise-box')[0];
       authBox.dispatchEvent(event);
-      requestGtmObjects();
     },
   });
-
   requestToken();
 }
 

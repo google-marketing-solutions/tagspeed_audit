@@ -18,7 +18,8 @@
  * @fileoverview Code related accessing the Google Tag Manager API
  */
 
-import {Account, Container, Workspace} from '../models/tag-manager';
+import { resolve } from 'path';
+import {Account, Container, Tag, Workspace} from '../models/tag-manager';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -87,18 +88,49 @@ export async function fetchTags(parentPath: string) {
 }
 
 // GTM Write functions
-
-export async function createWorkspace(parentPath: string) {
+export async function createWorkspace(containerPath: string) {
   const body = {name: 'tagspeed'};
+  const bodyString = JSON.stringify(body);
   await authorizedXhr(
-    `https://www.googleapis.com/tagmanager/v2/${parentPath}/workspaces`,
-    body
-  ).then((xhr: any) => {
-    console.log(xhr);
-    // const responseJson = JSON.parse(xhr.responseText);
-    // localStorage.setItem('tags', JSON.stringify(responseJson.tag));
+    `https://www.googleapis.com/tagmanager/v2/${containerPath}/workspaces`,
+    bodyString
+  ).then(xhr => {
+    const responseJson = JSON.parse(xhr.responseText);
+    localStorage.setItem('tagspeed-workspace', JSON.stringify(responseJson));
   });
 }
+
+// API reference wants this to be a POST, but without body
+export async function syncWorkspace(workspacePath: string) {
+  await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${workspacePath}:sync`,
+    '{}'
+  ).then(xhr => {
+    console.log(xhr);
+  });
+}
+
+export async function createTag(workspacePath: string, tag: Tag) {
+  const bodyJson = JSON.stringify(tag);
+  await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${workspacePath}/tags`,
+    bodyJson
+  ).then(xhr => {
+    console.log(xhr);
+  });
+}
+
+// GTM Delete functions
+export async function deleteWorkspace(workspacePath: string) {
+  await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${workspacePath}`,
+    undefined,
+    true
+  ).then(xhr => {
+    console.log(xhr);
+  });
+}
+
 
 // Underlying XHR Helper
 
@@ -114,12 +146,15 @@ export async function createWorkspace(parentPath: string) {
  *     successful, and rejects with the status and error message whenever
  *     there's been a failure.
  */
-function authorizedXhr(endpoint: string, body?: any): Promise<XMLHttpRequest> {
+function authorizedXhr(endpoint: string, body?: string, deleteMethod?:boolean): Promise<XMLHttpRequest> {
   let method = 'GET';
   if (body) {
     method = 'POST';
+  } else if (deleteMethod) {
+    method = 'DELETE';
   } else {
-    body = null;
+    body = undefined;
+  }
   return new Promise((resolve, reject) => {
     const accessToken = localStorage.getItem('access_token')!;
     const xhr = new XMLHttpRequest();
@@ -141,40 +176,13 @@ function authorizedXhr(endpoint: string, body?: any): Promise<XMLHttpRequest> {
   });
 }
 
-/**
- * This function exemplifies the chained usage of the above functions,
- * used for development, meant to be deleted.
- */
-export function requestGtmObjects() {
-  try {
-    fetchAccounts().then(() => {
-      const accountsStr = localStorage.getItem('accounts');
-      const accounts: Account[] = JSON.parse(accountsStr!);
-      fetchContainers(accounts[0].path).then(() => {
-        console.log(localStorage.getItem('containers'));
-        const containerStr = localStorage.getItem('containers');
-        const containers: Container[] = JSON.parse(containerStr!);
-        fetchWorkspaces(containers[0].path).then(() => {
-          console.log(localStorage.getItem('workspaces'));
-          const workspacesStr = localStorage.getItem('workspaces');
-          const workspaces: Workspace[] = JSON.parse(workspacesStr!);
-          fetchTags(workspaces[0].path).then(() => {
-            console.log(localStorage.getItem('tags'));
-            createWorkspace(containers[0].path).catch((e: any) => {
-              console.log(e);
-            });
-          });
-        });
-      });
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 module.exports = {
   fetchAccounts,
   fetchContainers,
   fetchWorkspaces,
   fetchTags,
+  createWorkspace,
+  syncWorkspace,
+  deleteWorkspace,
+  createTag,
 };

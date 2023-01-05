@@ -21,13 +21,17 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {map} from 'lit/directives/map.js';
-import {Account, Container, Workspace} from '../models/tag-manager';
+import {Account, Container, Tag, Workspace} from '../models/tag-manager';
 import {
   fetchContainers,
   fetchWorkspaces,
+  createTag,
+  fetchTags,
 } from '../controllers/tagmanager-controller';
 import {User} from '../models/user';
 import {authoriseUser} from '../controllers/user-controller';
+import { create } from 'domain';
+import { runTestForTags } from '../controllers/tagspeed-controller';
 
 @customElement('selector-list')
 export class SelectorList extends LitElement {
@@ -115,6 +119,21 @@ export class SelectorList extends LitElement {
     const workspaceString = localStorage.getItem('workspaces') ?? '[]';
     this.workspaceList = JSON.parse(workspaceString) as Workspace[];
     this.renderRoot.querySelector('#workspace-list')?.scrollIntoView(true);
+  }
+
+  async createWorkspaceTest() {
+    try {
+      // const tagspeedWorkspace = 'accounts/6001351588/containers/31600204/workspaces/3';
+      // const currentTagList: Tag[] = JSON.parse(localStorage.getItem('tags') ?? '') as Tag[];
+      // const testTagToCopy:Tag = currentTagList[0];
+      // await createTag(tagspeedWorkspace, testTagToCopy);  
+      await fetchTags(this.currentWorkspace!.path);
+      const tagsString = localStorage.getItem('tags') ?? '[]';
+      const tagList = JSON.parse(tagsString) as Tag[];
+      runTestForTags(this.currentContainer!.path, tagList);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   updateAuthorisation() {
@@ -211,7 +230,11 @@ export class SelectorList extends LitElement {
               </li>`
             )}
           </ul>
-          <button>Select Workspace</button>
+          <button
+          @click=${() => {
+            this.createWorkspaceTest();
+          }}
+          >Select Workspace</button>
         </section>
       `;
     } else {

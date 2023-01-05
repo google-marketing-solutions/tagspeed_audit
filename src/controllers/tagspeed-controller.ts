@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { Tag, Workspace } from "../models/tag-manager";
+import {Tag, Workspace} from '../models/tag-manager';
+
+import {createTag, createWorkspace, deleteWorkspace, fetchTags, syncWorkspace} from './tagmanager-controller';
 
 /**
  * @fileoverview Code related to the execution of the tagspeed tests
@@ -25,6 +27,19 @@ import { Tag, Workspace } from "../models/tag-manager";
  * Runs a Tagspeed test for a set of tags.
  * This will be ran in a new workspace
  */
-export function runTestForTags(containerPath:string, tags:Tag[]) {
-
+export async function runTestForTags(containerPath: string, tags: Tag[]) {
+  try {
+    //await createWorkspace(containerPath);
+    const tagspeedWorkspaceString =
+        localStorage.getItem('tagspeed-workspace') ?? '';
+    const tagspeedWorkspace = JSON.parse(tagspeedWorkspaceString) as Workspace;
+    await syncWorkspace(tagspeedWorkspace.path);
+    for (let testTag of tags) {
+      createTag(tagspeedWorkspace.path, testTag);
+    }
+    await fetchTags(tagspeedWorkspace.path);
+    deleteWorkspace(tagspeedWorkspace.path);
+  } catch (error) {
+    console.log(error);
+  }
 }
