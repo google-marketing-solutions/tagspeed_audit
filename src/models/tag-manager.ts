@@ -73,6 +73,190 @@ export interface Workspace {
   tagManagerUrl: string;
 }
 
+export interface Trigger {
+  path: string;
+  accountId: string;
+  containerId: string;
+  workspaceId: string;
+  triggerId: string;
+  name: string;
+  type: string;
+  customEventFilter: [
+    {
+      type: string;
+      parameter: [
+        {
+          type: string;
+          key: string;
+          value: string;
+          list: [any];
+          map: [any];
+        }
+      ];
+    }
+  ];
+  filter: [
+    {
+      type: string;
+      parameter: [
+        {
+          type: string;
+          key: string;
+          value: string;
+          list: [any];
+          map: [any];
+        }
+      ];
+    }
+  ];
+  autoEventFilter: [
+    {
+      type: string;
+      parameter: [
+        {
+          type: string;
+          key: string;
+          value: string;
+          list: [any];
+          map: [any];
+        }
+      ]; 
+    }
+  ];
+  waitForTags: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  checkValidation: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  waitForTagsTimeout: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  uniqueTriggerId: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  eventName: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  interval: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  limit: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  fingerprint: string;
+  parentFolderId: string;
+  selector: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  intervalSeconds: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  maxTimerLengthSeconds: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  verticalScrollPercentageList: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  horizontalScrollPercentageList: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  visibilitySelector: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  visiblePercentageMin: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  visiblePercentageMax: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  continuousTimeMinMilliseconds: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  totalTimeMinMilliseconds: {
+    type: string;
+    key: string;
+    value: string;
+    list: [any];
+    map: [any];
+  };
+  tagManagerUrl: string;
+  notes: string;
+  parameter: [
+    {
+      type: string;
+      key: string;
+      value: string;
+      list: [any];
+      map: [any];
+    }
+  ];
+}
+
 export interface Tag {
   path: string;
   accountId: string;

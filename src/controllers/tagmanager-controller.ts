@@ -19,7 +19,7 @@
  */
 
 import { resolve } from 'path';
-import {Account, Container, Tag, Workspace} from '../models/tag-manager';
+import {Account, Container, Tag, Trigger, Workspace} from '../models/tag-manager';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -63,12 +63,27 @@ export async function fetchContainers(parentPath: string) {
  * @return Promise<void> Resolves whenever the API request has finished
  * and the response has been stored into localStorage
  */
-export async function fetchWorkspaces(parentPath: string) {
+export async function fetchWorkspaces(containerPath: string) {
   await authorizedXhr(
-    'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/workspaces'
+    'https://www.googleapis.com/tagmanager/v2/' + containerPath + '/workspaces'
   ).then(xhr => {
     const responseJson = JSON.parse(xhr.responseText);
     localStorage.setItem('workspaces', JSON.stringify(responseJson.workspace));
+  });
+}
+
+/**
+ * Lists all GTM Triggers of a Container via the GTM API.
+ *
+ * @return Promise<void> Resolves whenever the API request has finished
+ * and the response has been stored into localStorage
+ */
+export async function fetchTriggers(workspacePath: string) {
+  await authorizedXhr(
+    'https://www.googleapis.com/tagmanager/v2/' + workspacePath + '/tags'
+  ).then(xhr => {
+    const responseJson = JSON.parse(xhr.responseText);
+    localStorage.setItem('tags', JSON.stringify(responseJson.tag));
   });
 }
 
@@ -78,9 +93,9 @@ export async function fetchWorkspaces(parentPath: string) {
  * @return Promise<void> Resolves whenever the API request has finished
  * and the response has been stored into localStorage
  */
-export async function fetchTags(parentPath: string) {
+export async function fetchTags(workspacePath: string) {
   await authorizedXhr(
-    'https://www.googleapis.com/tagmanager/v2/' + parentPath + '/tags'
+    'https://www.googleapis.com/tagmanager/v2/' + workspacePath + '/tags'
   ).then(xhr => {
     const responseJson = JSON.parse(xhr.responseText);
     localStorage.setItem('tags', JSON.stringify(responseJson.tag));
@@ -105,6 +120,16 @@ export async function syncWorkspace(workspacePath: string) {
   await authorizedXhr(
     `https://www.googleapis.com/tagmanager/v2/${workspacePath}:sync`,
     '{}'
+  ).then(xhr => {
+    console.log(xhr);
+  });
+}
+
+export async function createTrigger(workspacePath: string, trigger: Trigger) {
+  const bodyJson = JSON.stringify(trigger);
+  await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${workspacePath}/triggers`,
+    bodyJson
   ).then(xhr => {
     console.log(xhr);
   });
