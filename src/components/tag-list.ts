@@ -21,6 +21,7 @@
 import {css, html, LitElement} from 'lit';
 import {customElement} from 'lit/decorators.js';
 import {map} from 'lit/directives/map.js';
+import {runTestForTags} from '../controllers/tagspeed-controller';
 import {Account, Container, Tag, Workspace} from '../models/tag-manager';
 
 class SelectableTag {
@@ -101,6 +102,16 @@ export class TagList extends LitElement {
     }
   }
 
+  startTest() {
+    const tags = new Array<Tag>();
+    for (const t of this.tagList) {
+      if (t.selected) {
+        tags.push(t.tag);
+      }
+    }
+    runTestForTags(this.currentWorkspace, this.currentContainer, tags);
+  }
+
   render() {
     if (
       !(
@@ -134,7 +145,12 @@ export class TagList extends LitElement {
             t => html`
               <tr>
                 <td>
-                  <input type="checkbox" name="${t.tag.tagId}" checked />
+                  <input
+                    type="checkbox"
+                    name="${t.tag.tagId}"
+                    checked
+                    @click=${(t.selected = !t.selected)}
+                  />
                 </td>
                 <td>${t.tag.tagId}</td>
                 <td>${t.tag.name}</td>
@@ -149,11 +165,14 @@ export class TagList extends LitElement {
 
     return html`<div class="tag-list-container">
       <div class="info-area">
-        <h3>${this.currentAccount.name}</h3>
-        <strong>${this.currentContainer.name}</strong>
+        <h3>Account: ${this.currentAccount.name}</h3>
+        <strong>Container: ${this.currentContainer.name}</strong>
         <br />
-        <em>${this.currentWorkspace.name}</em>
-        <button class="run-button">Run Test</button>
+        <em>Workspace: ${this.currentWorkspace.name}</em>
+        <br /><br />
+        <lable for="test-url-field">URL to test with</lable>
+        <input id="test-url-field" size="40" />
+        <button class="run-button" @click=${this.startTest()}>Run Test</button>
       </div>
       <div class="tag-list">${tagTable}</div>
     </div>`;

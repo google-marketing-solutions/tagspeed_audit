@@ -325,3 +325,12 @@ export interface Tag {
     };
   };
 }
+
+export interface TestResult {
+  tagID: string;
+  tagName: string;
+  LCP: number;
+  FID: number;
+  CLS: number;
+  INP: number;
+}

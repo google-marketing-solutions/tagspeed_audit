@@ -24,15 +24,14 @@ import {map} from 'lit/directives/map.js';
 import {Account, Container, Tag, Workspace} from '../models/tag-manager';
 import {
   fetchContainers,
-  fetchTags,
   fetchWorkspaces,
   createTag,
   fetchTags,
 } from '../controllers/tagmanager-controller';
 import {User} from '../models/user';
 import {authoriseUser} from '../controllers/user-controller';
-import { create } from 'domain';
-import { runTestForTags } from '../controllers/tagspeed-controller';
+import {create} from 'domain';
+import {runTestForTags} from '../controllers/tagspeed-controller';
 
 @customElement('selector-list')
 export class SelectorList extends LitElement {
@@ -144,14 +143,14 @@ export class SelectorList extends LitElement {
       this.updateAuthorisation();
     }
     document.location.href = '/dist/tag_list.html';
-    }
-  
+  }
+
   async createWorkspaceTest() {
     try {
       // const tagspeedWorkspace = 'accounts/6001351588/containers/31600204/workspaces/3';
       // const currentTagList: Tag[] = JSON.parse(localStorage.getItem('tags') ?? '') as Tag[];
       // const testTagToCopy:Tag = currentTagList[0];
-      // await createTag(tagspeedWorkspace, testTagToCopy);  
+      // await createTag(tagspeedWorkspace, testTagToCopy);
       await fetchTags(this.currentWorkspace!.path);
       const tagsString = localStorage.getItem('tags') ?? '[]';
       const tagList = JSON.parse(tagsString) as Tag[];
