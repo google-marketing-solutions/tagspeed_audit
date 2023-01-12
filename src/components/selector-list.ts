@@ -24,6 +24,7 @@ import {map} from 'lit/directives/map.js';
 import {Account, Container, Tag, Workspace} from '../models/tag-manager';
 import {
   fetchContainers,
+  fetchTags,
   fetchWorkspaces,
   createTag,
   fetchTags,
@@ -121,6 +122,30 @@ export class SelectorList extends LitElement {
     this.renderRoot.querySelector('#workspace-list')?.scrollIntoView(true);
   }
 
+  async getTags(path: string | undefined) {
+    if (!path) {
+      return;
+    }
+    localStorage.setItem(
+      'current-account',
+      JSON.stringify(this.currentAccount)
+    );
+    localStorage.setItem(
+      'current-container',
+      JSON.stringify(this.currentContainer)
+    );
+    localStorage.setItem(
+      'current-workspace',
+      JSON.stringify(this.currentWorkspace)
+    );
+    try {
+      await fetchTags(path);
+    } catch {
+      this.updateAuthorisation();
+    }
+    document.location.href = '/dist/tag_list.html';
+    }
+  
   async createWorkspaceTest() {
     try {
       // const tagspeedWorkspace = 'accounts/6001351588/containers/31600204/workspaces/3';
@@ -230,11 +255,9 @@ export class SelectorList extends LitElement {
               </li>`
             )}
           </ul>
-          <button
-          @click=${() => {
-            this.createWorkspaceTest();
-          }}
-          >Select Workspace</button>
+          <button @click=${this.getTags(this.currentWorkspace?.path)}>
+            Select Workspace
+          </button>
         </section>
       `;
     } else {

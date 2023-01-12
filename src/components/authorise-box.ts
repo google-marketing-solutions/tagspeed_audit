@@ -115,7 +115,7 @@ export class AuthoriseBox extends LitElement {
     }
   }
 
-  async handleGISAuthorised(event: CustomEvent) {
+  async handleGISAuthorised() {
     await fetchAccounts();
     document.location.href = '/dist/account_list.html';
   }

@@ -27,6 +27,11 @@ module.exports = {
       filename: 'account_list.html',
       inject: 'head',
     }),
+        new HtmlWebpackPlugin({
+      template: 'src/tag_list.html',
+      filename: 'tag_list.html',
+      inject: 'head',
+    }),
   ],
   output: {
     filename: 'bundle.js',
