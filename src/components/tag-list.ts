@@ -19,9 +19,9 @@
  */
 
 import {css, html, LitElement} from 'lit';
-import {customElement} from 'lit/decorators.js';
+import {customElement, state} from 'lit/decorators.js';
 import {map} from 'lit/directives/map.js';
-import {runTestForTags} from '../controllers/tagspeed-controller';
+import {createWorkspaceForTest} from '../controllers/tagspeed-controller';
 import {Account, Container, Tag, Workspace} from '../models/tag-manager';
 
 class SelectableTag {
@@ -39,6 +39,7 @@ export class TagList extends LitElement {
   private currentContainer: Container;
   private currentWorkspace: Workspace;
   private tagList: Array<SelectableTag> = [];
+  @state() testWorkspace: Workspace | null;
 
   static styles = css`
     .tag-list-container {
@@ -100,16 +101,25 @@ export class TagList extends LitElement {
     } catch (error) {
       console.error('Selected workspace has no tags.');
     }
+
+    this.testWorkspace = null;
   }
 
-  startTest() {
+  async startTest() {
     const tags = new Array<Tag>();
     for (const t of this.tagList) {
       if (t.selected) {
         tags.push(t.tag);
       }
     }
-    runTestForTags(this.currentWorkspace, this.currentContainer, tags);
+    document.location.href = '/dist/test_results.html';
+    // this.testWorkspace = await createWorkspaceForTest(
+    //   this.currentWorkspace,
+    //   this.currentContainer,
+    //   tags
+    // );
+    // console.log(`Got the test workspace: ${this.testWorkspace}`);
+    // this.requestUpdate();
   }
 
   render() {
@@ -149,7 +159,7 @@ export class TagList extends LitElement {
                     type="checkbox"
                     name="${t.tag.tagId}"
                     checked
-                    @click=${(t.selected = !t.selected)}
+                    @click=${() => {t.selected = !t.selected}}
                   />
                 </td>
                 <td>${t.tag.tagId}</td>
@@ -170,9 +180,11 @@ export class TagList extends LitElement {
         <br />
         <em>Workspace: ${this.currentWorkspace.name}</em>
         <br /><br />
-        <lable for="test-url-field">URL to test with</lable>
-        <input id="test-url-field" size="40" />
-        <button class="run-button" @click=${this.startTest()}>Run Test</button>
+        <lable for="test-url" size=80>URL where the test container is deployed: </lable>
+        <input id="test-url" size="80" />
+        <button class="run-button" @click=${() => {this.startTest();}}>
+          Start Test
+        </button>
       </div>
       <div class="tag-list">${tagTable}</div>
     </div>`;

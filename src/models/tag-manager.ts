@@ -120,7 +120,7 @@ export interface Trigger {
           list: [any];
           map: [any];
         }
-      ]; 
+      ];
     }
   ];
   waitForTags: {
@@ -278,7 +278,7 @@ export interface Tag {
   notes: string;
   scheduleStartMs: number;
   scheduleEndMs: number;
-  any: [
+  parameter: [
     {
       type: string;
       key: string;
@@ -308,22 +308,45 @@ export interface Tag {
   paused: boolean;
   monitoringMetadata: {
     type: string;
-    key: string;
-    value: string;
-    list: [any];
-    map: [any];
+    key?: string;
+    value?: string;
+    list?: [any];
+    map?: [any];
   };
-  monitoringMetadataTagNameKey: string;
+  monitoringMetadataTagNameKey?: string;
   consentSettings: {
     consentStatus: string;
-    consentType: {
+    consentType?: {
+      type: string;
+      key?: string;
+      value?: string;
+      list?: [any];
+      map?: [any];
+    };
+  };
+}
+
+/**
+ * Simplest possible tag for creating new tags
+ */
+export interface ProtoTag {
+  name: string;
+  path: string;
+  type: string;
+  consentSettings: {
+    consentStatus: string;
+  };
+  priority: {
+    type: string;
+    value: string;
+  };
+  parameter: [
+    {
       type: string;
       key: string;
       value: string;
-      list: [any];
-      map: [any];
-    };
-  };
+    }
+  ];
 }
 
 export interface TestResult {
@@ -333,4 +356,6 @@ export interface TestResult {
   FID: number;
   CLS: number;
   INP: number;
+  FCP: number;
+  TTFB: number;
 }

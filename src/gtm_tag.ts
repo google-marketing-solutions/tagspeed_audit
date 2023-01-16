@@ -41,6 +41,13 @@ function postToAnalysisPlatform(metric: Metric) {
   window.opener.postMessage(data, PLATFORM_ORIGIN);
 }
 
+document.addEventListener('load', () => {
+  setTimeout(() => {
+    window.opener.postMessage('test-completed', PLATFORM_ORIGIN);
+    window.close();
+  }, 5000);
+});
+
 // set up webVitals to send all metrics to the analysis platform
 onTTFB(postToAnalysisPlatform);
 onFCP(postToAnalysisPlatform);

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Container, Tag, Workspace} from '../models/tag-manager';
+import {resolve} from 'dns';
+import {finished} from 'stream';
+import {compileFunction} from 'vm';
+import {Metric} from 'web-vitals';
+import {Container, ProtoTag, Tag, TestResult, Workspace} from '../models/tag-manager';
 import {
   createTag,
   createTrigger,
@@ -22,50 +26,143 @@ import {
   deleteWorkspace,
   fetchTags,
   getTrigger,
+  updateTag,
 } from './tagmanager-controller';
 
 /**
  * @fileoverview Code related to the execution of the tagspeed tests
  */
 
+// TODO: Update this with the origin the app is deployed to
+const DEPLOYMENT_ORIGIN = 'FIX_ME';
+
 type TriggerMap = {[key: string | number]: string};
+
+declare global {
+  interface Window {
+    currentResult: TestResult;
+  }
+}
+
+/**
+ * Creates a listener for messages from the window being tested.
+ */
+function createMessageListener(origin: string) {
+  function messageEventListener(event: MessageEvent) {
+    if (event.origin !== origin) return;
+    if (event.data === 'test-completed') {
+      const finishedEvent = new CustomEvent('test-finished');
+      const testResults = document.getElementsByTagName('test-results')[0];
+      testResults.dispatchEvent(finishedEvent);
+    } else {
+      const metric = JSON.parse(event.data) as Metric;
+      window.currentResult[metric.name] = metric.value;
+    }
+  }
+}
+
+/**
+ * Adds the GTM tag that sends the metrics to the app to the container.
+ */
+async function addTagspeedTag(workspace: Workspace) {
+  const tagspeedTag: ProtoTag = {
+    name: 'tagspeed-tag',
+    path: workspace.path,
+    type: 'html',
+    consentSettings: {
+      consentStatus: 'notNeeded',
+    },
+    priority: {
+      type: 'integer',
+      value: '700',
+    },
+    parameter: [
+    {
+      type: 'template',
+      key: 'html',
+      value: `<script src='${DEPLOYMENT_ORIGIN}/gtm_tag.js' async>`
+    }],
+  };
+  await createTag(workspace.path, tagspeedTag);
+}
 
 /**
  * Runs a Tagspeed test for a set of tags.
- * This will be ran in a new workspace
  */
-export async function runTestForTags(
-  testedWorkspace: Workspace,
-  parentContainer: Container,
-  tags: Tag[]
-) {
+export async function runTestForTags(tags: Tag[], url: URL) {
+  createMessageListener(url.origin);
   try {
-    const tagspeedWorkspace = await createWorkspaceForTest(
-      testedWorkspace,
-      parentContainer,
-      tags
-    );
-    const tagspeedTagList = await fetchTags(tagspeedWorkspace.path);
-    
-    deleteWorkspace(tagspeedWorkspace.path);
+    window.currentResult = {
+      tagID: 'baseline',
+      tagName: 'baseline',
+      LCP: 0,
+      FID: 0,
+      CLS: 0,
+      INP: 0,
+      FCP: 0,
+      TTFB: 0,
+    };
+    window.open(url);
+    await waitForTestFinished();
+    localStorage.setItem('baseline-result', JSON.stringify(window.currentResult));
+
+    for (const t of tags) {
+      window.currentResult = {
+        tagID: t.tagId || 'broken_tag',
+        tagName: t.name,
+        LCP: 0,
+        FID: 0,
+        CLS: 0,
+        INP: 0,
+        FCP: 0,
+        TTFB: 0,
+      };
+      t.paused = true;
+      await updateTag(t);
+      window.open(url, '_blank');
+      await waitForTestFinished();
+      const results = JSON.parse(
+        localStorage.getItem('test-results') || '{}'
+      ) as Map<string, TestResult>;
+      results.set(t.tagId || 'broken_tag', window.currentResult);
+      t.paused = false;
+      await updateTag(t);
+    }
   } catch (error) {
     console.log(error);
   }
 }
 
-//Workspace creation seems to fail without a specific error if the number of workspaces has reached a certain limit.
+/**
+ * Returns a promise that resolves when the test-finished message arrives.
+ */
+function waitForTestFinished() {
+  return new Promise<void>(resolve => {
+    const listener = () => {
+      document.removeEventListener('test-finished', listener);
+      resolve();
+    };
+    document.addEventListener('test-finished', listener);
+  });
+}
+
+//Workspace creation seems to fail without a specific error if the number of
+//workspaces has reached 3 for non-360 accounts.
 //TODO: Check logic behind this
-async function createWorkspaceForTest(
+export async function createWorkspaceForTest(
   testedWorkspace: Workspace,
   parentContainer: Container,
   tags: Tag[]
 ): Promise<Workspace> {
   const tagspeedWorkspace = await createWorkspace(parentContainer.path);
-  await updateTriggersForTags(tagspeedWorkspace, testedWorkspace, tags);
-  for (let testTag of tags) {
-    let tag = await createTag(tagspeedWorkspace.path, testTag);
-    console.log(tag.tagId);
-  }
+  setTimeout(async () => {
+    await updateTriggersForTags(tagspeedWorkspace, testedWorkspace, tags);
+    for (let testTag of tags) {
+      let tag = await createTag(tagspeedWorkspace.path, testTag);
+      console.log(tag.tagId);
+    }
+  }, 3000);
+
   return tagspeedWorkspace;
 }
 

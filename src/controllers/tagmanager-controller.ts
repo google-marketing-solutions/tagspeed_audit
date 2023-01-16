@@ -18,7 +18,14 @@
  * @fileoverview Code related accessing the Google Tag Manager API
  */
 
-import {Account, Container, Tag, Trigger, Workspace} from '../models/tag-manager';
+import {
+  Account,
+  Container,
+  ProtoTag,
+  Tag,
+  Trigger,
+  Workspace,
+} from '../models/tag-manager';
 
 // Defined globally to simplify invocation
 const localStorage = window.localStorage;
@@ -117,7 +124,9 @@ export async function fetchTags(workspacePath: string) {
 }
 
 // GTM Write functions
-export async function createWorkspace(containerPath: string): Promise<Workspace> {
+export async function createWorkspace(
+  containerPath: string
+): Promise<Workspace> {
   const body = {name: 'tagspeed' + Date.now()};
   const bodyString = JSON.stringify(body);
   return await authorizedXhr(
@@ -129,7 +138,10 @@ export async function createWorkspace(containerPath: string): Promise<Workspace>
   });
 }
 
-export async function createTrigger(workspacePath: string, trigger: Trigger): Promise<Trigger> {
+export async function createTrigger(
+  workspacePath: string,
+  trigger: Trigger
+): Promise<Trigger> {
   const bodyJson = JSON.stringify(trigger);
   return await authorizedXhr(
     `https://www.googleapis.com/tagmanager/v2/${workspacePath}/triggers`,
@@ -140,7 +152,7 @@ export async function createTrigger(workspacePath: string, trigger: Trigger): Pr
   });
 }
 
-export async function createTag(workspacePath: string, tag: Tag): Promise<Tag> {
+export async function createTag(workspacePath: string, tag: ProtoTag): Promise<Tag> {
   const bodyJson = JSON.stringify(tag);
   return await authorizedXhr(
     `https://www.googleapis.com/tagmanager/v2/${workspacePath}/tags`,
@@ -166,12 +178,22 @@ export async function deleteWorkspace(workspacePath: string) {
   await authorizedXhr(
     `https://www.googleapis.com/tagmanager/v2/${workspacePath}`,
     undefined,
-    true
+    'DELETE'
   ).then(xhr => {
     console.log(xhr);
   });
 }
 
+export async function updateTag(tag: Tag) {
+  const bodyJson = JSON.stringify(tag);
+  await authorizedXhr(
+    `https://www.googleapis.com/tagmanager/v2/${tag.path}`,
+    bodyJson,
+    'PUT'
+  ).then(xhr => {
+    console.log(xhr);
+  });
+}
 
 // Underlying XHR Helper
 
@@ -187,14 +209,18 @@ export async function deleteWorkspace(workspacePath: string) {
  *     successful, and rejects with the status and error message whenever
  *     there's been a failure.
  */
-function authorizedXhr(endpoint: string, body?: string, deleteMethod?:boolean): Promise<XMLHttpRequest> {
-  let method = 'GET';
-  if (body) {
-    method = 'POST';
-  } else if (deleteMethod) {
-    method = 'DELETE';
-  } else {
-    body = undefined;
+
+function authorizedXhr(
+  endpoint: string,
+  body?: string,
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+): Promise<XMLHttpRequest> {
+  if (method === undefined) {
+    if (body) {
+      method = 'POST';
+    } else {
+      method = 'GET';
+    }
   }
   return new Promise((resolve, reject) => {
     const accessToken = localStorage.getItem('access_token')!;
@@ -211,6 +237,10 @@ function authorizedXhr(endpoint: string, body?: string, deleteMethod?:boolean): 
         });
       }
     };
+    if (method === undefined) {
+      // tsc doesn't see the guard at the top.
+      method = 'GET';
+    }
     xhr.open(method, endpoint);
     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
     xhr.send(body);

@@ -154,7 +154,7 @@ export class SelectorList extends LitElement {
       await fetchTags(this.currentWorkspace!.path);
       const tagsString = localStorage.getItem('tags') ?? '[]';
       const tagList = JSON.parse(tagsString) as Tag[];
-      runTestForTags(this.currentWorkspace!, this.currentContainer!, tagList);
+      runTestForTags(tagList, new URL('https://www.example.com'));
     } catch (error) {
       console.log(error);
     }
@@ -254,7 +254,7 @@ export class SelectorList extends LitElement {
               </li>`
             )}
           </ul>
-          <button @click=${this.getTags(this.currentWorkspace?.path)}>
+          <button @click=${() => {this.getTags(this.currentWorkspace?.path);}}>
             Select Workspace
           </button>
         </section>

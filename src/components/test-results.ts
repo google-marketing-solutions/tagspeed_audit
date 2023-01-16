@@ -18,8 +18,8 @@
  */
 
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, state} from 'lit/decorators';
-import {map} from 'lit/directives/map';
+import {customElement, state} from 'lit/decorators.js';
+import {map} from 'lit/directives/map.js';
 import {Account, Container, TestResult, Workspace} from '../models/tag-manager';
 
 declare global {
@@ -44,13 +44,71 @@ export class TestResults extends LitElement {
       color: gainsboro;
     }
 
+    table {
+      table-layout: fixed;
+      width: 80%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    thead th:nth-child(1) {
+      width: 30%
+    }
+
+    thead th:nth-child(2) {
+      width: 10%
+    }
+
+    th, td {
+      padding:20px;
+    }
+
     .baseline-result {
-      border-bottom: 1pm solid darkgray;
+      padding: 20px;
+      border-bottom: 2px solid #9fa2a6;
     }
   `;
 
+  // TO BE REMOVED
+  private results = [
+    {
+      tagID: '29',
+      tagName: 'lighthouse_pic',
+      LCP: 35800,
+      FID: 400,
+      CLS: 0,
+      INP: 530,
+      FCP: 1100,
+      TTFB: 200,
+    },
+    {
+      tagID: '32',
+      tagName: 'Cat Pic',
+      LCP: 30900,
+      FID: 260,
+      CLS: 0,
+      INP: 390,
+      FCP: 1000,
+      TTFB: 110,
+    },
+  ];
+  // END TO BE REMOVED
+
   constructor() {
     super();
+    // TO BE REMOVED
+    const blr = {
+      tagID: 'baseline',
+      tagName: 'baseline',
+      LCP: 80000,
+      FID: 830,
+      CLS: 0.74,
+      INP: 3700,
+      FCP: 1000,
+      TTFB: 110,
+    };
+    localStorage.setItem('baseline-result', JSON.stringify(blr));
+    // END TO BE REMOVED
     this.currentAccount = JSON.parse(
       localStorage.getItem('current-account') ?? '{}'
     ) as Account;
@@ -62,13 +120,30 @@ export class TestResults extends LitElement {
     ) as Workspace;
     this.testResults = new Array<TestResult>();
     this.baseLine = JSON.parse(
-      localStorage.getItem('base-line') ?? '{}'
+      localStorage.getItem('baseline-result') ?? '{}'
     ) as TestResult;
 
     this.sortKey = 'LCP';
 
     this.addEventListener('test-completed', this.updateTestResults);
   }
+
+  // TO BE REMOVED
+  addResults(): void {
+    setTimeout(() => {
+      const ce = new CustomEvent<TestResult>('test-completed', {
+        detail: this.results[0],
+      });
+      this.updateTestResults(ce);
+    }, 4000);
+    setTimeout(() => {
+      const ce = new CustomEvent<TestResult>('test-completed', {
+        detail: this.results[1],
+      });
+      this.updateTestResults(ce);
+    }, 8000);
+  }
+  // END TO BE REMOVED
 
   updateTestResults(event: CustomEvent): void {
     this.testResults.push(event.detail);
@@ -99,50 +174,51 @@ export class TestResults extends LitElement {
     const inpDiff = this.baseLine.INP - result.INP;
 
     return html`
+    <tr>
       <td>${result.tagName}</td>
       <td>${result.tagID}</td>
       <td>${result.LCP} <span class="diff">(${lcpDiff})</span></td>
       <td>${result.FID} <span class="diff">(${fidDiff})</span></td>
       <td>${result.CLS} <span class="diff">(${clsDiff})</span></td>
       <td>${result.INP} <span class="diff">(${inpDiff})</span></td>
+      </tr>
     `;
   }
 
   render() {
-    if (
-      !(
-        this.currentAccount.name &&
-        this.currentContainer.name &&
-        this.currentWorkspace.name
-      )
-    ) {
-      return html`<p>
-        The tool is not properly configured.
-        <a href="./index.html">Please start from the beginning.</a>
-      </p>`;
-    }
-
+    // if (
+    //   !(
+    //     this.currentAccount.name &&
+    //     this.currentContainer.name &&
+    //     this.currentWorkspace.name
+    //   )
+    // ) {
+    //   return html`<p>
+    //     The tool is not properly configured.
+    //     <a href="./index.html">Please start from the beginning.</a>
+    //   </p>`;
+    // }
     return html`
       <table>
         <thead>
           <tr>
-            <th @click=${this.sortResults('tagName')}>Tag Name</th>
-            <th @click=${this.sortResults('tagID')}>Tag ID</th>
+            <th @click=${() => this.sortResults('tagName')}>Tag Name</th>
+            <th @click=${() => this.sortResults('tagID')}>Tag ID</th>
             <th colspan="4">Web Vitals</th>
             <th></th>
           </tr>
 
           <tr>
             <th colspan="2"></th>
-            <th @click=${this.sortResults('LCP')}>LCP</th>
-            <th @click=${this.sortResults('FID')}>FID</th>
-            <th @click=${this.sortResults('CLS')}>CLS</th>
-            <th @click=${this.sortResults('INP')}>INP</th>
+            <th @click=${() => this.sortResults('LCP')}>LCP</th>
+            <th @click=${() => this.sortResults('FID')}>FID</th>
+            <th @click=${() => this.sortResults('CLS')}>CLS</th>
+            <th @click=${() => this.sortResults('INP')}>INP</th>
           </tr>
         </thead>
         <tbody>
           <tr class="baseline-result">
-            <td colspan="2">Base Line</td>
+            <td colspan="2" @click=${() => this.addResults()}>Base Line</td>
             <td>${this.baseLine.LCP}</td>
             <td>${this.baseLine.FID}</td>
             <td>${this.baseLine.CLS}</td>
