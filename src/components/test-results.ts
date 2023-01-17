@@ -91,6 +91,16 @@ export class TestResults extends LitElement {
       FCP: 1000,
       TTFB: 110,
     },
+    {
+      tagID: '33',
+      tagName: 'Log Filler',
+      LCP: 35700,
+      FID: 4100,
+      CLS: 0.74,
+      INP: 540,
+      FCP: 900,
+      TTFB: 110,
+    },
   ];
   // END TO BE REMOVED
 
@@ -100,11 +110,11 @@ export class TestResults extends LitElement {
     const blr = {
       tagID: 'baseline',
       tagName: 'baseline',
-      LCP: 80000,
-      FID: 830,
+      LCP: 36200,
+      FID: 5400,
       CLS: 0.74,
       INP: 3700,
-      FCP: 1000,
+      FCP: 1200,
       TTFB: 110,
     };
     localStorage.setItem('baseline-result', JSON.stringify(blr));
