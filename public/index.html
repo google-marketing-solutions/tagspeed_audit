@@ -1,0 +1,127 @@
+<html>
+  <head>
+    <title>3rd party tool</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+    />
+    <style>
+      h1 {
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+      .results {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>3rd Party Analysis!</h1>
+      <p>
+        We will execute Lighthouse tests after removing identified 3rd party
+        scripts, one by one, in order to understand their performance impact.
+      </p>
+      <p>
+        Console Error counts are provided in order to have a high-level check on
+        whether other scripts begin to error when removing a specific script.
+      </p>
+      <script>
+        function printResults(result) {
+          const existingResults = document.getElementsByClassName("result");
+          document.querySelectorAll(".result").forEach((e) => e.remove());
+
+          const table = document.getElementById("results");
+          table.style.display = "block";
+          result.forEach((result, index) => {
+            const row = table.insertRow(1 + index);
+            row.classList.add("result");
+            const url = row.insertCell(0);
+            if (result.blockedURL.length > 70) {
+              url.innerText = result.blockedURL.substring(1, 70) + "...";
+            } else if (result.blockedURL.length === 0) {
+              url.innerText = "BASELINE";
+            } else {
+              url.innerText = result.blockedURL;
+            }
+            url.title = result.blockedURL;
+            row.insertCell(1).innerText = result.scores.LCP;
+            row.insertCell(2).innerText = result.scores.FID;
+            row.insertCell(3).innerText = result.scores.CLS;
+            row.insertCell(4).innerText = result.scores.consoleErrors;
+          });
+        }
+
+        function submit(e) {
+          e.preventDefault();
+          try {
+            document.getElementById("submit").disabled = true;
+            const table = document.getElementById("results");
+            table.style.display = "none";
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+              if (this.readyState == 4 && this.status == 200) {
+                var result = JSON.parse(this.responseText);
+
+                printResults(result);
+                document.getElementById("submit").disabled = false;
+              }
+            };
+            xhr.open(
+              "GET",
+              "/test/" +
+                encodeURIComponent(document.getElementById("url").value),
+              true
+            );
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify());
+          } catch (e) {
+            throw new Error(e.message);
+          }
+          return false;
+        }
+      </script>
+
+      <form enctype="multipart/form-data" method="post" id="form">
+        <input
+          type="url"
+          id="url"
+          name="url"
+          class="form-control"
+          required
+          placeholder="URL"
+          value="http://nenuadrian.com"
+        />
+        <br />
+        <button
+          class="btn btn-block btn-primary"
+          name="action"
+          value="send"
+          type="submit"
+          id="submit"
+        >
+          Send
+        </button>
+      </form>
+      <br /><br />
+      <div>
+        <table id="results" class="table results">
+          <thead>
+            <th>URL</th>
+            <th>LCP</th>
+            <th>FID</th>
+            <th>CLS</th>
+            <th>Console Errors</th>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <script>
+        document
+          .getElementById("form")
+          .addEventListener("submit", submit, false);
+      </script>
+    </div>
+  </body>
+</html>
