@@ -17,6 +17,9 @@
 /**
  * @fileoverview Code related to user flow management: Authentication,
  * authoriszation, logout, user change, and JWT token decoding
+ *
+ * The GIS client library must be imported in the importing scope
+ * from "https://accounts.google.com/gsi/client"
  */
 
 import jwtDecode from 'jwt-decode';
@@ -48,7 +51,9 @@ export function handleUserCredentialResponse(response: GISResponse): void {
   const event = new CustomEvent<User>('gis-logged-in', {detail: user});
   // We need to let the authorise-box know that the login is complete
   const authBox = document.getElementsByTagName('authorise-box')[0];
-  authBox.dispatchEvent(event);
+  if (authBox) {
+    authBox.dispatchEvent(event);
+  }
 }
 
 /**
@@ -106,7 +111,9 @@ export function authoriseUser(user: User): void {
       const event = new CustomEvent<User>('gis-authorised', {detail: user});
       // We need to let the authorise-box know that the auth is complete before continuing.
       const authBox = document.getElementsByTagName('authorise-box')[0];
-      authBox.dispatchEvent(event);
+      if (authBox) {
+        authBox.dispatchEvent(event);
+      }
     },
   });
 
