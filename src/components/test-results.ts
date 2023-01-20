@@ -69,56 +69,8 @@ export class TestResults extends LitElement {
     }
   `;
 
-  // TO BE REMOVED
-  private results = [
-    {
-      tagID: '29',
-      tagName: 'lighthouse_pic',
-      LCP: 35800,
-      FID: 400,
-      CLS: 0,
-      INP: 530,
-      FCP: 1100,
-      TTFB: 200,
-    },
-    {
-      tagID: '32',
-      tagName: 'Cat Pic',
-      LCP: 30900,
-      FID: 260,
-      CLS: 0,
-      INP: 390,
-      FCP: 1000,
-      TTFB: 110,
-    },
-    {
-      tagID: '33',
-      tagName: 'Log Filler',
-      LCP: 35700,
-      FID: 4100,
-      CLS: 0.74,
-      INP: 540,
-      FCP: 900,
-      TTFB: 110,
-    },
-  ];
-  // END TO BE REMOVED
-
   constructor() {
     super();
-    // TO BE REMOVED
-    const blr = {
-      tagID: 'baseline',
-      tagName: 'baseline',
-      LCP: 36200,
-      FID: 5400,
-      CLS: 0.74,
-      INP: 3700,
-      FCP: 1200,
-      TTFB: 110,
-    };
-    localStorage.setItem('baseline-result', JSON.stringify(blr));
-    // END TO BE REMOVED
     this.currentAccount = JSON.parse(
       localStorage.getItem('current-account') ?? '{}'
     ) as Account;
@@ -137,23 +89,6 @@ export class TestResults extends LitElement {
 
     this.addEventListener('test-completed', this.updateTestResults);
   }
-
-  // TO BE REMOVED
-  addResults(): void {
-    setTimeout(() => {
-      const ce = new CustomEvent<TestResult>('test-completed', {
-        detail: this.results[0],
-      });
-      this.updateTestResults(ce);
-    }, 4000);
-    setTimeout(() => {
-      const ce = new CustomEvent<TestResult>('test-completed', {
-        detail: this.results[1],
-      });
-      this.updateTestResults(ce);
-    }, 8000);
-  }
-  // END TO BE REMOVED
 
   updateTestResults(event: CustomEvent): void {
     this.testResults.push(event.detail);
@@ -228,7 +163,7 @@ export class TestResults extends LitElement {
         </thead>
         <tbody>
           <tr class="baseline-result">
-            <td colspan="2" @click=${() => this.addResults()}>Base Line</td>
+            <td colspan="2">Base Line</td>
             <td>${this.baseLine.LCP}</td>
             <td>${this.baseLine.FID}</td>
             <td>${this.baseLine.CLS}</td>
