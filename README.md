@@ -15,8 +15,8 @@ limitations under the License.
 # Tagspeed Audit
 
 ## Introduction
-Tagspeed Audit is a tool to help measure the impact tags deployed via Google Tag
-Manager are having on pagespeed. 
+Tagspeed Audit is a tool to help measure the impact third-party JavaScript is
+having on pagespeed.
 
 Third-party JavaScript, much of which is delivered via a tag management system,
 is a well known culprit when it comes to poor page performance. Although tag
@@ -27,20 +27,8 @@ tens of megabytes of JavaScript being added to sites, resulting in slower
 load times and poor interactivity. 
 
 Tagspeed Audit provides a way for non-technical users to measure the performance
-impact of individual tags on a page, based on the [Core Web
+impact of individual scripts on a page, based on the [Core Web
 Vitals](https://web.dev/vitals/) metrics. 
 
 ## Building and Deploying
 *TBD*
-
-## Architecture
-- single page application
-- requires a URL with GTM deployed on it
-- requires the user to authenticate with an account that has access to the GTM
-  container deployed on the page
-- uses OAuth2 for authentication
-- uses window.pushMessage() to send CWV data back to the opener (i.e. the tool)
-- deploys and additional tag to the page being tested to facilitate the
-  measurement
-- uses the page as is as a baseline and then turns off tags one at a time and
-  measures improvements
