@@ -53,7 +53,7 @@ async function doAnalysis(url) {
       uri: request.url(),
       resolveWithFullResponse: true,
     })
-      .then(_ => {
+      .then(() => {
         const request_url = request.url();
 
         result.push({

@@ -1,13 +1,14 @@
 {
-  "name": "3rd",
+  "name": "tagspeed-audit",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && cp -R public/** dist && node dist/app.js"
+    "start": "tsc && cp -R public/** dist && node dist/app.js",
+    "lint": "gts lint"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Google LLC",
+  "license": "Apache-2.0",
   "dependencies": {
     "express": "^4.17.1",
     "lighthouse": "^9.6.8",
