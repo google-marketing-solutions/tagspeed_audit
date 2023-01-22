@@ -1,24 +1,11 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
+    "module": "commonjs",
     "esModuleInterop": true,
-    "rootDir": ".",
-    "outDir": "build",
+    "target": "es6",
+    "moduleResolution": "node",
     "sourceMap": true,
-    "lib": [
-      "ES2020",
-      "DOM"
-    ],
-    "plugins": [
-      {
-        "name": "ts-lit-plugin"
-      }
-    ]
+    "outDir": "dist"
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ]
+  "lib": ["es2015"]
 }
