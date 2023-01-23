@@ -13,17 +13,12 @@
 // under the License.
 import express from 'express';
 import lighthouse from 'lighthouse';
-import puppeteer, {Browser} from 'puppeteer';
+import puppeteer, {Browser, HTTPRequest} from 'puppeteer';
 import {getEntity} from 'third-party-web';
-const path = require('path');
-const {URL} = require('url');
-const request_client = require('request-promise-native');
+import path from 'path';
+import {URL} from 'url';
 const app = express();
 const port = 3000;
-
-type Result = {
-  url: string;
-};
 
 type LHResponse = {
   blockedURL: string;
@@ -35,7 +30,7 @@ type LHResponse = {
   };
 };
 
-async function doAnalysis(url) {
+async function doAnalysis(url: string) {
   // Use Puppeteer to launch headful Chrome and don't use its default 800x600
   // viewport.
   const browser = await puppeteer.launch({
@@ -44,28 +39,12 @@ async function doAnalysis(url) {
   });
 
   const page = await browser.newPage();
-  const result: Result[] = new Array<Result>();
+  const requests = new Array<HTTPRequest>();
 
   await page.setRequestInterception(true);
 
   page.on('request', request => {
-    request_client({
-      uri: request.url(),
-      resolveWithFullResponse: true,
-    })
-      .then(() => {
-        const request_url = request.url();
-
-        result.push({
-          url: request_url,
-        });
-
-        request.continue();
-      })
-      .catch(error => {
-        console.error(error);
-        request.abort();
-      });
+    requests.push(request);
   });
 
   await page.goto(url, {
@@ -79,10 +58,11 @@ async function doAnalysis(url) {
 
   // create list of blocking URLs
   const toBlock = new Set<string>();
-  for (const r of result) {
-    if (getEntity(r.url)) {
-      toBlock.add(r.url);
-    }
+  for (const r of requests) {
+      const url = r.url();
+      if (getEntity(url)) {
+        toBlock.add(url);
+      }
   }
 
   // Lighthouse will open the URL.
