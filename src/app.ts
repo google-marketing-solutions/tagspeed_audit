@@ -45,6 +45,7 @@ async function doAnalysis(url: string) {
 
   page.on('request', request => {
     requests.push(request);
+    request.continue();
   });
 
   await page.goto(url, {
@@ -59,10 +60,10 @@ async function doAnalysis(url: string) {
   // create list of blocking URLs
   const toBlock = new Set<string>();
   for (const r of requests) {
-      const url = r.url();
-      if (getEntity(url)) {
-        toBlock.add(url);
-      }
+    const url = r.url();
+    if (getEntity(url)) {
+      toBlock.add(url);
+    }
   }
 
   // Lighthouse will open the URL.
@@ -101,6 +102,7 @@ async function runLHForURL(
     port: new URL(browser.wsEndpoint()).port,
     output: 'json',
     logLevel: 'info',
+    onlyCategories: ['performance', 'best-practices'],
     blockedUrlPatterns: [`*${toBlock}*`],
   });
 
