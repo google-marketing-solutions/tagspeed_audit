@@ -56,7 +56,7 @@ under the License.
             row.classList.add('result');
             const url = row.insertCell(0);
             if (result.blockedURL.length > 70) {
-              url.innerText = result.blockedURL.substring(1, 70) + '...';
+              url.innerText = result.blockedURL.substring(0, 70) + "...";
             } else if (result.blockedURL.length === 0) {
               url.innerText = 'BASELINE';
             } else {
