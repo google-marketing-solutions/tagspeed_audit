@@ -68,8 +68,9 @@ async function doAnalysis(url: string) {
 
   // Lighthouse will open the URL.
   // Puppeteer will observe `targetchanged` and inject our stylesheet.
-
+  console.log(`Will block ${toBlock.size} URLs`);
   for (const b of toBlock) {
+    console.log(`Blocking ${b}`);
     responses.push(await runLHForURL(browser, url, b));
   }
 
@@ -82,11 +83,15 @@ app.get('/', (_, res) => {
 });
 
 app.get('/test/:url', async (req, res) => {
-  const url = decodeURI(req.params.url);
-  console.log(`Testing ${url}`);
-  const response = await doAnalysis(url);
-
-  res.send(response);
+  try {
+    const url = decodeURI(req.params.url);
+    console.log(`Testing ${url}`);
+    const response = await doAnalysis(url);
+    res.send(response);
+  } catch (ex) {
+    console.error(ex);
+    res.send({error: ex.message});
+  }
 });
 
 app.listen(port, () => {
@@ -101,7 +106,7 @@ async function runLHForURL(
   const {lhr} = await lighthouse(url, {
     port: new URL(browser.wsEndpoint()).port,
     output: 'json',
-    logLevel: 'info',
+    logLevel: 'error',
     onlyCategories: ['performance', 'best-practices'],
     blockedUrlPatterns: [`*${toBlock}*`],
   });

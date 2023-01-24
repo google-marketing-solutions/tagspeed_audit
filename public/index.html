@@ -12,7 +12,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations
 under the License.
  -->
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>3rd party tool</title>
@@ -26,6 +26,9 @@ under the License.
         margin-bottom: 40px;
       }
       .results {
+        display: none;
+      }
+      #error {
         display: none;
       }
     </style>
@@ -43,19 +46,19 @@ under the License.
       </p>
       <script>
         function printResults(result) {
-          const existingResults = document.getElementsByClassName("result");
-          document.querySelectorAll(".result").forEach((e) => e.remove());
+          const existingResults = document.getElementsByClassName('result');
+          document.querySelectorAll('.result').forEach(e => e.remove());
 
-          const table = document.getElementById("results");
-          table.style.display = "block";
+          const table = document.getElementById('results');
+          table.style.display = 'block';
           result.forEach((result, index) => {
             const row = table.insertRow(1 + index);
-            row.classList.add("result");
+            row.classList.add('result');
             const url = row.insertCell(0);
             if (result.blockedURL.length > 70) {
-              url.innerText = result.blockedURL.substring(1, 70) + "...";
+              url.innerText = result.blockedURL.substring(1, 70) + '...';
             } else if (result.blockedURL.length === 0) {
-              url.innerText = "BASELINE";
+              url.innerText = 'BASELINE';
             } else {
               url.innerText = result.blockedURL;
             }
@@ -67,29 +70,47 @@ under the License.
           });
         }
 
+        function showError(message) {
+          const error = document.getElementById('error');
+          error.innerText = message;
+          error.style.display = 'block';
+        }
+
         function submit(e) {
           e.preventDefault();
           try {
-            document.getElementById("submit").disabled = true;
-            const table = document.getElementById("results");
-            table.style.display = "none";
+            document.getElementById('submit').disabled = true;
+            const error = document.getElementById('error');
+            error.innerText = '';
+            error.style.display = 'none';
+
+            const table = document.getElementById('results');
+            table.style.display = 'none';
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
-              if (this.readyState == 4 && this.status == 200) {
-                var result = JSON.parse(this.responseText);
+              if (this.readyState == 4) {
+                document.getElementById('submit').disabled = false;
 
-                printResults(result);
-                document.getElementById("submit").disabled = false;
+                if (this.status == 200) {
+                  var result = JSON.parse(this.responseText);
+                  if (result.error) {
+                    showError(result.error);
+                  } else {
+                    printResults(result);
+                  }
+                } else {
+                  showError('Unexpected server error');
+                }
               }
             };
             xhr.open(
-              "GET",
-              "/test/" +
-                encodeURIComponent(document.getElementById("url").value),
+              'GET',
+              '/test/' +
+                encodeURIComponent(document.getElementById('url').value),
               true
             );
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.send(JSON.stringify());
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send();
           } catch (e) {
             throw new Error(e.message);
           }
@@ -107,6 +128,7 @@ under the License.
           placeholder="URL"
         />
         <br />
+        <div id="error" class="alert alert-danger"></div>
         <button
           class="btn btn-block btn-primary"
           name="action"
@@ -133,8 +155,8 @@ under the License.
 
       <script>
         document
-          .getElementById("form")
-          .addEventListener("submit", submit, false);
+          .getElementById('form')
+          .addEventListener('submit', submit, false);
       </script>
     </div>
   </body>
