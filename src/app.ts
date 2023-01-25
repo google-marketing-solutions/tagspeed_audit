@@ -17,8 +17,18 @@ import puppeteer, {Browser, HTTPRequest} from 'puppeteer';
 import {getEntity} from 'third-party-web';
 import path from 'path';
 import {URL} from 'url';
+import fs from 'fs';
+import {v4 as uuidv4} from 'uuid';
+
 const app = express();
 const port = 3000;
+
+type LHReport = {
+  lhr: {
+    audits: any;
+  };
+  report: string;
+};
 
 async function doAnalysis(
   url: string,
@@ -106,32 +116,45 @@ async function runLHForURL(
   url: string,
   toBlock: string
 ): Promise<LHResponse> {
-  const {lhr} = await lighthouse(url, {
+  const lhr: LHReport = await lighthouse(url, {
     port: new URL(browser.wsEndpoint()).port,
-    output: 'json',
+    output: 'html',
     logLevel: 'error',
     onlyCategories: ['performance', 'best-practices'],
     blockedUrlPatterns: [`*${toBlock}*`],
   });
 
-  if (lhr.audits['first-contentful-paint']['scoreDisplayMode'] === 'error') {
+  if (
+    lhr.lhr.audits['first-contentful-paint']['scoreDisplayMode'] === 'error'
+  ) {
     throw new Error(
       'Lighthouse did not return any metrics. The request may be blocked.'
     );
   }
 
+  if (!fs.existsSync('reports')) {
+    fs.mkdirSync('reports');
+  }
+
+  const reportId = uuidv4();
+  const reportUrl = `dist/reports/${reportId}.html`;
+  fs.writeFileSync(reportUrl, lhr.report);
+
   const fcp = parseFloat(
-    lhr.audits['first-contentful-paint'].displayValue.split(' ')[0]
+    lhr.lhr.audits['first-contentful-paint'].displayValue.split(' ')[0]
   );
   const lcp = parseFloat(
-    lhr.audits['largest-contentful-paint'].displayValue.split(' ')[0]
+    lhr.lhr.audits['largest-contentful-paint'].displayValue.split(' ')[0]
   );
-  const cls = parseFloat(lhr.audits['cumulative-layout-shift'].displayValue);
-  const consoleErrors = lhr.audits['errors-in-console'].displayValue
-    ? lhr.audits['errors-in-console'].displayValue
+  const cls = parseFloat(
+    lhr.lhr.audits['cumulative-layout-shift'].displayValue
+  );
+  const consoleErrors = lhr.lhr.audits['errors-in-console'].displayValue
+    ? lhr.lhr.audits['errors-in-console'].displayValue
     : 0;
   const response: LHResponse = {
     blockedURL: toBlock,
+    reportUrl: `reports/${reportId}.html`,
     scores: {
       FCP: fcp,
       LCP: lcp,

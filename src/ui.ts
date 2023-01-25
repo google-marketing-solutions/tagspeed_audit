@@ -19,6 +19,9 @@ function printResult(
   row.insertCell(2).innerText = result.scores.FCP;
   row.insertCell(3).innerText = result.scores.CLS;
   row.insertCell(4).innerText = result.scores.consoleErrors;
+  row.insertCell(
+    5
+  ).innerHTML = `<a href="${result.reportUrl}" target="_blank">LINK</a>`;
 }
 
 function printResults(results: LHResponse[]) {

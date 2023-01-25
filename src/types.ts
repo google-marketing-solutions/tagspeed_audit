@@ -1,5 +1,6 @@
 type LHResponse = {
     blockedURL: string;
+    reportUrl: string;
     scores: {
       LCP: number;
       FCP: number;
