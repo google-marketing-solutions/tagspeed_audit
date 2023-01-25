@@ -20,8 +20,6 @@ import {URL} from 'url';
 const app = express();
 const port = 3000;
 
-
-
 async function doAnalysis(
   url: string,
   userAgent: string,
@@ -77,7 +75,7 @@ async function doAnalysis(
   return responses;
 }
 
-app.use(express.static('dist'))
+app.use(express.static('dist'));
 
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname + '/index.html'));
