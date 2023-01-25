@@ -20,17 +20,13 @@ import {URL} from 'url';
 const app = express();
 const port = 3000;
 
-type LHResponse = {
-  blockedURL: string;
-  scores: {
-    LCP: number;
-    FID: number;
-    CLS: number;
-    consoleErrors: number;
-  };
-};
 
-async function doAnalysis(url: string) {
+
+async function doAnalysis(
+  url: string,
+  userAgent: string,
+  maxUrlsToTry: number
+) {
   // Use Puppeteer to launch headful Chrome and don't use its default 800x600
   // viewport.
   const browser = await puppeteer.launch({
@@ -39,10 +35,14 @@ async function doAnalysis(url: string) {
   });
 
   const page = await browser.newPage();
+  console.log(userAgent);
+  if (userAgent.length > 0) {
+    await page.setUserAgent(userAgent);
+  }
   const requests = new Array<HTTPRequest>();
 
   await page.setRequestInterception(true);
-
+  await page.setUserAgent(userAgent);
   page.on('request', request => {
     requests.push(request);
     request.continue();
@@ -61,13 +61,12 @@ async function doAnalysis(url: string) {
   const toBlock = new Set<string>();
   for (const r of requests) {
     const url = r.url();
-    if (getEntity(url)) {
+    if (getEntity(url) && toBlock.size < maxUrlsToTry) {
       toBlock.add(url);
     }
   }
 
   // Lighthouse will open the URL.
-  // Puppeteer will observe `targetchanged` and inject our stylesheet.
   console.log(`Will block ${toBlock.size} URLs`);
   for (const b of toBlock) {
     console.log(`Blocking ${b}`);
@@ -78,6 +77,8 @@ async function doAnalysis(url: string) {
   return responses;
 }
 
+app.use(express.static('dist'))
+
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname + '/index.html'));
 });
@@ -86,7 +87,11 @@ app.get('/test/:url', async (req, res) => {
   try {
     const url = decodeURI(req.params.url);
     console.log(`Testing ${url}`);
-    const response = await doAnalysis(url);
+    const maxUrlsToTry = parseInt((req.query.maxUrlsToTry ?? '10').toString());
+    const userAgentOverride = req.query.userAgent
+      ? req.query.userAgent.toString()
+      : '';
+    const response = await doAnalysis(url, userAgentOverride, maxUrlsToTry);
     res.send(response);
   } catch (ex) {
     console.error(ex);
@@ -111,15 +116,29 @@ async function runLHForURL(
     blockedUrlPatterns: [`*${toBlock}*`],
   });
 
+  if (lhr.audits['first-contentful-paint']['scoreDisplayMode'] === 'error') {
+    throw new Error(
+      'Lighthouse did not return any metrics. The request may be blocked.'
+    );
+  }
+
+  const fcp = parseFloat(
+    lhr.audits['first-contentful-paint'].displayValue.split(' ')[0]
+  );
+  const lcp = parseFloat(
+    lhr.audits['largest-contentful-paint'].displayValue.split(' ')[0]
+  );
+  const cls = parseFloat(lhr.audits['cumulative-layout-shift'].displayValue);
+  const consoleErrors = lhr.audits['errors-in-console'].displayValue
+    ? lhr.audits['errors-in-console'].displayValue
+    : 0;
   const response: LHResponse = {
     blockedURL: toBlock,
     scores: {
-      FID: lhr.audits['first-contentful-paint'].displayValue,
-      LCP: lhr.audits['largest-contentful-paint'].displayValue,
-      CLS: lhr.audits['cumulative-layout-shift'].displayValue,
-      consoleErrors: lhr.audits['errors-in-console'].displayValue
-        ? lhr.audits['errors-in-console'].displayValue
-        : 0,
+      FCP: fcp,
+      LCP: lcp,
+      CLS: cls,
+      consoleErrors: consoleErrors,
     },
   };
   return response;

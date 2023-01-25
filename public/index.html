@@ -31,7 +31,11 @@ under the License.
       #error {
         display: none;
       }
+      .text-center {
+        text-align: center;
+      }
     </style>
+    <script src="./ui.js"></script>
   </head>
   <body>
     <div class="container">
@@ -44,104 +48,45 @@ under the License.
         Console Error counts are provided in order to have a high-level check on
         whether other scripts begin to error when removing a specific script.
       </p>
-      <script>
-        function printResults(result) {
-          const existingResults = document.getElementsByClassName('result');
-          document.querySelectorAll('.result').forEach(e => e.remove());
-
-          const table = document.getElementById('results');
-          table.style.display = 'block';
-          result.forEach((result, index) => {
-            const row = table.insertRow(1 + index);
-            row.classList.add('result');
-            const url = row.insertCell(0);
-            if (result.blockedURL.length > 70) {
-              url.innerText = result.blockedURL.substring(0, 70) + '...';
-            } else if (result.blockedURL.length === 0) {
-              url.innerText = 'BASELINE';
-            } else {
-              url.innerText = result.blockedURL;
-            }
-            url.title = result.blockedURL;
-            row.insertCell(1).innerText = result.scores.LCP;
-            row.insertCell(2).innerText = result.scores.FID;
-            row.insertCell(3).innerText = result.scores.CLS;
-            row.insertCell(4).innerText = result.scores.consoleErrors;
-          });
-        }
-
-        function showError(message) {
-          const error = document.getElementById('error');
-          error.innerText = message;
-          error.style.display = 'block';
-        }
-
-        function submit(e) {
-          e.preventDefault();
-          const submitButtom = document.getElementById('submit');
-          try {
-            submitButtom.disabled = true;
-            const error = document.getElementById('error');
-            error.innerText = '';
-            error.style.display = 'none';
-
-            const table = document.getElementById('results');
-            table.style.display = 'none';
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-              if (this.readyState === 4) {
-                submitButtom.disabled = false;
-
-                if (this.status === 200) {
-                  var result = JSON.parse(this.responseText);
-                  if (result.error) {
-                    showError(result.error);
-                  } else {
-                    printResults(result);
-                  }
-                } else {
-                  showError('Unexpected server error');
-                }
-              }
-            };
-            xhr.open(
-              'GET',
-              '/test/' +
-                encodeURIComponent(document.getElementById('url').value),
-              true
-            );
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send();
-          } catch (e) {
-            submitButtom.disabled = false;
-            showError(e.message);
-            console.error(e);
-            throw new Error(e.message);
-          }
-          return false;
-        }
-      </script>
 
       <form enctype="multipart/form-data" method="post" id="form">
-        <input
-          type="url"
-          id="url"
-          name="url"
-          class="form-control"
-          required
-          placeholder="URL"
-        />
+        <div class="row">
+          <div class="col-6">
+            <p><label>URL</label></p>
+            <input
+              type="url"
+              id="url"
+              name="url"
+              class="form-control"
+              required
+              placeholder="URL"
+            />
+          </div>
+          <div class="col-6">
+            <p><label>User Agent Override (optional)</label></p>
+            <input
+              type="agent"
+              id="agent"
+              name="agent"
+              class="form-control"
+              placeholder="OPTIONAL"
+            />
+          </div>
+        </div>
+
         <br />
         <div id="error" class="alert alert-danger"></div>
-        <button
-          class="btn btn-block btn-primary"
-          name="action"
-          value="send"
-          type="submit"
-          id="submit"
-        >
-          Send
-        </button>
+        <div class="text-center">
+          <button
+            class="btn btn-lg btn-primary"
+            name="action"
+            value="send"
+            type="submit"
+            id="submit"
+          >
+            Generate Report
+          </button>
+        </div>
       </form>
       <br /><br />
       <div>
@@ -149,7 +94,7 @@ under the License.
           <thead>
             <th>URL</th>
             <th>LCP</th>
-            <th>FID</th>
+            <th>FCP</th>
             <th>CLS</th>
             <th>Console Errors</th>
           </thead>
