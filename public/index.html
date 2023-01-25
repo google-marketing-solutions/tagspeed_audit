@@ -56,7 +56,7 @@ under the License.
             row.classList.add('result');
             const url = row.insertCell(0);
             if (result.blockedURL.length > 70) {
-              url.innerText = result.blockedURL.substring(0, 70) + "...";
+              url.innerText = result.blockedURL.substring(0, 70) + '...';
             } else if (result.blockedURL.length === 0) {
               url.innerText = 'BASELINE';
             } else {
@@ -78,8 +78,9 @@ under the License.
 
         function submit(e) {
           e.preventDefault();
+          const submitButtom = document.getElementById('submit');
           try {
-            document.getElementById('submit').disabled = true;
+            submitButtom.disabled = true;
             const error = document.getElementById('error');
             error.innerText = '';
             error.style.display = 'none';
@@ -88,10 +89,10 @@ under the License.
             table.style.display = 'none';
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
-              if (this.readyState == 4) {
-                document.getElementById('submit').disabled = false;
+              if (this.readyState === 4) {
+                submitButtom.disabled = false;
 
-                if (this.status == 200) {
+                if (this.status === 200) {
                   var result = JSON.parse(this.responseText);
                   if (result.error) {
                     showError(result.error);
@@ -112,6 +113,9 @@ under the License.
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send();
           } catch (e) {
+            submitButtom.disabled = false;
+            showError(e.message);
+            console.error(e);
             throw new Error(e.message);
           }
           return false;
