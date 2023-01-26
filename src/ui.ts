@@ -92,7 +92,7 @@ export function submit(e: Event) {
       '/test/' +
         encodeURIComponent(url) +
         '?' +
-        (userAgent ? `userAgent=` + encodeURIComponent(userAgent) : ''),
+        (userAgent ? `userAgent=${encodeURIComponent(userAgent)}` : ''),
       true
     );
     xhr.setRequestHeader('Content-Type', 'application/json');
