@@ -1,5 +1,21 @@
-function printResult(
-  table,
+// Copyright 2023 Google LLC
+
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License. You may obtain a copy
+// of the License at
+
+//   http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
+
+import {LHResponse} from './types';
+
+export function printResult(
+  table: HTMLTableElement,
   baseline: LHResponse,
   result: LHResponse,
   index: number
@@ -15,17 +31,17 @@ function printResult(
     url.innerText = result.blockedURL;
   }
   url.title = result.blockedURL;
-  row.insertCell(1).innerText = result.scores.LCP;
-  row.insertCell(2).innerText = result.scores.FCP;
-  row.insertCell(3).innerText = result.scores.CLS;
-  row.insertCell(4).innerText = result.scores.consoleErrors;
+  row.insertCell(1).innerText = `${result.scores.LCP} s`;
+  row.insertCell(2).innerText = `${result.scores.FCP} s`;
+  row.insertCell(3).innerText = `${result.scores.CLS}`;
+  row.insertCell(4).innerText = `${result.scores.consoleErrors}`;
   row.insertCell(
     5
-  ).innerHTML = `<a href="${result.reportUrl}" target="_blank">LINK</a>`;
+  ).innerHTML = `<a href='${result.reportUrl}' target='_blank'>LINK</a>`;
 }
 
 function printResults(results: LHResponse[]) {
-  const table = document.getElementById('results');
+  const table = document.getElementById('results') as HTMLTableElement;
 
   document.querySelectorAll('.result').forEach(e => e.remove());
   table.style.display = 'block';
@@ -41,7 +57,7 @@ function showError(message: string) {
   error.style.display = 'block';
 }
 
-function submit(e: Event) {
+export function submit(e: Event) {
   e.preventDefault();
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
   const url = (document.getElementById('url') as HTMLFormElement).value;
