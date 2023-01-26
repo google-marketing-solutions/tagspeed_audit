@@ -72,8 +72,8 @@ async function runLHForURL(
   const response = await processLighthouseReport(toBlock, lhr);
   const reportUrl = `dist/${response.reportUrl}`;
 
-  if (!fs.existsSync('reports')) {
-    fs.mkdirSync('reports');
+  if (!fs.existsSync('dist/reports')) {
+    fs.mkdirSync('dist/reports');
   }
 
   fs.writeFileSync(reportUrl, lhr.report);
