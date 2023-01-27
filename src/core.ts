@@ -49,7 +49,7 @@ export async function doAnalysis(
   const toBlock = Array.from(toBlockSet);
   console.log(`Will block ${toBlock.length} URLs`);
   const limit =
-    maxUrlsToTry == -1
+    maxUrlsToTry === -1
       ? toBlock.length
       : Math.min(maxUrlsToTry, toBlock.length);
   for (let i = 0; i < limit; i++) {
