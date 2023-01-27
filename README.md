@@ -31,4 +31,20 @@ impact of individual scripts on a page, based on the [Core Web
 Vitals](https://web.dev/vitals/) metrics. 
 
 ## Building and Deploying
-*TBD*
+
+### Building
+```
+npm install
+npm run build
+```
+
+### Running 
+```
+npm run start
+```
+
+### Tests 
+```
+npm run test
+```
+ 
