@@ -37,17 +37,19 @@ export async function doAnalysis(
   responses.push(await runLHForURL(browser, url, ''));
 
   // create list of blocking URLs
-  const toBlock = new Set<string>();
+  const toBlockSet = new Set<string>();
   for (const r of requests) {
     const url = r.url();
-    if (getEntity(url) && toBlock.size < maxUrlsToTry) {
-      toBlock.add(url);
+    if (getEntity(url) && toBlockSet.size < maxUrlsToTry) {
+      toBlockSet.add(url);
     }
   }
 
   // Lighthouse will open the URL.
-  console.log(`Will block ${toBlock.size} URLs`);
-  for (const b of toBlock) {
+  const toBlock = Array.from(toBlockSet);
+  console.log(`Will block ${toBlock.length} URLs`);
+  for (var i = 0; i < Math.min(maxUrlsToTry, toBlock.length); i++) {
+    const b = toBlock[i];
     console.log(`Blocking ${b}`);
     responses.push(await runLHForURL(browser, url, b));
   }

@@ -62,6 +62,8 @@ export function submit(e: Event) {
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
   const url = (document.getElementById('url') as HTMLFormElement).value;
   const userAgent = (document.getElementById('agent') as HTMLFormElement).value;
+  const maxUrlsToTry = (document.getElementById('max') as HTMLFormElement)
+    .value;
   try {
     submitButton.disabled = true;
     const error = document.getElementById('error');
@@ -91,8 +93,8 @@ export function submit(e: Event) {
       'GET',
       '/test/' +
         encodeURIComponent(url) +
-        '?' +
-        (userAgent ? `userAgent=${encodeURIComponent(userAgent)}` : ''),
+        `?maxUrlsToTry=${maxUrlsToTry}` +
+        (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : ''),
       true
     );
     xhr.setRequestHeader('Content-Type', 'application/json');
