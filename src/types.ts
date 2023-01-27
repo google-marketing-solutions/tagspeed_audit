@@ -11,6 +11,10 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations
 // under the License.
+
+/**
+ * Simplified Lighthouse response with only the fields required.
+ */
 export type LHResponse = {
   blockedURL: string;
   reportUrl: string;
@@ -23,6 +27,9 @@ export type LHResponse = {
   error?: string;
 };
 
+/**
+ * Lighthouse report type for stricter checking.
+ */
 export type LHReport = {
   lhr: {
     audits: object;
