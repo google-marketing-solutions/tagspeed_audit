@@ -68,7 +68,7 @@ async function runLHForURL(
     output: 'html',
     logLevel: 'error',
     onlyCategories: ['performance', 'best-practices'],
-    blockedUrlPatterns: [`*${toBlock}*`],
+    blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
   });
 
   const response = await processLighthouseReport(toBlock, lhr);
