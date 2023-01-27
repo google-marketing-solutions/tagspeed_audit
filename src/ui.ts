@@ -91,9 +91,8 @@ export function submit(e: Event) {
     };
     xhr.open(
       'GET',
-      '/test/' +
-        encodeURIComponent(url) +
-        `?maxUrlsToTry=${maxUrlsToTry}` +
+      `/test/${encodeURIComponent(url)}?` +
+        (maxUrlsToTry ? `?maxUrlsToTry=${maxUrlsToTry}` : '') +
         (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : ''),
       true
     );

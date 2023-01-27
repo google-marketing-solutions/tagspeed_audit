@@ -28,7 +28,7 @@ app.get('/test/:url', async (req, res) => {
   try {
     const url = decodeURI(req.params.url);
     console.log(`Testing ${url}`);
-    const maxUrlsToTry = parseInt((req.query.maxUrlsToTry ?? '10').toString());
+    const maxUrlsToTry = parseInt((req.query.maxUrlsToTry ?? '-1').toString());
     const userAgentOverride = req.query.userAgent
       ? req.query.userAgent.toString()
       : '';
