@@ -14,14 +14,22 @@
 import express from 'express';
 import path from 'path';
 import {doAnalysis} from './core';
+import {AuditExecution} from './types';
+import {v4 as uuidv4} from 'uuid';
 
 const app = express();
 const port = 3000;
+const executions: AuditExecution[] = [];
 
 app.use(express.static('dist'));
 
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname + '/index.html'));
+});
+
+app.get('/status/:id', async (req, res) => {
+  const execution = executions.find(e => e.id === req.params.id);
+  res.send(execution);
 });
 
 app.get('/test/:url', async (req, res) => {
@@ -32,8 +40,17 @@ app.get('/test/:url', async (req, res) => {
     const userAgentOverride = req.query.userAgent
       ? req.query.userAgent.toString()
       : '';
-    const response = await doAnalysis(url, userAgentOverride, maxUrlsToTry);
-    res.send(response);
+    const execution: AuditExecution = {
+      id: uuidv4(),
+      url: url,
+      userAgentOverride: userAgentOverride,
+      maxUrlsToTry: maxUrlsToTry,
+      results: [],
+      status: 'running',
+    };
+    doAnalysis(execution);
+    executions.push(execution);
+    res.send({executionId: execution.id});
   } catch (ex) {
     console.error(ex);
     res.send({error: ex.message});

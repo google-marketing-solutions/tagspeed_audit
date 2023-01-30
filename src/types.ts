@@ -16,6 +16,7 @@
  * Simplified Lighthouse response with only the fields required.
  */
 export type LHResponse = {
+  id: string;
   blockedURL: string;
   reportUrl: string;
   scores: {
@@ -35,4 +36,17 @@ export type LHReport = {
     audits: object;
   };
   report: string;
+};
+
+/**
+ * Represents an analysis request against an URL.
+ */
+export type AuditExecution = {
+  id: string;
+  status: string;
+  url: string;
+  userAgentOverride: string;
+  maxUrlsToTry?: number;
+  results: LHResponse[];
+  error?: string;
 };
