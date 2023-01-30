@@ -134,11 +134,10 @@ export function submit(e: Event) {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
       if (this.readyState === 4) {
-        const result: {executionId: string; error?: string} = JSON.parse(
-          this.responseText
-        );
-
         if (this.status === 200) {
+          const result: {executionId: string; error?: string} = JSON.parse(
+            this.responseText
+          );
           if (result.error) {
             showError(result.error);
           } else {
@@ -146,6 +145,7 @@ export function submit(e: Event) {
           }
         } else {
           showError('Unexpected server error');
+          submitButton.disabled = false;
         }
       }
     };
