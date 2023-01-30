@@ -46,15 +46,13 @@ function showError(message: string) {
   error.style.display = 'block';
 }
 
-let pollForResultsInterval = null;
 /**
  * Poll regularly for results from backend for a specific id.
  * The backend will continue processing async.
  * @param executionId
  */
-async function pollForResults(executionId: string) {
-  const processedResults: string[] = [];
-  pollForResultsInterval = setInterval(async () => {
+async function pollForResults(executionId: string, processedResults: string[]) {
+  setTimeout(async () => {
     try {
       const response = await checkForResults(executionId);
       const newResults = response.results.filter(
@@ -66,17 +64,16 @@ async function pollForResults(executionId: string) {
       });
 
       if (response.status !== 'running') {
-        if (pollForResultsInterval) {
-          clearInterval(pollForResultsInterval);
-        }
         (document.getElementById('submit') as HTMLButtonElement).disabled =
           false;
+      } else {
+        setTimeout(
+          async () => await pollForResults(executionId, processedResults),
+          3000
+        );
       }
     } catch (ex) {
       showError(ex.message);
-      if (pollForResultsInterval) {
-        clearInterval(pollForResultsInterval);
-      }
       (document.getElementById('submit') as HTMLButtonElement).disabled = false;
     }
   }, 3000);
@@ -145,7 +142,8 @@ export function submit(e: Event) {
           if (result.error) {
             showError(result.error);
           } else {
-            pollForResults(result.executionId);
+            const processedResults: string[] = [];
+            pollForResults(result.executionId, processedResults);
           }
         } else {
           showError('Unexpected server error');
