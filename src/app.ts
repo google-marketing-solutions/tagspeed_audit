@@ -29,7 +29,11 @@ app.get('/', (_, res) => {
 
 app.get('/status/:id', async (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
-  res.send(execution);
+  if (execution) {
+    res.send(execution);
+  } else {
+    res.sendStatus(404);
+  }
 });
 
 app.get('/test/:url', async (req, res) => {
