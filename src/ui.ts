@@ -66,13 +66,17 @@ async function pollForResults(executionId: string) {
       });
 
       if (response.status !== 'running') {
-        clearInterval(pollForResultsInterval);
+        if (pollForResultsInterval) {
+          clearInterval(pollForResultsInterval);
+        }
         (document.getElementById('submit') as HTMLButtonElement).disabled =
           false;
       }
     } catch (ex) {
       showError(ex.message);
-      clearInterval(pollForResultsInterval);
+      if (pollForResultsInterval) {
+        clearInterval(pollForResultsInterval);
+      }
       (document.getElementById('submit') as HTMLButtonElement).disabled = false;
     }
   }, 3000);
