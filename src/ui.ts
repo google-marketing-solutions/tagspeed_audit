@@ -46,7 +46,7 @@ function showError(message: string) {
   error.style.display = 'block';
 }
 
-var pollForResultsInterval = null;
+let pollForResultsInterval = null;
 /**
  * Poll regularly for results from backend for a specific id.
  * The backend will continue processing async.
