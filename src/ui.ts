@@ -12,15 +12,15 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-import {LHResponse} from './types';
+import {AuditExecution, LHResponse} from './types';
 
-export function printResult(
-  table: HTMLTableElement,
-  baseline: LHResponse,
-  result: LHResponse,
-  index: number
-) {
-  const row = table.insertRow(1 + index);
+/**
+ * Inject information into the UI.
+ * @param result
+ */
+export function printResult(result: LHResponse) {
+  const table = document.getElementById('results') as HTMLTableElement;
+  const row = table.insertRow(table.rows.length);
   row.classList.add('result');
   const url = row.insertCell(0);
   if (result.blockedURL.length > 70) {
@@ -40,23 +40,79 @@ export function printResult(
   ).innerHTML = `<a href='${result.reportUrl}' target='_blank'>LINK</a>`;
 }
 
-function printResults(results: LHResponse[]) {
-  const table = document.getElementById('results') as HTMLTableElement;
-
-  document.querySelectorAll('.result').forEach(e => e.remove());
-  table.style.display = 'block';
-
-  results.forEach((result, index) =>
-    printResult(table, results[0], result, index)
-  );
-}
-
 function showError(message: string) {
   const error = document.getElementById('error');
   error.innerText = message;
   error.style.display = 'block';
 }
 
+/**
+ * Poll regularly for results from backend for a specific id.
+ * The backend will continue processing async.
+ * @param executionId
+ */
+async function pollForResults(executionId: string, processedResults: string[]) {
+  setTimeout(async () => {
+    try {
+      const response = await checkForResults(executionId);
+      const newResults = response.results.filter(
+        r => processedResults.indexOf(r.id) === -1
+      );
+      newResults.forEach(result => {
+        printResult(result);
+        processedResults.push(result.id);
+      });
+
+      if (response.status !== 'running') {
+        (document.getElementById('submit') as HTMLButtonElement).disabled =
+          false;
+      } else {
+        setTimeout(
+          async () => await pollForResults(executionId, processedResults),
+          3000
+        );
+      }
+    } catch (ex) {
+      showError(ex.message);
+      (document.getElementById('submit') as HTMLButtonElement).disabled = false;
+    }
+  }, 3000);
+}
+
+/**
+ * Execute HTTP request to check for new results from backend.
+ * @param executionId
+ * @returns
+ */
+async function checkForResults(executionId: string): Promise<AuditExecution> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        if (this.status === 200) {
+          const result: AuditExecution = JSON.parse(this.responseText);
+          if (result.error) {
+            showError(result.error);
+            reject(result.error);
+          } else {
+            resolve(result);
+          }
+        } else {
+          reject(new Error('Unexpected server error'));
+        }
+      }
+    };
+    xhr.open('GET', `/status/${executionId}?`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+  });
+}
+
+/**
+ * Handle UI form submission, requesting analysis for a URL.
+ * @param e
+ * @returns
+ */
 export function submit(e: Event) {
   e.preventDefault();
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
@@ -64,28 +120,34 @@ export function submit(e: Event) {
   const userAgent = (document.getElementById('agent') as HTMLFormElement).value;
   const maxUrlsToTry = (document.getElementById('max') as HTMLFormElement)
     .value;
-  try {
-    submitButton.disabled = true;
-    const error = document.getElementById('error');
-    error.innerText = '';
-    error.style.display = 'none';
 
-    const table = document.getElementById('results');
-    table.style.display = 'none';
+  const table = document.getElementById('results') as HTMLTableElement;
+
+  document.querySelectorAll('.result').forEach(e => e.remove());
+  table.style.display = 'block';
+
+  submitButton.disabled = true;
+  const error = document.getElementById('error');
+  error.innerText = '';
+  error.style.display = 'none';
+
+  try {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
       if (this.readyState === 4) {
-        submitButton.disabled = false;
-        const result = JSON.parse(this.responseText);
-
         if (this.status === 200) {
+          const result: {executionId: string; error?: string} = JSON.parse(
+            this.responseText
+          );
           if (result.error) {
             showError(result.error);
           } else {
-            printResults(result);
+            const processedResults: string[] = [];
+            pollForResults(result.executionId, processedResults);
           }
         } else {
           showError('Unexpected server error');
+          submitButton.disabled = false;
         }
       }
     };

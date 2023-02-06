@@ -17,51 +17,77 @@ import puppeteer, {Browser, HTTPRequest} from 'puppeteer';
 import {getEntity} from 'third-party-web';
 import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
-import {LHReport, LHResponse} from './types';
+import {AuditExecution, LHReport, LHResponse} from './types';
 
+/**
+ * Identify all network requests done by a page, filter out those that are
+ * 3rd parties, then block the 3rd party URLs one by one and run a lighthouse
+ * report for each situation to identify if there are performance improvements.
+ * @param url
+ * @param userAgent
+ * @param maxUrlsToTry
+ * @returns
+ */
 export async function doAnalysis(
-  url: string,
-  userAgent: string,
-  maxUrlsToTry: number
-) {
-  // Use Puppeteer to launch headful Chrome and don't use its default 800x600
-  // viewport.
-  const browser = await puppeteer.launch({
-    headless: true,
-    defaultViewport: null,
-  });
+  execution: AuditExecution
+): Promise<AuditExecution> {
+  console.log(`[${execution.id}] Started`);
+  try {
+    // Use Puppeteer to launch headful Chrome and don't use its default 800x600
+    // viewport.
+    const browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: null,
+    });
 
-  const requests = await extractRequestsFromPage(browser, userAgent, url);
+    const requests = await extractRequestsFromPage(
+      browser,
+      execution.userAgentOverride,
+      execution.url
+    );
 
-  const responses = new Array<LHResponse>();
-  responses.push(await runLHForURL(browser, url, ''));
+    execution.results.push(await runLHForURL(browser, execution.url, ''));
 
-  // create list of blocking URLs
-  const toBlockSet = new Set<string>();
-  for (const r of requests) {
-    const url = r.url();
-    if (getEntity(url)) {
-      toBlockSet.add(url);
+    // create list of blocking URLs
+    const toBlockSet = new Set<string>();
+    for (const r of requests) {
+      const url = r.url();
+      if (getEntity(url)) {
+        toBlockSet.add(url);
+      }
     }
-  }
 
-  // Lighthouse will open the URL.
-  const toBlock = Array.from(toBlockSet);
-  console.log(`Will block ${toBlock.length} URLs`);
-  const limit =
-    maxUrlsToTry === -1
-      ? toBlock.length
-      : Math.min(maxUrlsToTry, toBlock.length);
-  for (let i = 0; i < limit; i++) {
-    const b = toBlock[i];
-    console.log(`Blocking ${b}`);
-    responses.push(await runLHForURL(browser, url, b));
-  }
+    // Lighthouse will open the URL.
+    const toBlock = Array.from(toBlockSet);
+    console.log(`[${execution.id}] Will block ${toBlock.length} URLs`);
+    const limit =
+      execution.maxUrlsToTry === -1
+        ? toBlock.length
+        : Math.min(execution.maxUrlsToTry, toBlock.length);
+    for (let i = 0; i < limit; i++) {
+      const b = toBlock[i];
+      console.log(`[${execution.id}] Blocking ${b}`);
+      execution.results.push(await runLHForURL(browser, execution.url, b));
+    }
 
-  await browser.close();
-  return responses;
+    await browser.close();
+    console.log(`[${execution.id}] Completed`);
+    execution.status = 'complete';
+  } catch (ex) {
+    execution.status = 'error';
+    console.error(ex);
+  }
+  return execution;
 }
 
+/**
+ * Execute Lighthouse against URL, blocking specific pattern from `toBlock`
+ * and writing final HTML report to disk.
+ * @param browser
+ * @param url
+ * @param toBlock
+ * @returns
+ */
 async function runLHForURL(
   browser: Browser,
   url: string,
@@ -87,6 +113,14 @@ async function runLHForURL(
   return response;
 }
 
+/**
+ * Execute a browser requests to given URL and keep track of
+ * network requests.
+ * @param browser
+ * @param userAgent
+ * @param url
+ * @returns
+ */
 async function extractRequestsFromPage(
   browser: Browser,
   userAgent: string,
@@ -113,6 +147,12 @@ async function extractRequestsFromPage(
   return requests;
 }
 
+/**
+ * Extract relevant data from result return by the lighthouse library.
+ * @param toBlock
+ * @param lhr
+ * @returns
+ */
 export async function processLighthouseReport(
   toBlock: string,
   lhr: LHReport
@@ -140,6 +180,7 @@ export async function processLighthouseReport(
     ? lhr.lhr.audits['errors-in-console'].displayValue
     : 0;
   return {
+    id: reportId,
     blockedURL: toBlock,
     reportUrl: `reports/${reportId}.html`,
     scores: {
