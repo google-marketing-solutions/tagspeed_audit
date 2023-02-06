@@ -106,18 +106,24 @@ under the License.
         </div>
       </div>
       <br><br>
-      <div>
-        <table id="results" class="table results">
-          <thead>
-            <th>URL</th>
-            <th>LCP</th>
-            <th>FCP</th>
-            <th>CLS</th>
-            <th>Console Errors</th>
-            <th>LH Report</th>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div id="results" class="card results">
+        <div class="card-header">Results</div>
+        <div class="card-body">
+          <div class="alert alert-info">
+            Reported generated: <span id="results-so-far">0</span>/<span id="results-expected"></span>.
+          </div>
+          <table id="results-table" class="table">
+            <thead>
+              <th>URL</th>
+              <th>LCP</th>
+              <th>FCP</th>
+              <th>CLS</th>
+              <th>Console Errors</th>
+              <th>LH Report</th>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
 
       <script>

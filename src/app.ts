@@ -52,9 +52,9 @@ app.get('/test/:url', async (req, res) => {
       results: [],
       status: 'running',
     };
-    doAnalysis(execution);
+    const analysisResponse = await doAnalysis(execution);
     executions.push(execution);
-    res.send({executionId: execution.id});
+    res.send(analysisResponse);
   } catch (ex) {
     console.error(ex);
     res.send({error: ex.message});
