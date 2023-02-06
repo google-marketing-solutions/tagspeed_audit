@@ -37,8 +37,8 @@ describe('core lighthouse report processing', () => {
           },
           'errors-in-console': {
             details: {
-              items: []
-            }
+              items: [],
+            },
           },
         },
       },
