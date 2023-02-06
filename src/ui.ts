@@ -139,6 +139,7 @@ export function submit(e: Event) {
         if (this.status === 200) {
           const response: ExecutionResponse = JSON.parse(this.responseText);
           if (response.error) {
+            submitButton.disabled = false;
             showError(response.error);
           } else {
             const processedResults: string[] = [];

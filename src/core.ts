@@ -68,7 +68,7 @@ export async function doAnalysis(
 
     return {
       executionId: execution.id,
-      expectedResults: limit,
+      expectedResults: limit + 1,
     } as ExecutionResponse;
   } catch (ex) {
     execution.status = 'error';
