@@ -50,3 +50,12 @@ export type AuditExecution = {
   results: LHResponse[];
   error?: string;
 };
+
+/**
+ * Holds response from backend when Generating a report.
+ */
+export type ExecutionResponse = {
+  executionId?: string;
+  error?: string;
+  expectedResults?: number;
+};
