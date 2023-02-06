@@ -120,7 +120,9 @@ export function submit(e: Event) {
   const userAgent = (document.getElementById('agent') as HTMLFormElement).value;
   const maxUrlsToTry = (document.getElementById('max') as HTMLFormElement)
     .value;
-
+  const numberOfReports = (
+    document.getElementById('numberOfReports') as HTMLFormElement
+  ).value;
   const table = document.getElementById('results') as HTMLTableElement;
 
   document.querySelectorAll('.result').forEach(e => e.remove());
@@ -153,10 +155,9 @@ export function submit(e: Event) {
     };
     xhr.open(
       'GET',
-      `/test/${encodeURIComponent(url)}?` +
-        (maxUrlsToTry ? `?maxUrlsToTry=${maxUrlsToTry}` : '') +
-        (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : ''),
-      true
+      `/test/${encodeURIComponent(url)}?numberOfReports=${numberOfReports}` +
+        (maxUrlsToTry ? `&maxUrlsToTry=${maxUrlsToTry}` : '') +
+        (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : '')
     );
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send();

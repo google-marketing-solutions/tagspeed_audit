@@ -46,7 +46,9 @@ export async function doAnalysis(
       execution.url
     );
 
-    execution.results.push(await runLHForURL(browser, execution.url, ''));
+    execution.results.push(
+      await runLHForURL(browser, execution.url, '', execution.numberOfReports)
+    );
 
     // create list of blocking URLs
     const toBlockSet = new Set<string>();
@@ -67,7 +69,9 @@ export async function doAnalysis(
     for (let i = 0; i < limit; i++) {
       const b = toBlock[i];
       console.log(`[${execution.id}] Blocking ${b}`);
-      execution.results.push(await runLHForURL(browser, execution.url, b));
+      execution.results.push(
+        await runLHForURL(browser, execution.url, b, execution.numberOfReports)
+      );
     }
 
     await browser.close();
@@ -91,7 +95,8 @@ export async function doAnalysis(
 async function runLHForURL(
   browser: Browser,
   url: string,
-  toBlock: string
+  toBlock: string,
+  numberOfReports: number
 ): Promise<LHResponse> {
   const lhr: LHReport = await lighthouse(url, {
     port: new URL(browser.wsEndpoint()).port,
@@ -101,8 +106,14 @@ async function runLHForURL(
     blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
   });
 
-  const response = await processLighthouseReport(toBlock, lhr);
-  const reportUrl = `dist/${response.reportUrl}`;
+  const responses: LHResponse[] = [];
+  for (let i = 0; i < numberOfReports; i++) {
+    responses.push(await processLighthouseReport(toBlock, lhr));
+  }
+
+  const averagedResponse = averageCrossReportMetrics(responses);
+
+  const reportUrl = `dist/${responses[0].reportUrl}`;
 
   if (!fs.existsSync('dist/reports')) {
     fs.mkdirSync('dist/reports');
@@ -110,7 +121,7 @@ async function runLHForURL(
 
   fs.writeFileSync(reportUrl, lhr.report);
 
-  return response;
+  return averagedResponse;
 }
 
 /**
@@ -148,15 +159,67 @@ async function extractRequestsFromPage(
 }
 
 /**
+ * Average metrics after having ran multiple LH reports for the same scenario.
+ * @param responses
+ */
+export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
+  const FCP =
+    Math.round(
+      (responses.map(r => r.scores.FCP).reduce((r1, r2) => r1 + r2, 0) /
+        responses.length +
+        Number.EPSILON) *
+        100
+    ) / 100;
+
+  const LCP =
+    Math.round(
+      (responses.map(r => r.scores.LCP).reduce((r1, r2) => r1 + r2, 0) /
+        responses.length +
+        Number.EPSILON) *
+        100
+    ) / 100;
+
+  const CLS =
+    Math.round(
+      (responses.map(r => r.scores.CLS).reduce((r1, r2) => r1 + r2, 0) /
+        responses.length +
+        Number.EPSILON) *
+        100
+    ) / 100;
+
+  const consoleErrors =
+    Math.round(
+      (responses
+        .map(r => r.scores.consoleErrors)
+        .reduce((r1, r2) => r1 + r2, 0) /
+        responses.length +
+        Number.EPSILON) *
+        100
+    ) / 100;
+
+  return {
+    id: responses[0].id,
+    blockedURL: responses[0].blockedURL,
+    reportUrl: responses[0].reportUrl,
+    scores: {
+      FCP: FCP,
+      LCP: LCP,
+      CLS: CLS,
+      consoleErrors: consoleErrors,
+    },
+  };
+}
+
+/**
  * Extract relevant data from result return by the lighthouse library.
  * @param toBlock
  * @param lhr
  * @returns
  */
-export async function processLighthouseReport(
+export function processLighthouseReport(
   toBlock: string,
   lhr: LHReport
-): Promise<LHResponse> {
+): LHResponse {
   if (
     lhr.lhr.audits['first-contentful-paint']['scoreDisplayMode'] === 'error'
   ) {
@@ -176,9 +239,8 @@ export async function processLighthouseReport(
   const cls = parseFloat(
     lhr.lhr.audits['cumulative-layout-shift'].displayValue
   );
-  const consoleErrors = lhr.lhr.audits['errors-in-console'].displayValue
-    ? lhr.lhr.audits['errors-in-console'].displayValue
-    : 0;
+  const consoleErrors =
+    lhr.lhr.audits['errors-in-console'].details.items.length;
   return {
     id: reportId,
     blockedURL: toBlock,
