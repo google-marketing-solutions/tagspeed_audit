@@ -12,14 +12,14 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-import {AuditExecution, LHResponse} from './types';
+import {AuditExecution, ExecutionResponse, LHResponse} from './types';
 
 /**
  * Inject information into the UI.
  * @param result
  */
 export function printResult(result: LHResponse) {
-  const table = document.getElementById('results') as HTMLTableElement;
+  const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
   row.classList.add('result');
   const url = row.insertCell(0);
@@ -55,6 +55,9 @@ async function pollForResults(executionId: string, processedResults: string[]) {
   setTimeout(async () => {
     try {
       const response = await checkForResults(executionId);
+      document.getElementById(
+        'results-so-far'
+      ).innerText = `${response.results.length}`;
       const newResults = response.results.filter(
         r => processedResults.indexOf(r.id) === -1
       );
@@ -64,6 +67,7 @@ async function pollForResults(executionId: string, processedResults: string[]) {
       });
 
       if (response.status !== 'running') {
+        alert('Analysis has finished running!');
         (document.getElementById('submit') as HTMLButtonElement).disabled =
           false;
       } else {
@@ -123,10 +127,8 @@ export function submit(e: Event) {
   const numberOfReports = (
     document.getElementById('numberOfReports') as HTMLFormElement
   ).value;
-  const table = document.getElementById('results') as HTMLTableElement;
 
   document.querySelectorAll('.result').forEach(e => e.remove());
-  table.style.display = 'block';
 
   submitButton.disabled = true;
   const error = document.getElementById('error');
@@ -138,14 +140,21 @@ export function submit(e: Event) {
     xhr.onreadystatechange = function () {
       if (this.readyState === 4) {
         if (this.status === 200) {
-          const result: {executionId: string; error?: string} = JSON.parse(
-            this.responseText
-          );
-          if (result.error) {
-            showError(result.error);
+          const response: ExecutionResponse = JSON.parse(this.responseText);
+          if (response.error) {
+            submitButton.disabled = false;
+            showError(response.error);
           } else {
             const processedResults: string[] = [];
-            pollForResults(result.executionId, processedResults);
+            document.getElementById('results-so-far').innerText = '0';
+            document.getElementById(
+              'results-expected'
+            ).innerText = `${response.expectedResults}`;
+            const results = document.getElementById(
+              'results'
+            ) as HTMLDivElement;
+            results.style.display = 'block';
+            pollForResults(response.executionId, processedResults);
           }
         } else {
           showError('Unexpected server error');

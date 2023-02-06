@@ -17,7 +17,7 @@ import puppeteer, {Browser, HTTPRequest} from 'puppeteer';
 import {getEntity} from 'third-party-web';
 import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
-import {AuditExecution, LHReport, LHResponse} from './types';
+import {AuditExecution, ExecutionResponse, LHReport, LHResponse} from './types';
 
 /**
  * Identify all network requests done by a page, filter out those that are
@@ -30,7 +30,7 @@ import {AuditExecution, LHReport, LHResponse} from './types';
  */
 export async function doAnalysis(
   execution: AuditExecution
-): Promise<AuditExecution> {
+): Promise<ExecutionResponse> {
   console.log(`[${execution.id}] Started`);
   try {
     // Use Puppeteer to launch headful Chrome and don't use its default 800x600
@@ -59,29 +59,26 @@ export async function doAnalysis(
       }
     }
 
-    // Lighthouse will open the URL.
     const toBlock = Array.from(toBlockSet);
     console.log(`[${execution.id}] Will block ${toBlock.length} URLs`);
     const limit =
       execution.maxUrlsToTry === -1
         ? toBlock.length
         : Math.min(execution.maxUrlsToTry, toBlock.length);
-    for (let i = 0; i < limit; i++) {
-      const b = toBlock[i];
-      console.log(`[${execution.id}] Blocking ${b}`);
-      execution.results.push(
-        await runLHForURL(browser, execution.url, b, execution.numberOfReports)
-      );
-    }
 
-    await browser.close();
-    console.log(`[${execution.id}] Completed`);
-    execution.status = 'complete';
+    generateReports(browser, toBlock, limit, execution);
+
+    return {
+      executionId: execution.id,
+      expectedResults: limit + 1,
+    } as ExecutionResponse;
   } catch (ex) {
     execution.status = 'error';
     console.error(ex);
+    return {
+      error: ex.message,
+    };
   }
-  return execution;
 }
 
 /**
@@ -166,24 +163,21 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
   const FCP =
     Math.round(
       (responses.map(r => r.scores.FCP).reduce((r1, r2) => r1 + r2, 0) /
-        responses.length +
-        Number.EPSILON) *
+        responses.length) *
         100
     ) / 100;
 
   const LCP =
     Math.round(
       (responses.map(r => r.scores.LCP).reduce((r1, r2) => r1 + r2, 0) /
-        responses.length +
-        Number.EPSILON) *
+        responses.length) *
         100
     ) / 100;
 
   const CLS =
     Math.round(
       (responses.map(r => r.scores.CLS).reduce((r1, r2) => r1 + r2, 0) /
-        responses.length +
-        Number.EPSILON) *
+        responses.length) *
         100
     ) / 100;
 
@@ -192,8 +186,7 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
       (responses
         .map(r => r.scores.consoleErrors)
         .reduce((r1, r2) => r1 + r2, 0) /
-        responses.length +
-        Number.EPSILON) *
+        responses.length) *
         100
     ) / 100;
 
@@ -252,4 +245,30 @@ export function processLighthouseReport(
       consoleErrors: consoleErrors,
     },
   };
+}
+
+/**
+ * Execute lighthouse reports, per parameter specifications.
+ * @param browser
+ * @param toBlock
+ * @param limit
+ * @param execution
+ */
+async function generateReports(
+  browser: Browser,
+  toBlock: string[],
+  limit: number,
+  execution: AuditExecution
+) {
+  for (let i = 0; i < limit; i++) {
+    const b = toBlock[i];
+    console.log(`[${execution.id}] Blocking ${b}`);
+    execution.results.push(
+      await runLHForURL(browser, execution.url, b, execution.numberOfReports)
+    );
+  }
+
+  await browser.close();
+  console.log(`[${execution.id}] Completed`);
+  execution.status = 'complete';
 }
