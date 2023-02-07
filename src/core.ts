@@ -11,17 +11,15 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations
 // under the License.
-import fs from 'fs';
-import lighthouse from 'lighthouse';
 import puppeteer, {
   Browser,
   HTTPRequest,
+  KnownDevices,
   PredefinedNetworkConditions,
 } from 'puppeteer';
 import {getEntity} from 'third-party-web';
-import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
-import {AuditExecution, ExecutionResponse, LHReport, LHResponse} from './types';
+import {AuditExecution, ExecutionResponse, LHResponse} from './types';
 
 /**
  * Identify all network requests done by a page, filter out those that are
@@ -101,20 +99,72 @@ async function runLHForURL(
 ): Promise<LHResponse> {
   const responses: LHResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
-    const lhr: LHReport = await lighthouse(url, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'html',
-      logLevel: 'error',
-      onlyCategories: ['performance', 'best-practices'],
-      blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
-    });
-    responses.push(await processLighthouseReport(toBlock, lhr));
-
-    if (!fs.existsSync('dist/reports')) {
-      fs.mkdirSync('dist/reports');
+    const page = await browser.newPage();
+    await page.emulate(KnownDevices['iPhone 11']);
+    await page.emulateNetworkConditions(PredefinedNetworkConditions['Slow 3G']);
+    if (toBlock.length > 0) {
+      await page.setRequestInterception(true);
+      page.on('request', request => {
+        if (request.url().indexOf(toBlock) !== -1) {
+          request.abort();
+        } else {
+          request.continue();
+        }
+      });
     }
+    await page.goto(url);
 
-    fs.writeFileSync(`dist/${responses[0].reportUrl}`, lhr.report);
+    const LCP = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        const observer = new PerformanceObserver(list => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1]; // Use the latest LCP candidate
+          resolve(lastEntry.startTime);
+        });
+        observer.observe({type: 'largest-contentful-paint', buffered: true});
+      });
+    });
+
+    const FCP = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        const observer = new PerformanceObserver(entryList => {
+          resolve(
+            entryList.getEntriesByName('first-contentful-paint')[0].startTime
+          );
+        });
+        // Some browsers throw when 'type' is passed:
+        observer.observe({type: 'paint', buffered: true});
+      });
+    });
+
+    const CLS = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        let cumulativeLayoutShiftScore = 0;
+
+        const observer = new PerformanceObserver(list => {
+          for (const entry of list.getEntries()) {
+            cumulativeLayoutShiftScore += entry.toJSON().value;
+          }
+          resolve(cumulativeLayoutShiftScore);
+        });
+
+        observer.observe({type: 'layout-shift', buffered: true});
+      });
+    });
+
+    await page.close();
+
+    responses.push({
+      id: uuidv4(),
+      reportUrl: '',
+      blockedURL: toBlock,
+      scores: {
+        LCP: LCP / 1000.0,
+        FCP: FCP / 1000.0,
+        CLS: CLS,
+        consoleErrors: 0,
+      },
+    });
   }
 
   const averagedResponse = averageCrossReportMetrics(responses);
@@ -199,50 +249,6 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
       FCP: FCP,
       LCP: LCP,
       CLS: CLS,
-      consoleErrors: consoleErrors,
-    },
-  };
-}
-
-/**
- * Extract relevant data from result return by the lighthouse library.
- * @param toBlock
- * @param lhr
- * @returns
- */
-export function processLighthouseReport(
-  toBlock: string,
-  lhr: LHReport
-): LHResponse {
-  if (
-    lhr.lhr.audits['first-contentful-paint']['scoreDisplayMode'] === 'error'
-  ) {
-    throw new Error(
-      'Lighthouse did not return any metrics. The request may be blocked.'
-    );
-  }
-
-  const reportId = uuidv4();
-
-  const fcp = parseFloat(
-    lhr.lhr.audits['first-contentful-paint'].displayValue.split(' ')[0]
-  );
-  const lcp = parseFloat(
-    lhr.lhr.audits['largest-contentful-paint'].displayValue.split(' ')[0]
-  );
-  const cls = parseFloat(
-    lhr.lhr.audits['cumulative-layout-shift'].displayValue
-  );
-  const consoleErrors =
-    lhr.lhr.audits['errors-in-console'].details.items.length;
-  return {
-    id: reportId,
-    blockedURL: toBlock,
-    reportUrl: `reports/${reportId}.html`,
-    scores: {
-      FCP: fcp,
-      LCP: lcp,
-      CLS: cls,
       consoleErrors: consoleErrors,
     },
   };

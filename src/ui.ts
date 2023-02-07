@@ -34,10 +34,6 @@ export function printResult(result: LHResponse) {
   row.insertCell(1).innerText = `${result.scores.LCP} s`;
   row.insertCell(2).innerText = `${result.scores.FCP} s`;
   row.insertCell(3).innerText = `${result.scores.CLS}`;
-  row.insertCell(4).innerText = `${result.scores.consoleErrors}`;
-  row.insertCell(
-    5
-  ).innerHTML = `<a href='${result.reportUrl}' target='_blank'>LINK</a>`;
 }
 
 function showError(message: string) {
