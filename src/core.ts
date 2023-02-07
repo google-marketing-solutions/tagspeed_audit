@@ -13,7 +13,11 @@
 // under the License.
 import fs from 'fs';
 import lighthouse from 'lighthouse';
-import puppeteer, {Browser, HTTPRequest} from 'puppeteer';
+import puppeteer, {
+  Browser,
+  HTTPRequest,
+  PredefinedNetworkConditions,
+} from 'puppeteer';
 import {getEntity} from 'third-party-web';
 import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
@@ -95,16 +99,15 @@ async function runLHForURL(
   toBlock: string,
   numberOfReports: number
 ): Promise<LHResponse> {
-  const lhr: LHReport = await lighthouse(url, {
-    port: new URL(browser.wsEndpoint()).port,
-    output: 'html',
-    logLevel: 'error',
-    onlyCategories: ['performance', 'best-practices'],
-    blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
-  });
-
   const responses: LHResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
+    const lhr: LHReport = await lighthouse(url, {
+      port: new URL(browser.wsEndpoint()).port,
+      output: 'html',
+      logLevel: 'error',
+      onlyCategories: ['performance', 'best-practices'],
+      blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
+    });
     responses.push(await processLighthouseReport(toBlock, lhr));
   }
 
