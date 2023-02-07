@@ -47,6 +47,7 @@ export type AuditExecution = {
   url: string;
   userAgentOverride: string;
   maxUrlsToTry?: number;
+  numberOfReports: number;
   results: LHResponse[];
   error?: string;
 };

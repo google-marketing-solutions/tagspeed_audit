@@ -36,13 +36,14 @@ describe('core lighthouse report processing', () => {
             scoreDisplayMode: 'ok',
           },
           'errors-in-console': {
-            displayValue: undefined,
-            scoreDisplayMode: 'ok',
+            details: {
+              items: [],
+            },
           },
         },
       },
     };
-    const response = await processLighthouseReport('http://test', report);
+    const response = processLighthouseReport('http://test', report);
     expect(response.scores.FCP).to.equal(1.0);
     expect(response.scores.LCP).to.equal(2.0);
     expect(response.scores.CLS).to.equal(0.1);

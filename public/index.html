@@ -54,7 +54,7 @@ under the License.
         <div class="card-body">
           <form enctype="multipart/form-data" method="post" id="form">
             <div class="row">
-              <div class="col-6">
+              <div class="col-12">
                 <p><label for="url">URL</label></p>
                 <input
                   type="url"
@@ -66,7 +66,7 @@ under the License.
                 />
                 <br>
               </div>
-              <div class="col-6">
+              <div class="col-4">
                 <p><label for="agent">User Agent Override (optional)</label></p>
                 <input
                   type="text"
@@ -77,7 +77,7 @@ under the License.
                 />
                 <br>
               </div>
-              <div class="col-6">
+              <div class="col-4">
                 <p><label for="max">Max URLs to attempt to block (optional)</label></p>
                 <input
                   type="number"
@@ -85,6 +85,20 @@ under the License.
                   name="max"
                   class="form-control"
                   placeholder="OPTIONAL"
+                />
+                <br>
+              </div>
+              <div class="col-4">
+                <p><label for="numberOfReports">#LH reports to run per 3rd party? (averaged stats)</label></p>
+                <input
+                  type="number"
+                  id="numberOfReports"
+                  name="numberOfReports"
+                  class="form-control"
+                  min="1"
+                  max="10"
+                  value="1"
+                  required
                 />
                 <br>
               </div>
@@ -110,7 +124,7 @@ under the License.
         <div class="card-header">Results</div>
         <div class="card-body">
           <div class="alert alert-info">
-            Reported generated: <span id="results-so-far">0</span>/<span id="results-expected"></span>.
+            Reports generated: <span id="results-so-far">0</span>/<span id="results-expected"></span>.
           </div>
           <table id="results-table" class="table">
             <thead>

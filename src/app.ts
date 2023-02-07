@@ -41,12 +41,16 @@ app.get('/test/:url', async (req, res) => {
     const url = decodeURI(req.params.url);
     console.log(`Testing ${url}`);
     const maxUrlsToTry = parseInt((req.query.maxUrlsToTry ?? '-1').toString());
+    const numberOfReports = parseInt(
+      (req.query.numberOfReports ?? '1').toString()
+    );
     const userAgentOverride = req.query.userAgent
       ? req.query.userAgent.toString()
       : '';
     const execution: AuditExecution = {
       id: uuidv4(),
       url: url,
+      numberOfReports: numberOfReports,
       userAgentOverride: userAgentOverride,
       maxUrlsToTry: maxUrlsToTry,
       results: [],
