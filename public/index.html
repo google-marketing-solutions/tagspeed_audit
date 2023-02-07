@@ -26,10 +26,7 @@ under the License.
         margin-top: 40px;
         margin-bottom: 40px;
       }
-      .results {
-        display: none;
-      }
-      #error {
+      #error, #cancel, .results {
         display: none;
       }
       .text-center {
@@ -115,6 +112,15 @@ under the License.
               >
                 Generate Report
               </button>
+              <button
+                class="btn btn-lg btn-danger"
+                name="action"
+                value="cancel"
+                id="cancel"
+                type="button"
+              >
+                Cancel Analysis
+              </button>
             </div>
           </form>
         </div>
@@ -144,6 +150,10 @@ under the License.
         document
           .getElementById('form')
           .addEventListener('submit', submit, false);
+
+        document
+          .getElementById('cancel')
+          .addEventListener('click', cancel, false);
       </script>
     </div>
   </body>
