@@ -23,26 +23,40 @@ function enableSubmit() {
     'none';
 }
 
+function round(n: number) {
+  return Math.round(n * 100) / 100;
+}
+
 /**
  * Inject information into the UI.
  * @param result
  */
-export function printResult(result: LHResponse) {
+export function printResult(result: LHResponse, baseline: LHResponse) {
   const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
+  const isBaseline = baseline === undefined;
   row.classList.add('result');
   const url = row.insertCell(0);
   if (result.blockedURL.length > 70) {
     url.innerText = result.blockedURL.substring(0, 70) + '...';
-  } else if (result.blockedURL.length === 0) {
+  } else if (isBaseline) {
     url.innerText = 'BASELINE';
   } else {
     url.innerText = result.blockedURL;
   }
   url.title = result.blockedURL;
-  row.insertCell(1).innerText = `${result.scores.LCP} s`;
-  row.insertCell(2).innerText = `${result.scores.FCP} s`;
-  row.insertCell(3).innerText = `${result.scores.CLS}`;
+  const LCPImproved = !isBaseline
+    ? ` (${round(100 - result.scores.LCP / (baseline.scores.LCP / 100))}%)`
+    : '';
+  const FCPImproved = !isBaseline
+    ? ` (${round(100 - result.scores.FCP / (baseline.scores.FCP / 100))}%)`
+    : '';
+  const CLSImproved = !isBaseline
+    ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
+    : '';
+  row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
+  row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
+  row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
   row.insertCell(4).innerText = `${result.scores.consoleErrors}`;
   row.insertCell(
     5
@@ -78,7 +92,10 @@ async function pollForResults(executionId: string, processedResults: string[]) {
         r => processedResults.indexOf(r.id) === -1
       );
       newResults.forEach(result => {
-        printResult(result);
+        printResult(
+          result,
+          response.results.length > 1 ? response.results[0] : undefined
+        );
         processedResults.push(result.id);
       });
 
