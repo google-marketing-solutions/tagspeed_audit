@@ -109,17 +109,15 @@ async function runLHForURL(
       blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
     });
     responses.push(await processLighthouseReport(toBlock, lhr));
+
+    if (!fs.existsSync('dist/reports')) {
+      fs.mkdirSync('dist/reports');
+    }
+
+    fs.writeFileSync(`dist/${responses[0].reportUrl}`, lhr.report);
   }
 
   const averagedResponse = averageCrossReportMetrics(responses);
-
-  const reportUrl = `dist/${responses[0].reportUrl}`;
-
-  if (!fs.existsSync('dist/reports')) {
-    fs.mkdirSync('dist/reports');
-  }
-
-  fs.writeFileSync(reportUrl, lhr.report);
 
   return averagedResponse;
 }
