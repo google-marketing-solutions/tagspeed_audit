@@ -13,11 +13,7 @@
 // under the License.
 import fs from 'fs';
 import lighthouse from 'lighthouse';
-import puppeteer, {
-  Browser,
-  HTTPRequest,
-  PredefinedNetworkConditions,
-} from 'puppeteer';
+import puppeteer, {Browser, HTTPRequest} from 'puppeteer';
 import {getEntity} from 'third-party-web';
 import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
