@@ -57,6 +57,7 @@ app.get('/test/:url', async (req, res) => {
       status: 'running',
     };
     const analysisResponse = await doAnalysis(execution);
+
     executions.push(execution);
     res.send(analysisResponse);
   } catch (ex) {

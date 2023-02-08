@@ -141,7 +141,6 @@ async function runLHForURL(
     const CLS = await page.evaluate(() => {
       return new Promise<number>(resolve => {
         let cumulativeLayoutShiftScore = 0;
-
         const observer = new PerformanceObserver(list => {
           for (const entry of list.getEntries()) {
             cumulativeLayoutShiftScore += entry.toJSON().value;
@@ -181,7 +180,7 @@ async function runLHForURL(
  * @param url
  * @returns
  */
-async function extractRequestsFromPage(
+export async function extractRequestsFromPage(
   browser: Browser,
   userAgent: string,
   url: string
@@ -262,7 +261,7 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
  * @param limit
  * @param execution
  */
-async function generateReports(
+export async function generateReports(
   browser: Browser,
   toBlock: string[],
   limit: number,
