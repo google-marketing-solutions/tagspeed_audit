@@ -17,7 +17,7 @@ import {assert} from 'chai';
 import 'mocha';
 import {averageCrossReportMetrics, extractRequestsFromPage} from '../core';
 import {LHResponse} from '../types';
-import puppeteer from 'puppeteer';
+import puppeteer, {Browser} from 'puppeteer';
 import {createServer} from 'http';
 /*
 describe('analysis should work end to end', function () {
@@ -28,20 +28,22 @@ describe('analysis should work end to end', function () {
       '<html><head><title>test</title></head><body><p>test</p><br/>test<script>for (var i = 0; i < 100; i++) document.getElementsByTagName("p")[0].style.marginTop=i+"px"</script></body></html>'
     );
   });
+  let browser: Browser;
 
   before(function () {
     server.listen(8181);
+    browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: null,
+    });
   });
 
   after(function () {
     server.close();
+    browser.close();
   });
 
   it('should return results', async function () {
-    const browser = await puppeteer.launch({
-      headless: true,
-      defaultViewport: null,
-    });
     const toBlock = ['test'];
     const limit = 1;
     const execution: AuditExecution = {
@@ -64,20 +66,22 @@ describe('extract requests from URL and identify 3rd party', function () {
     res.end('<html></html>');
   });
 
-  before(function () {
+  let browser: Browser;
+
+  before(async function () {
     server.listen(8181);
+    browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: null,
+    });
   });
 
   after(function () {
     server.close();
+    browser.close();
   });
 
   it('should extract requests from a page', async () => {
-    const browser = await puppeteer.launch({
-      headless: true,
-      defaultViewport: null,
-    });
-
     const requests = await extractRequestsFromPage(
       browser,
       '',
