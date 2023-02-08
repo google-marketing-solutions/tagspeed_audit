@@ -110,7 +110,9 @@ async function runLHForURL(
       fs.mkdirSync('dist/reports');
     }
 
-    fs.writeFileSync(`dist/${responses[0].reportUrl}`, lhr.report);
+    fs.writeFile(`dist/${responses[0].reportUrl}`, lhr.report, () => {
+      console.log(`Wrote to disk: dist/${responses[0].reportUrl}`);
+    });
   }
 
   const averagedResponse = averageCrossReportMetrics(responses);
