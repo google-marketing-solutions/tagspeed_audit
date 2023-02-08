@@ -17,6 +17,7 @@ import puppeteer, {
   KnownDevices,
   PredefinedNetworkConditions,
 } from 'puppeteer';
+
 import {getEntity} from 'third-party-web';
 import {v4 as uuidv4} from 'uuid';
 import {AuditExecution, ExecutionResponse, LHResponse} from './types';
