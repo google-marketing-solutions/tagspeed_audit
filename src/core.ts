@@ -102,7 +102,7 @@ async function runLHForURL(
   for (let i = 0; i < numberOfReports; i++) {
     const page = await browser.newPage();
     await page.emulate(KnownDevices['iPhone 11']);
-    await page.emulateNetworkConditions(PredefinedNetworkConditions['Slow 3G']);
+    await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
     if (toBlock.length > 0) {
       await page.setRequestInterception(true);
       page.on('request', request => {
