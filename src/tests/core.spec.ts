@@ -11,15 +11,19 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations
 // under the License.
-/* eslint prefer-arrow-callback: "warn" */
+/* eslint prefer-arrow-callback: "off" */
 
 import {assert} from 'chai';
 import 'mocha';
-import {averageCrossReportMetrics, extractRequestsFromPage} from '../core';
-import {LHResponse} from '../types';
+import {
+  averageCrossReportMetrics,
+  extractRequestsFromPage,
+  generateReports,
+} from '../core';
+import {AuditExecution, LHResponse} from '../types';
 import puppeteer, {Browser} from 'puppeteer';
 import {createServer} from 'http';
-/*
+
 describe('analysis should work end to end', function () {
   this.timeout(10000);
   const server = createServer(function (req, res) {
@@ -30,7 +34,7 @@ describe('analysis should work end to end', function () {
   });
   let browser: Browser;
 
-  before(function () {
+  before(async function () {
     server.listen(8181);
     browser = await puppeteer.launch({
       headless: true,
@@ -56,7 +60,7 @@ describe('analysis should work end to end', function () {
     };
     await generateReports(browser, toBlock, limit, execution);
   });
-});*/
+});
 
 describe('extract requests from URL and identify 3rd party', function () {
   this.timeout(10000);

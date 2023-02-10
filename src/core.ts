@@ -147,11 +147,12 @@ async function runLHForURL(
           }
           resolve(cumulativeLayoutShiftScore);
         });
-
         observer.observe({type: 'layout-shift', buffered: true});
+        // in a test environment / no CLS at all environment
+        // the observer is never called hence timing it out
+        setTimeout(() => resolve(cumulativeLayoutShiftScore), 2000);
       });
     });
-
     await page.close();
 
     responses.push({
