@@ -14,9 +14,19 @@
 
 import {AuditExecution, ExecutionResponse, LHResponse} from './types';
 
+let globalTimeoutIdentifier: NodeJS.Timeout = null;
+let globalExecutionId: string = null;
+
+function enableSubmit() {
+  (document.getElementById('submit') as HTMLButtonElement).disabled = false;
+  (document.getElementById('cancel') as HTMLButtonElement).style.display =
+    'none';
+}
+
 function round(n: number) {
   return Math.round(n * 100) / 100;
 }
+
 /**
  * Inject information into the UI.
  * @param result
@@ -54,6 +64,7 @@ function showError(message: string) {
   const error = document.getElementById('error');
   error.innerText = message;
   error.style.display = 'block';
+  console.error(message);
 }
 
 /**
@@ -62,9 +73,15 @@ function showError(message: string) {
  * @param executionId
  */
 async function pollForResults(executionId: string, processedResults: string[]) {
-  setTimeout(async () => {
+  globalExecutionId = executionId;
+  (document.getElementById('cancel') as HTMLButtonElement).style.display =
+    'inline-block';
+
+  globalTimeoutIdentifier = setTimeout(async () => {
     try {
       const response = await checkForResults(executionId);
+      if (response.id !== globalExecutionId) return;
+
       document.getElementById(
         'results-so-far'
       ).innerText = `${response.results.length}`;
@@ -81,17 +98,16 @@ async function pollForResults(executionId: string, processedResults: string[]) {
 
       if (response.status !== 'running') {
         alert('Analysis has finished running!');
-        (document.getElementById('submit') as HTMLButtonElement).disabled =
-          false;
+        enableSubmit();
       } else {
-        setTimeout(
+        globalTimeoutIdentifier = setTimeout(
           async () => await pollForResults(executionId, processedResults),
           3000
         );
       }
     } catch (ex) {
       showError(ex.message);
-      (document.getElementById('submit') as HTMLButtonElement).disabled = false;
+      enableSubmit();
     }
   }, 3000);
 }
@@ -140,6 +156,8 @@ export function submit(e: Event) {
   const numberOfReports = (
     document.getElementById('numberOfReports') as HTMLFormElement
   ).value;
+  const results = document.getElementById('results') as HTMLDivElement;
+  results.style.display = 'none';
 
   document.querySelectorAll('.result').forEach(e => e.remove());
 
@@ -155,7 +173,7 @@ export function submit(e: Event) {
         if (this.status === 200) {
           const response: ExecutionResponse = JSON.parse(this.responseText);
           if (response.error) {
-            submitButton.disabled = false;
+            enableSubmit();
             showError(response.error);
           } else {
             const processedResults: string[] = [];
@@ -163,15 +181,13 @@ export function submit(e: Event) {
             document.getElementById(
               'results-expected'
             ).innerText = `${response.expectedResults}`;
-            const results = document.getElementById(
-              'results'
-            ) as HTMLDivElement;
+
             results.style.display = 'block';
             pollForResults(response.executionId, processedResults);
           }
         } else {
           showError('Unexpected server error');
-          submitButton.disabled = false;
+          enableSubmit();
         }
       }
     };
@@ -184,10 +200,33 @@ export function submit(e: Event) {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send();
   } catch (e) {
-    submitButton.disabled = false;
+    enableSubmit();
     showError(e.message);
     console.error(e);
     throw new Error(e.message);
   }
   return false;
+}
+
+export function cancel() {
+  if (globalTimeoutIdentifier) {
+    clearTimeout(globalTimeoutIdentifier);
+    globalTimeoutIdentifier = null;
+    const submitButton = document.getElementById('submit') as HTMLButtonElement;
+    submitButton.disabled = false;
+    (document.getElementById('cancel') as HTMLButtonElement).style.display =
+      'none';
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        if (this.status !== 200) {
+          showError('Unknow server state error');
+        }
+      }
+    };
+    xhr.open('GET', `/cancel/${globalExecutionId}`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+    globalExecutionId = null;
+  }
 }

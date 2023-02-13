@@ -269,6 +269,10 @@ export async function generateReports(
   execution: AuditExecution
 ) {
   for (let i = 0; i < limit; i++) {
+    if (execution.status === 'canceled') {
+      console.log(`[${execution.id}] Canceled`);
+      break;
+    }
     const b = toBlock[i];
     console.log(`[${execution.id}] Blocking ${b}`);
     execution.results.push(
@@ -278,5 +282,6 @@ export async function generateReports(
 
   await browser.close();
   console.log(`[${execution.id}] Completed`);
-  execution.status = 'complete';
+  execution.status =
+    execution.status === 'running' ? 'complete' : execution.status;
 }
