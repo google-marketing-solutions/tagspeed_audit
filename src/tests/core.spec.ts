@@ -19,6 +19,7 @@ import {
   averageCrossReportMetrics,
   extractRequestsFromPage,
   generateReports,
+  doAnalysis,
 } from '../core';
 import {AuditExecution, LHResponse} from '../types';
 import puppeteer, {Browser} from 'puppeteer';
@@ -59,6 +60,24 @@ describe('analysis should work end to end', function () {
       results: [],
     };
     await generateReports(browser, toBlock, limit, execution);
+  });
+
+  it('should run audit asynchronously', async function () {
+    const execution: AuditExecution = {
+      id: 'test',
+      url: 'http://localhost:8181',
+      userAgentOverride: '',
+      numberOfReports: 1,
+      status: 'running',
+      results: [],
+    };
+    await doAnalysis(execution);
+    await new Promise(resolve => {
+      setTimeout(() => {
+        assert.equal(execution.status, 'complete');
+        resolve(null);
+      }, 4000);
+    });
   });
 });
 
