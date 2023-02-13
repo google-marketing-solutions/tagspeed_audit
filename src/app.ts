@@ -36,6 +36,16 @@ app.get('/status/:id', async (req, res) => {
   }
 });
 
+app.get('/cancel/:id', (req, res) => {
+  const execution = executions.find(e => e.id === req.params.id);
+  if (execution) {
+    execution.status = 'canceled';
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
 app.get('/test/:url', async (req, res) => {
   try {
     const url = decodeURI(req.params.url);
