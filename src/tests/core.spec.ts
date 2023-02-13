@@ -21,7 +21,7 @@ import {
   generateReports,
   doAnalysis,
 } from '../core';
-import {AuditExecution, LHResponse} from '../types';
+import {AuditExecution, AuditResponse} from '../types';
 import puppeteer, {Browser} from 'puppeteer';
 import {createServer} from 'http';
 
@@ -116,7 +116,7 @@ describe('extract requests from URL and identify 3rd party', function () {
 
 describe('process results of having run analysis', () => {
   it('should average stats from multiple reports', () => {
-    const response1: LHResponse = {
+    const response1: AuditResponse = {
       id: 'test1',
       blockedURL: '',
       reportUrl: '',
@@ -127,7 +127,7 @@ describe('process results of having run analysis', () => {
         consoleErrors: 0,
       },
     };
-    const response2: LHResponse = {
+    const response2: AuditResponse = {
       id: 'test2',
       blockedURL: '',
       reportUrl: '',

@@ -20,11 +20,11 @@ import puppeteer, {
 
 import {getEntity} from 'third-party-web';
 import {v4 as uuidv4} from 'uuid';
-import {AuditExecution, ExecutionResponse, LHResponse} from './types';
+import {AuditExecution, ExecutionResponse, AuditResponse} from './types';
 
 /**
  * Identify all network requests done by a page, filter out those that are
- * 3rd parties, then block the 3rd party URLs one by one and run a lighthouse
+ * 3rd parties, then block the 3rd party URLs one by one and run a perf
  * report for each situation to identify if there are performance improvements.
  * @param url
  * @param userAgent
@@ -85,7 +85,7 @@ export async function doAnalysis(
 }
 
 /**
- * Execute Lighthouse against URL, blocking specific pattern from `toBlock`
+ * Execute performance checks against URL, blocking specific pattern from `toBlock`
  * and writing final HTML report to disk.
  * @param browser
  * @param url
@@ -97,8 +97,8 @@ async function runLHForURL(
   url: string,
   toBlock: string,
   numberOfReports: number
-): Promise<LHResponse> {
-  const responses: LHResponse[] = [];
+): Promise<AuditResponse> {
+  const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
     const page = await browser.newPage();
     await page.emulate(KnownDevices['iPhone 11']);
@@ -211,7 +211,9 @@ export async function extractRequestsFromPage(
  * Average metrics after having ran multiple LH reports for the same scenario.
  * @param responses
  */
-export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
+export function averageCrossReportMetrics(
+  responses: AuditResponse[]
+): AuditResponse {
   const FCP =
     Math.round(
       (responses.map(r => r.scores.FCP).reduce((r1, r2) => r1 + r2, 0) /
@@ -256,7 +258,7 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
 }
 
 /**
- * Execute lighthouse reports, per parameter specifications.
+ * Generate reports, per parameter specifications.
  * @param browser
  * @param toBlock
  * @param limit

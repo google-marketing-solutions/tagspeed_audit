@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-import {AuditExecution, ExecutionResponse, LHResponse} from './types';
+import {AuditExecution, ExecutionResponse, AuditResponse} from './types';
 
 let globalTimeoutIdentifier: NodeJS.Timeout = null;
 let globalExecutionId: string = null;
@@ -31,7 +31,7 @@ function round(n: number) {
  * Inject information into the UI.
  * @param result
  */
-export function printResult(result: LHResponse, baseline: LHResponse) {
+export function printResult(result: AuditResponse, baseline: AuditResponse) {
   const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
   const isBaseline = baseline === undefined;
