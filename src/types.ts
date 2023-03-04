@@ -26,6 +26,7 @@ export type LHResponse = {
     consoleErrors: number;
   };
   error?: string;
+  screenshot?: string;
 };
 
 /**
