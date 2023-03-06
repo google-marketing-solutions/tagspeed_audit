@@ -149,7 +149,7 @@ async function extractRequestsFromPage(
   if (userAgent.length > 0) {
     await page.setUserAgent(userAgent);
   }
-  attachCookiesToPage(page, cookies);
+  attachCookiesToPage(page, url, cookies);
 
   const requests = new Array<HTTPRequest>();
 
@@ -336,7 +336,7 @@ async function generateReports(
  * @param page
  * @param cookies
  */
-async function attachCookiesToPage(page: Page, cookies?: string) {
+async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
   if (cookies) {
     const parsedCookies = cookies
       .split(';')
@@ -346,8 +346,12 @@ async function attachCookiesToPage(page: Page, cookies?: string) {
         return acc;
       }, {});
 
-    for (let cookie in Object.keys(parsedCookies)) {
-      await page.setCookie({name: cookie, value: parsedCookies[cookie]});
+    for (const cookie of Object.keys(parsedCookies)) {
+      await page.setCookie({
+        name: cookie,
+        value: parsedCookies[cookie],
+        url: url,
+      });
     }
   }
 }
