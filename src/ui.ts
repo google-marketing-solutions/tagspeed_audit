@@ -58,6 +58,9 @@ export function printResult(result: AuditResponse, baseline: AuditResponse) {
   row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
   row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
+  row.insertCell(
+    4
+  ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px">`;
 }
 
 function showError(message: string) {

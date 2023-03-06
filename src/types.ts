@@ -26,6 +26,7 @@ export type AuditResponse = {
     consoleErrors: number;
   };
   error?: string;
+  screenshot?: string;
 };
 
 /**

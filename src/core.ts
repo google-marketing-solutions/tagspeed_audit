@@ -17,7 +17,6 @@ import puppeteer, {
   KnownDevices,
   PredefinedNetworkConditions,
 } from 'puppeteer';
-
 import {getEntity} from 'third-party-web';
 import {v4 as uuidv4} from 'uuid';
 import {AuditExecution, ExecutionResponse, AuditResponse} from './types';
@@ -49,9 +48,18 @@ export async function doAnalysis(
       execution.url
     );
 
-    execution.results.push(
-      await runLHForURL(browser, execution.url, '', execution.numberOfReports)
+    const baselineLHResult = await runLHForURL(
+      browser,
+      execution.url,
+      '',
+      execution.numberOfReports
     );
+    baselineLHResult.screenshot = await generateScreenshot(
+      browser,
+      execution.url,
+      ''
+    );
+    execution.results.push(baselineLHResult);
 
     // create list of blocking URLs
     const toBlockSet = new Set<string>();
@@ -258,7 +266,35 @@ export function averageCrossReportMetrics(
 }
 
 /**
- * Generate reports, per parameter specifications.
+ * Creates a screenshot of the page once it's loaded.
+ *
+ * @param page The page to take the screenshot of.
+ * @return a Promise that resolves to a base64 string for the
+ *        screenshot png
+ */
+async function generateScreenshot(
+  browser: Browser,
+  url: string,
+  block: string
+): Promise<string> {
+  const page = await browser.newPage();
+  await page.emulate(KnownDevices['Moto G4']);
+  await page.setRequestInterception(true);
+  page.on('request', req => {
+    if (req.url() === block) {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
+  await page.goto(url, {waitUntil: 'networkidle0'});
+  const ss = await page.screenshot({encoding: 'base64'});
+  await page.close();
+  return ss;
+}
+
+/**
+ * Execute lighthouse reports, per parameter specifications.
  * @param browser
  * @param toBlock
  * @param limit
@@ -277,9 +313,14 @@ export async function generateReports(
     }
     const b = toBlock[i];
     console.log(`[${execution.id}] Blocking ${b}`);
-    execution.results.push(
-      await runLHForURL(browser, execution.url, b, execution.numberOfReports)
+    const lhResult = await runLHForURL(
+      browser,
+      execution.url,
+      b,
+      execution.numberOfReports
     );
+    lhResult.screenshot = await generateScreenshot(browser, execution.url, b);
+    execution.results.push(lhResult);
   }
 
   await browser.close();
