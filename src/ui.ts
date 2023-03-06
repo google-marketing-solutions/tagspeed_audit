@@ -34,7 +34,7 @@ function round(n: number) {
 export function printResult(result: AuditResponse, baseline: AuditResponse) {
   const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
-  const isBaseline = baseline === undefined;
+  const isBaseline = baseline === result;
   row.classList.add('result');
   const url = row.insertCell(0);
   if (result.blockedURL.length > 70) {
@@ -52,9 +52,10 @@ export function printResult(result: AuditResponse, baseline: AuditResponse) {
   const FCPImproved = !isBaseline
     ? ` (${round(100 - result.scores.FCP / (baseline.scores.FCP / 100))}%)`
     : '';
-  const CLSImproved = !isBaseline
-    ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
-    : '';
+  const CLSImproved =
+    !isBaseline && baseline.scores.CLS > 0
+      ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
+      : '';
   row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
   row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
