@@ -51,6 +51,7 @@ export type AuditExecution = {
   numberOfReports: number;
   results: AuditResponse[];
   error?: string;
+  cookies?: string;
 };
 
 /**
