@@ -50,16 +50,11 @@ export async function doAnalysis(
       execution.cookies
     );
 
-    const baselineLHResult = await runLHForURL(
+    const baselineLHResult = await getPerformanceForURL(
       browser,
       execution.url,
       '',
       execution.numberOfReports
-    );
-    baselineLHResult.screenshot = await generateScreenshot(
-      browser,
-      execution.url,
-      ''
     );
     execution.results.push(baselineLHResult);
 
@@ -102,17 +97,20 @@ export async function doAnalysis(
  * @param toBlock
  * @returns
  */
-async function runLHForURL(
+async function getPerformanceForURL(
   browser: Browser,
   url: string,
   toBlock: string,
-  numberOfReports: number
+  numberOfReports: number,
+  cookies?: string
 ): Promise<AuditResponse> {
   const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
     const page = await browser.newPage();
     await page.emulate(KnownDevices['iPhone 11']);
     await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
+    await attachCookiesToPage(page, url, cookies);
+
     if (toBlock.length > 0) {
       await page.setRequestInterception(true);
       page.on('request', request => {
@@ -124,6 +122,7 @@ async function runLHForURL(
       });
     }
     await page.goto(url);
+    console.log(await page.cookies());
 
     const LCP = await page.evaluate(() => {
       return new Promise<number>(resolve => {
@@ -163,12 +162,12 @@ async function runLHForURL(
         setTimeout(() => resolve(cumulativeLayoutShiftScore), 2000);
       });
     });
-    await page.close();
 
     responses.push({
       id: uuidv4(),
       reportUrl: '',
       blockedURL: toBlock,
+      screenshot: await page.screenshot({encoding: 'base64'}),
       scores: {
         LCP: LCP / 1000.0,
         FCP: FCP / 1000.0,
@@ -176,6 +175,8 @@ async function runLHForURL(
         consoleErrors: 0,
       },
     });
+
+    await page.close();
   }
 
   const averagedResponse = averageCrossReportMetrics(responses);
@@ -261,6 +262,7 @@ export function averageCrossReportMetrics(
     id: responses[0].id,
     blockedURL: responses[0].blockedURL,
     reportUrl: responses[0].reportUrl,
+    screenshot: responses[0].screenshot,
     scores: {
       FCP: FCP,
       LCP: LCP,
@@ -268,36 +270,6 @@ export function averageCrossReportMetrics(
       consoleErrors: consoleErrors,
     },
   };
-}
-
-/**
- * Creates a screenshot of the page once it's loaded.
- *
- * @param page The page to take the screenshot of.
- * @return a Promise that resolves to a base64 string for the
- *        screenshot png
- */
-async function generateScreenshot(
-  browser: Browser,
-  url: string,
-  block: string,
-  cookies?: string
-): Promise<string> {
-  const page = await browser.newPage();
-  await page.emulate(KnownDevices['Moto G4']);
-  await page.setRequestInterception(true);
-  await attachCookiesToPage(page, cookies);
-  page.on('request', req => {
-    if (req.url() === block) {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
-  await page.goto(url, {waitUntil: 'networkidle0'});
-  const ss = await page.screenshot({encoding: 'base64'});
-  await page.close();
-  return ss;
 }
 
 /**
@@ -320,18 +292,14 @@ export async function generateReports(
     }
     const b = toBlock[i];
     console.log(`[${execution.id}] Blocking ${b}`);
-    const lhResult = await runLHForURL(
+    const lhResult = await getPerformanceForURL(
       browser,
       execution.url,
       b,
-      execution.numberOfReports
-    );
-    lhResult.screenshot = await generateScreenshot(
-      browser,
-      execution.url,
-      b,
+      execution.numberOfReports,
       execution.cookies
     );
+
     execution.results.push(lhResult);
   }
 

@@ -95,7 +95,7 @@ async function pollForResults(executionId: string, processedResults: string[]) {
       newResults.forEach(result => {
         printResult(
           result,
-          response.results.length > 1 ? response.results[0] : undefined
+          response.results.length >= 1 ? response.results[0] : undefined
         );
         processedResults.push(result.id);
       });
