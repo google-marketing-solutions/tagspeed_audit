@@ -18,6 +18,7 @@ import {getEntity} from 'third-party-web';
 import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
 import {AuditExecution, ExecutionResponse, LHReport, LHResponse} from './types';
+import {Page} from 'puppeteer';
 
 /**
  * Identify all network requests done by a page, filter out those that are
@@ -43,7 +44,8 @@ export async function doAnalysis(
     const requests = await extractRequestsFromPage(
       browser,
       execution.userAgentOverride,
-      execution.url
+      execution.url,
+      execution.cookies
     );
 
     const baselineLHResult = await runLHForURL(
@@ -140,12 +142,15 @@ async function runLHForURL(
 async function extractRequestsFromPage(
   browser: Browser,
   userAgent: string,
-  url: string
+  url: string,
+  cookies?: string
 ) {
   const page = await browser.newPage();
   if (userAgent.length > 0) {
     await page.setUserAgent(userAgent);
   }
+  attachCookiesToPage(page, cookies);
+
   const requests = new Array<HTTPRequest>();
 
   await page.setRequestInterception(true);
@@ -265,11 +270,13 @@ export function processLighthouseReport(
 async function generateScreenshot(
   browser: Browser,
   url: string,
-  block: string
+  block: string,
+  cookies?: string
 ): Promise<string> {
   const page = await browser.newPage();
   await page.emulate(KnownDevices['Moto G4']);
   await page.setRequestInterception(true);
+  await attachCookiesToPage(page, cookies);
   page.on('request', req => {
     if (req.url() === block) {
       req.abort();
@@ -309,7 +316,12 @@ async function generateReports(
       b,
       execution.numberOfReports
     );
-    lhResult.screenshot = await generateScreenshot(browser, execution.url, b);
+    lhResult.screenshot = await generateScreenshot(
+      browser,
+      execution.url,
+      b,
+      execution.cookies
+    );
     execution.results.push(lhResult);
   }
 
@@ -317,4 +329,25 @@ async function generateReports(
   console.log(`[${execution.id}] Completed`);
   execution.status =
     execution.status === 'running' ? 'complete' : execution.status;
+}
+
+/**
+ * Attaching cookies to a puppeteer page
+ * @param page
+ * @param cookies
+ */
+async function attachCookiesToPage(page: Page, cookies?: string) {
+  if (cookies) {
+    const parsedCookies = cookies
+      .split(';')
+      .map(v => v.split('='))
+      .reduce((acc, v) => {
+        acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+        return acc;
+      }, {});
+
+    for (let cookie in Object.keys(parsedCookies)) {
+      await page.setCookie({name: cookie, value: parsedCookies[cookie]});
+    }
+  }
 }

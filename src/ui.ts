@@ -157,6 +157,7 @@ export function submit(e: Event) {
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
   const url = (document.getElementById('url') as HTMLFormElement).value;
   const userAgent = (document.getElementById('agent') as HTMLFormElement).value;
+  const cookies = (document.getElementById('cookies') as HTMLFormElement).value;
   const maxUrlsToTry = (document.getElementById('max') as HTMLFormElement)
     .value;
   const numberOfReports = (
@@ -174,6 +175,9 @@ export function submit(e: Event) {
 
   try {
     const xhr = new XMLHttpRequest();
+    const data = {
+      cookies: cookies,
+    };
     xhr.onreadystatechange = function () {
       if (this.readyState === 4) {
         if (this.status === 200) {
@@ -198,13 +202,13 @@ export function submit(e: Event) {
       }
     };
     xhr.open(
-      'GET',
+      'POST',
       `/test/${encodeURIComponent(url)}?numberOfReports=${numberOfReports}` +
         (maxUrlsToTry ? `&maxUrlsToTry=${maxUrlsToTry}` : '') +
         (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : '')
     );
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
+    xhr.send(JSON.stringify(data));
   } catch (e) {
     enableSubmit();
     showError(e.message);
