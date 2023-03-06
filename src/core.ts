@@ -122,7 +122,6 @@ async function getPerformanceForURL(
       });
     }
     await page.goto(url);
-    console.log(await page.cookies());
 
     const LCP = await page.evaluate(() => {
       return new Promise<number>(resolve => {
