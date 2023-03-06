@@ -57,9 +57,12 @@ export function printResult(result: LHResponse, baseline: LHResponse) {
   row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
   row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
-  row.insertCell(4).innerText = `${result.scores.consoleErrors}`;
   row.insertCell(
-    5
+    4
+  ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px">`;
+  row.insertCell(5).innerText = `${result.scores.consoleErrors}`;
+  row.insertCell(
+    6
   ).innerHTML = `<a href='${result.reportUrl}' target='_blank'>LINK</a>`;
 }
 
