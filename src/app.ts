@@ -22,6 +22,7 @@ const port = 3000;
 const executions: AuditExecution[] = [];
 
 app.use(express.static('dist'));
+app.use(express.json()); // to support JSON-encoded bodies
 
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname + '/index.html'));
@@ -46,25 +47,34 @@ app.get('/cancel/:id', (req, res) => {
   }
 });
 
-app.get('/test/:url', async (req, res) => {
+/**
+ * Run analysys request containing:
+ * url: required
+ * maxUrlsToTry: optional
+ * numberOfReports: optional
+ * userAgent: optional
+ * cookies: optional
+ */
+app.post('/test', async (req, res) => {
   try {
-    const url = decodeURI(req.params.url);
+    const url = decodeURI(req.body.url);
     console.log(`Testing ${url}`);
-    const maxUrlsToTry = parseInt((req.query.maxUrlsToTry ?? '-1').toString());
+    const maxUrlsToTry = parseInt((req.body.maxUrlsToTry ?? '-1').toString());
     const numberOfReports = parseInt(
-      (req.query.numberOfReports ?? '1').toString()
+      (req.body.numberOfReports ?? '1').toString()
     );
-    const userAgentOverride = req.query.userAgent
-      ? req.query.userAgent.toString()
+    const userAgentOverride = req.body.userAgent
+      ? req.body.userAgent.toString()
       : '';
     const execution: AuditExecution = {
       id: uuidv4(),
       url: url,
       numberOfReports: numberOfReports,
       userAgentOverride: userAgentOverride,
-      maxUrlsToTry: maxUrlsToTry,
+      maxUrlsToTry: isNaN(maxUrlsToTry) ? -1 : maxUrlsToTry,
       results: [],
       status: 'running',
+      cookies: req.body.cookies,
     };
     const analysisResponse = await doAnalysis(execution);
     executions.push(execution);

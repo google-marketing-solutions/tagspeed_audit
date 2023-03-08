@@ -157,6 +157,7 @@ export function submit(e: Event) {
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
   const url = (document.getElementById('url') as HTMLFormElement).value;
   const userAgent = (document.getElementById('agent') as HTMLFormElement).value;
+  const cookies = (document.getElementById('cookies') as HTMLFormElement).value;
   const maxUrlsToTry = (document.getElementById('max') as HTMLFormElement)
     .value;
   const numberOfReports = (
@@ -171,6 +172,14 @@ export function submit(e: Event) {
   const error = document.getElementById('error');
   error.innerText = '';
   error.style.display = 'none';
+
+  const data = {
+    url: url,
+    cookies: cookies,
+    numberOfReports: numberOfReports,
+    maxUrlsToTry: maxUrlsToTry,
+    userAgent: userAgent,
+  };
 
   try {
     const xhr = new XMLHttpRequest();
@@ -197,14 +206,9 @@ export function submit(e: Event) {
         }
       }
     };
-    xhr.open(
-      'GET',
-      `/test/${encodeURIComponent(url)}?numberOfReports=${numberOfReports}` +
-        (maxUrlsToTry ? `&maxUrlsToTry=${maxUrlsToTry}` : '') +
-        (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : '')
-    );
+    xhr.open('POST', '/test/');
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
+    xhr.send(JSON.stringify(data));
   } catch (e) {
     enableSubmit();
     showError(e.message);
