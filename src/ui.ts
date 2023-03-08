@@ -171,11 +171,16 @@ export function submit(e: Event) {
   error.innerText = '';
   error.style.display = 'none';
 
+  const data = {
+    url: url,
+    cookies: cookies,
+    numberOfReports: numberOfReports,
+    maxUrlsToTry: maxUrlsToTry,
+    userAgent: userAgent,
+  };
+
   try {
     const xhr = new XMLHttpRequest();
-    const data = {
-      cookies: cookies,
-    };
     xhr.onreadystatechange = function () {
       if (this.readyState === 4) {
         if (this.status === 200) {
@@ -199,12 +204,7 @@ export function submit(e: Event) {
         }
       }
     };
-    xhr.open(
-      'POST',
-      `/test/${encodeURIComponent(url)}?numberOfReports=${numberOfReports}` +
-        (maxUrlsToTry ? `&maxUrlsToTry=${maxUrlsToTry}` : '') +
-        (userAgent ? `&userAgent=${encodeURIComponent(userAgent)}` : '')
-    );
+    xhr.open('POST', '/test/');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(data));
   } catch (e) {
