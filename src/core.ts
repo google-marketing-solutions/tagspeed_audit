@@ -333,6 +333,10 @@ async function generateReports(
 
 /**
  * Attaching cookies to a puppeteer page
+ * Expected format of cookie string is one that matches what Chrome shows
+ * on the network tab when reviewing a request, ';' separated key=value pairs
+ * Example:
+ * _octo=HASH123; device_id=IDHERE
  * @param page
  * @param cookies
  */
