@@ -14,6 +14,8 @@ limitations under the License.
 
 # Tagspeed Audit
 
+![Screen](docs/analysis.jpg)
+
 ## Introduction
 Tagspeed Audit is a tool to help measure the impact third-party JavaScript is
 having on pagespeed.
