@@ -11,18 +11,20 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations
 // under the License.
-import fs from 'fs';
-import lighthouse from 'lighthouse';
-import puppeteer, {Browser, HTTPRequest, KnownDevices} from 'puppeteer';
+import puppeteer, {
+  Browser,
+  HTTPRequest,
+  KnownDevices,
+  PredefinedNetworkConditions,
+} from 'puppeteer';
 import {getEntity} from 'third-party-web';
-import {URL} from 'url';
 import {v4 as uuidv4} from 'uuid';
-import {AuditExecution, ExecutionResponse, LHReport, LHResponse} from './types';
+import {AuditExecution, AuditResponse, ExecutionResponse} from './types';
 import {Page} from 'puppeteer';
 
 /**
  * Identify all network requests done by a page, filter out those that are
- * 3rd parties, then block the 3rd party URLs one by one and run a lighthouse
+ * 3rd parties, then block the 3rd party URLs one by one and run a perf
  * report for each situation to identify if there are performance improvements.
  * @param url
  * @param userAgent
@@ -48,16 +50,11 @@ export async function doAnalysis(
       execution.cookies
     );
 
-    const baselineLHResult = await runLHForURL(
+    const baselineLHResult = await getPerformanceForURL(
       browser,
       execution.url,
       '',
       execution.numberOfReports
-    );
-    baselineLHResult.screenshot = await generateScreenshot(
-      browser,
-      execution.url,
-      ''
     );
     execution.results.push(baselineLHResult);
 
@@ -93,37 +90,92 @@ export async function doAnalysis(
 }
 
 /**
- * Execute Lighthouse against URL, blocking specific pattern from `toBlock`
+ * Execute performance checks against URL, blocking specific pattern from `toBlock`
  * and writing final HTML report to disk.
  * @param browser
  * @param url
  * @param toBlock
  * @returns
  */
-async function runLHForURL(
+async function getPerformanceForURL(
   browser: Browser,
   url: string,
   toBlock: string,
-  numberOfReports: number
-): Promise<LHResponse> {
-  const responses: LHResponse[] = [];
+  numberOfReports: number,
+  cookies?: string
+): Promise<AuditResponse> {
+  const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
-    const lhr: LHReport = await lighthouse(url, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'html',
-      logLevel: 'error',
-      onlyCategories: ['performance', 'best-practices'],
-      blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
-    });
-    responses.push(await processLighthouseReport(toBlock, lhr));
+    const page = await browser.newPage();
+    await page.emulate(KnownDevices['iPhone 11']);
+    await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
+    await attachCookiesToPage(page, url, cookies);
 
-    if (!fs.existsSync('dist/reports')) {
-      fs.mkdirSync('dist/reports');
+    if (toBlock.length > 0) {
+      await page.setRequestInterception(true);
+      page.on('request', request => {
+        if (request.url().indexOf(toBlock) !== -1) {
+          request.abort();
+        } else {
+          request.continue();
+        }
+      });
     }
+    await page.goto(url);
 
-    fs.writeFile(`dist/${responses[0].reportUrl}`, lhr.report, () => {
-      console.log(`Wrote to disk: dist/${responses[0].reportUrl}`);
+    const LCP = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        const observer = new PerformanceObserver(list => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1]; // Use the latest LCP candidate
+          resolve(lastEntry.startTime);
+        });
+        observer.observe({type: 'largest-contentful-paint', buffered: true});
+      });
     });
+
+    const FCP = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        const observer = new PerformanceObserver(entryList => {
+          resolve(
+            entryList.getEntriesByName('first-contentful-paint')[0].startTime
+          );
+        });
+        // Some browsers throw when 'type' is passed:
+        observer.observe({type: 'paint', buffered: true});
+      });
+    });
+
+    const CLS = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        let cumulativeLayoutShiftScore = 0;
+        const observer = new PerformanceObserver(list => {
+          for (const entry of list.getEntries()) {
+            cumulativeLayoutShiftScore += entry.toJSON().value;
+          }
+          resolve(cumulativeLayoutShiftScore);
+        });
+        observer.observe({type: 'layout-shift', buffered: true});
+        // in a test environment / no CLS at all environment
+        // the observer is never called hence timing it out
+        setTimeout(() => resolve(cumulativeLayoutShiftScore), 2000);
+      });
+    });
+
+    responses.push({
+      id: uuidv4(),
+      reportUrl: '',
+      blockedURL: toBlock,
+      screenshot: await page.screenshot({encoding: 'base64'}),
+      scores: {
+        LCP: LCP / 1000.0,
+        FCP: FCP / 1000.0,
+        CLS: CLS,
+        consoleErrors: 0,
+      },
+    });
+
+    await page.close();
   }
 
   const averagedResponse = averageCrossReportMetrics(responses);
@@ -139,7 +191,7 @@ async function runLHForURL(
  * @param url
  * @returns
  */
-async function extractRequestsFromPage(
+export async function extractRequestsFromPage(
   browser: Browser,
   userAgent: string,
   url: string,
@@ -172,7 +224,9 @@ async function extractRequestsFromPage(
  * Average metrics after having ran multiple LH reports for the same scenario.
  * @param responses
  */
-export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
+export function averageCrossReportMetrics(
+  responses: AuditResponse[]
+): AuditResponse {
   const FCP =
     Math.round(
       (responses.map(r => r.scores.FCP).reduce((r1, r2) => r1 + r2, 0) /
@@ -207,6 +261,7 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
     id: responses[0].id,
     blockedURL: responses[0].blockedURL,
     reportUrl: responses[0].reportUrl,
+    screenshot: responses[0].screenshot,
     scores: {
       FCP: FCP,
       LCP: LCP,
@@ -217,87 +272,13 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
 }
 
 /**
- * Extract relevant data from result return by the lighthouse library.
- * @param toBlock
- * @param lhr
- * @returns
- */
-export function processLighthouseReport(
-  toBlock: string,
-  lhr: LHReport
-): LHResponse {
-  if (
-    lhr.lhr.audits['first-contentful-paint']['scoreDisplayMode'] === 'error'
-  ) {
-    throw new Error(
-      'Lighthouse did not return any metrics. The request may be blocked.'
-    );
-  }
-
-  const reportId = uuidv4();
-
-  const fcp = parseFloat(
-    lhr.lhr.audits['first-contentful-paint'].displayValue.split(' ')[0]
-  );
-  const lcp = parseFloat(
-    lhr.lhr.audits['largest-contentful-paint'].displayValue.split(' ')[0]
-  );
-  const cls = parseFloat(
-    lhr.lhr.audits['cumulative-layout-shift'].displayValue
-  );
-  const consoleErrors =
-    lhr.lhr.audits['errors-in-console'].details.items.length;
-  return {
-    id: reportId,
-    blockedURL: toBlock,
-    reportUrl: `reports/${reportId}.html`,
-    scores: {
-      FCP: fcp,
-      LCP: lcp,
-      CLS: cls,
-      consoleErrors: consoleErrors,
-    },
-  };
-}
-
-/**
- * Creates a screenshot of the page once it's loaded.
- *
- * @param page The page to take the screenshot of.
- * @return a Promise that resolves to a base64 string for the
- *        screenshot png
- */
-async function generateScreenshot(
-  browser: Browser,
-  url: string,
-  block: string,
-  cookies?: string
-): Promise<string> {
-  const page = await browser.newPage();
-  await page.emulate(KnownDevices['Moto G4']);
-  await page.setRequestInterception(true);
-  await attachCookiesToPage(page, cookies);
-  page.on('request', req => {
-    if (req.url() === block) {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
-  await page.goto(url, {waitUntil: 'networkidle0'});
-  const ss = await page.screenshot({encoding: 'base64'});
-  await page.close();
-  return ss;
-}
-
-/**
  * Execute lighthouse reports, per parameter specifications.
  * @param browser
  * @param toBlock
  * @param limit
  * @param execution
  */
-async function generateReports(
+export async function generateReports(
   browser: Browser,
   toBlock: string[],
   limit: number,
@@ -310,18 +291,14 @@ async function generateReports(
     }
     const b = toBlock[i];
     console.log(`[${execution.id}] Blocking ${b}`);
-    const lhResult = await runLHForURL(
+    const lhResult = await getPerformanceForURL(
       browser,
       execution.url,
       b,
-      execution.numberOfReports
-    );
-    lhResult.screenshot = await generateScreenshot(
-      browser,
-      execution.url,
-      b,
+      execution.numberOfReports,
       execution.cookies
     );
+
     execution.results.push(lhResult);
   }
 

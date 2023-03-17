@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-import {AuditExecution, ExecutionResponse, LHResponse} from './types';
+import {AuditExecution, ExecutionResponse, AuditResponse} from './types';
 
 let globalTimeoutIdentifier: NodeJS.Timeout = null;
 let globalExecutionId: string = null;
@@ -31,10 +31,10 @@ function round(n: number) {
  * Inject information into the UI.
  * @param result
  */
-export function printResult(result: LHResponse, baseline: LHResponse) {
+export function printResult(result: AuditResponse, baseline: AuditResponse) {
   const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
-  const isBaseline = baseline === undefined;
+  const isBaseline = baseline === result;
   row.classList.add('result');
   const url = row.insertCell(0);
   if (result.blockedURL.length > 70) {
@@ -45,25 +45,23 @@ export function printResult(result: LHResponse, baseline: LHResponse) {
     url.innerText = result.blockedURL;
   }
   url.title = result.blockedURL;
+
   const LCPImproved = !isBaseline
     ? ` (${round(100 - result.scores.LCP / (baseline.scores.LCP / 100))}%)`
     : '';
   const FCPImproved = !isBaseline
     ? ` (${round(100 - result.scores.FCP / (baseline.scores.FCP / 100))}%)`
     : '';
-  const CLSImproved = !isBaseline
-    ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
-    : '';
+  const CLSImproved =
+    !isBaseline && baseline.scores.CLS > 0
+      ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
+      : '';
   row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
   row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
   row.insertCell(
     4
   ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px">`;
-  row.insertCell(5).innerText = `${result.scores.consoleErrors}`;
-  row.insertCell(
-    6
-  ).innerHTML = `<a href='${result.reportUrl}' target='_blank'>LINK</a>`;
 }
 
 function showError(message: string) {
@@ -97,7 +95,7 @@ async function pollForResults(executionId: string, processedResults: string[]) {
       newResults.forEach(result => {
         printResult(
           result,
-          response.results.length > 1 ? response.results[0] : undefined
+          response.results.length >= 1 ? response.results[0] : undefined
         );
         processedResults.push(result.id);
       });

@@ -77,6 +77,7 @@ app.post('/test', async (req, res) => {
       cookies: req.body.cookies,
     };
     const analysisResponse = await doAnalysis(execution);
+
     executions.push(execution);
     res.send(analysisResponse);
   } catch (ex) {

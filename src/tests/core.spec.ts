@@ -11,42 +11,137 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations
 // under the License.
+/* eslint prefer-arrow-callback: "off" */
 
-import {expect} from 'chai';
+import {assert} from 'chai';
 import 'mocha';
-import {processLighthouseReport} from '../core';
-import {LHReport} from '../types';
+import {
+  averageCrossReportMetrics,
+  extractRequestsFromPage,
+  generateReports,
+  doAnalysis,
+} from '../core';
+import {AuditExecution, AuditResponse} from '../types';
+import puppeteer, {Browser} from 'puppeteer';
+import {createServer} from 'http';
 
-describe('core lighthouse report processing', () => {
-  it('parse response from lighthouse and create data for UI', async () => {
-    const report: LHReport = {
-      report: '<html></html>',
-      lhr: {
-        audits: {
-          'first-contentful-paint': {
-            displayValue: '1 s',
-            scoreDisplayMode: 'ok',
-          },
-          'largest-contentful-paint': {
-            displayValue: '2 s',
-            scoreDisplayMode: 'ok',
-          },
-          'cumulative-layout-shift': {
-            displayValue: '0.1',
-            scoreDisplayMode: 'ok',
-          },
-          'errors-in-console': {
-            details: {
-              items: [],
-            },
-          },
-        },
+describe('analysis should work end to end', function () {
+  this.timeout(10000);
+  const server = createServer(function (req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end(
+      '<html><head><title>test</title></head><body><p>test</p><br/>test<script>for (var i = 0; i < 100; i++) document.getElementsByTagName("p")[0].style.marginTop=i+"px"</script></body></html>'
+    );
+  });
+  let browser: Browser;
+
+  before(async function () {
+    server.listen(8181);
+    browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: null,
+    });
+  });
+
+  after(function () {
+    server.close();
+    browser.close();
+  });
+
+  it('should return results', async function () {
+    const toBlock = ['test'];
+    const limit = 1;
+    const execution: AuditExecution = {
+      id: 'test',
+      url: 'http://localhost:8181',
+      userAgentOverride: '',
+      numberOfReports: 1,
+      status: 'running',
+      results: [],
+    };
+    await generateReports(browser, toBlock, limit, execution);
+  });
+
+  it('should run audit asynchronously', async function () {
+    const execution: AuditExecution = {
+      id: 'test',
+      url: 'http://localhost:8181',
+      userAgentOverride: '',
+      numberOfReports: 1,
+      status: 'running',
+      results: [],
+    };
+    await doAnalysis(execution);
+    await new Promise(resolve => {
+      setTimeout(() => {
+        assert.equal(execution.status, 'complete');
+        resolve(null);
+      }, 4000);
+    });
+  });
+});
+
+describe('extract requests from URL and identify 3rd party', function () {
+  this.timeout(10000);
+
+  const server = createServer(function (req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end('<html></html>');
+  });
+
+  let browser: Browser;
+
+  before(async function () {
+    server.listen(8181);
+    browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: null,
+    });
+  });
+
+  after(function () {
+    server.close();
+    browser.close();
+  });
+
+  it('should extract requests from a page', async () => {
+    const requests = await extractRequestsFromPage(
+      browser,
+      '',
+      'http://localhost:8181'
+    );
+    assert.equal(requests.length, 1);
+  });
+});
+
+describe('process results of having run analysis', () => {
+  it('should average stats from multiple reports', () => {
+    const response1: AuditResponse = {
+      id: 'test1',
+      blockedURL: '',
+      reportUrl: '',
+      scores: {
+        LCP: 3,
+        FCP: 3,
+        CLS: 3,
+        consoleErrors: 0,
       },
     };
-    const response = processLighthouseReport('http://test', report);
-    expect(response.scores.FCP).to.equal(1.0);
-    expect(response.scores.LCP).to.equal(2.0);
-    expect(response.scores.CLS).to.equal(0.1);
-    expect(response.scores.consoleErrors).to.equal(0);
+    const response2: AuditResponse = {
+      id: 'test2',
+      blockedURL: '',
+      reportUrl: '',
+      scores: {
+        LCP: 5,
+        FCP: 3,
+        CLS: 3,
+        consoleErrors: 0,
+      },
+    };
+    const result = averageCrossReportMetrics([response1, response2]);
+    assert.equal(result.scores.LCP, 4);
+    assert.equal(result.scores.FCP, 3);
+    assert.equal(result.scores.CLS, 3);
+    assert.equal(result.scores.consoleErrors, 0);
   });
 });
