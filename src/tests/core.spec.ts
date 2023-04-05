@@ -60,6 +60,8 @@ describe('analysis should work end to end', function () {
       results: [],
     };
     await generateReports(browser, toBlock, limit, execution);
+    assert.equal(execution.status, 'complete');
+    assert.equal(execution.results.length, 1);
   });
 
   it('should run audit asynchronously', async function () {
