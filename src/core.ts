@@ -60,9 +60,13 @@ export async function doAnalysis(
 
     // create list of blocking URLs
     const toBlockSet = new Set<string>();
-    for (const r of requests) {
-      const url = r.url();
-      if (getEntity(url)) {
+    for (const request of requests) {
+      const url = request.url();
+      const isImage = !!request
+        .response()
+        .headers()
+        ['content-type'].match(/(image)+\//g);
+      if (!isImage && getEntity(url)) {
         toBlockSet.add(url);
       }
     }
@@ -106,7 +110,9 @@ async function getPerformanceForURL(
 ): Promise<AuditResponse> {
   const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
-    const page = await browser.newPage();
+    const page = await (
+      await browser.createIncognitoBrowserContext()
+    ).newPage();
     await page.emulate(KnownDevices['iPhone 11']);
     await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
     await attachCookiesToPage(page, url, cookies);
@@ -208,8 +214,10 @@ export async function extractRequestsFromPage(
   await page.setRequestInterception(true);
   await page.setUserAgent(userAgent);
   page.on('request', request => {
-    requests.push(request);
     request.continue();
+  });
+  page.on('requestfinished', request => {
+    requests.push(request);
   });
 
   await page.goto(url, {
