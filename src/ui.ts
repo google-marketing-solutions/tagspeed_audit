@@ -61,7 +61,7 @@ export function printResult(result: AuditResponse, baseline: AuditResponse) {
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
   row.insertCell(
     4
-  ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px">`;
+  ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px" onclick="screenshotClick(event)">`;
 }
 
 function showError(message: string) {
@@ -69,6 +69,14 @@ function showError(message: string) {
   error.innerText = message;
   error.style.display = 'block';
   console.error(message);
+}
+
+export function screenshotClick(event: {target: {src: string}}) {
+  const w = window.open('');
+  const image = new Image();
+  image.src = event.target.src;
+
+  w.document.write(image.outerHTML);
 }
 
 /**
