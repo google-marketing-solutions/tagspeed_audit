@@ -163,8 +163,7 @@ async function checkForResults(executionId: string): Promise<AuditExecution> {
  */
 export function submit(e: Event) {
   e.preventDefault();
-  var formData = new FormData(e.target as HTMLFormElement);
-
+  const formData = new FormData(e.target as HTMLFormElement);
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
   const url = formData.get('url').valueOf();
   const userAgent = formData.get('agent').valueOf();

@@ -1,11 +1,8 @@
 <!-- Copyright 2023 Google LLC
-
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy
 of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -34,7 +31,6 @@ under the License.
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
       rel="stylesheet"
     />
-
     <style>
       body {
         font-family: Roboto, 'Helvetica Neue', sans-serif;
@@ -48,18 +44,15 @@ under the License.
       .results {
         display: none;
       }
-
       #error {
         margin: 5px;
         padding: 5px;
         font-weight: 300;
         color: red;
       }
-
       #results img {
         cursor: pointer;
       }
-
       .text-center {
         text-align: center;
       }
@@ -70,61 +63,47 @@ under the License.
       .mdc-data-table {
         width: 100%;
       }
-
       .row {
         display: flex;
         flex-wrap: wrap;
       }
-
       .column {
         flex: 1;
         margin: 10px;
       }
-
       .col-1 {
         max-width: calc(100% / 12);
       }
-
       .col-2 {
         max-width: calc(100% / 12 * 2);
       }
-
       .col-3 {
         max-width: calc(100% / 12 * 3);
       }
-
       .col-4 {
         max-width: calc(100% / 12 * 4);
       }
-
       .col-5 {
         max-width: calc(100% / 12 * 5);
       }
-
       .col-6 {
         max-width: calc(100% / 2);
       }
-
       .col-7 {
         max-width: calc(100% / 12 * 7);
       }
-
       .col-8 {
         max-width: calc(100% / 12 * 8);
       }
-
       .col-9 {
         max-width: calc(100% / 12 * 9);
       }
-
       .col-10 {
         max-width: calc(100% / 12 * 10);
       }
-
       .col-11 {
         max-width: calc(100% / 12 * 10);
       }
-
       .col-12 {
         max-width: 100%;
       }
@@ -137,13 +116,11 @@ under the License.
   <body>
     <div class="container-fluid">
       <br />
-
       <div class="mdc-card mdc-card--outlined">
         <p>
           We will execute tests after removing identified 3rd party scripts, one
           by one, in order to understand their performance impact.
         </p>
-
         <form enctype="multipart/form-data" method="post" id="form">
           <div class="row">
             <div class="column col-12">
@@ -185,7 +162,6 @@ under the License.
                 <span class="mdc-line-ripple"></span>
               </label>
             </div>
-
             <div class="column col-4">
               <p><label for="agent">User Agent Override (optional)</label></p>
               <label class="mdc-text-field mdc-text-field--filled">
@@ -200,7 +176,6 @@ under the License.
                 <span class="mdc-line-ripple"></span>
               </label>
             </div>
-
             <div class="column col-4">
               <p>
                 <label for="max">Max URLs to attempt to block (optional)</label>
@@ -242,7 +217,6 @@ under the License.
               </label>
             </div>
           </div>
-
           <div id="error"></div>
           <div class="text-center">
             <br />
@@ -256,7 +230,6 @@ under the License.
               <div class="mdc-button__ripple"></div>
               <span class="mdc-button__label">Generate Report</span>
             </button>
-
             <button
               class="mdc-button foo-button"
               name="action"
@@ -334,7 +307,6 @@ under the License.
         document
           .getElementById('form')
           .addEventListener('submit', submit, false);
-
         document
           .getElementById('cancel')
           .addEventListener('click', cancel, false);
