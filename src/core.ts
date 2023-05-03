@@ -62,10 +62,10 @@ export async function doAnalysis(
     const toBlockSet = new Set<string>();
     for (const request of requests) {
       const url = request.url();
-      const isImage = !!request
-        .response()
-        .headers()
-        ['content-type'].match(/(image)+\//g);
+      const headers = request.response().headers();
+      const isImage =
+        headers['content-type'] &&
+        !!headers['content-type'].match(/(image)+\//g);
       if (!isImage && getEntity(url)) {
         toBlockSet.add(url);
       }
