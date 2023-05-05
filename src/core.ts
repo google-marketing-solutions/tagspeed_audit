@@ -329,7 +329,10 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
   if (cookies) {
     const parsedCookies = cookies
       .split(';')
-      .map(v => v.split('='))
+      .map(v => {
+        const i = v.indexOf('=');
+        return [v.substring(0, i), v.substring(i + 1)];
+      })
       .reduce((acc, v) => {
         acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
         return acc;
