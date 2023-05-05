@@ -16,6 +16,7 @@ under the License.
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>3rd Party Auditing Tool</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="main.css" rel="stylesheet" />
     <link
       href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
       rel="stylesheet"
@@ -31,83 +32,6 @@ under the License.
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
       rel="stylesheet"
     />
-    <style>
-      body {
-        font-family: Roboto, 'Helvetica Neue', sans-serif;
-      }
-      h1 {
-        margin-top: 40px;
-        margin-bottom: 40px;
-      }
-      #error,
-      #cancel,
-      .results {
-        display: none;
-      }
-      #error {
-        margin: 5px;
-        padding: 5px;
-        font-weight: 300;
-        color: red;
-      }
-      #results img {
-        cursor: pointer;
-      }
-      .text-center {
-        text-align: center;
-      }
-      .mdc-card {
-        padding: 16px;
-      }
-      .mdc-text-field,
-      .mdc-data-table {
-        width: 100%;
-      }
-      .row {
-        display: flex;
-        flex-wrap: wrap;
-      }
-      .column {
-        flex: 1;
-        margin: 10px;
-      }
-      .col-1 {
-        max-width: calc(100% / 12);
-      }
-      .col-2 {
-        max-width: calc(100% / 12 * 2);
-      }
-      .col-3 {
-        max-width: calc(100% / 12 * 3);
-      }
-      .col-4 {
-        max-width: calc(100% / 12 * 4);
-      }
-      .col-5 {
-        max-width: calc(100% / 12 * 5);
-      }
-      .col-6 {
-        max-width: calc(100% / 2);
-      }
-      .col-7 {
-        max-width: calc(100% / 12 * 7);
-      }
-      .col-8 {
-        max-width: calc(100% / 12 * 8);
-      }
-      .col-9 {
-        max-width: calc(100% / 12 * 9);
-      }
-      .col-10 {
-        max-width: calc(100% / 12 * 10);
-      }
-      .col-11 {
-        max-width: calc(100% / 12 * 10);
-      }
-      .col-12 {
-        max-width: 100%;
-      }
-    </style>
     <script>
       var exports = {};
     </script>
@@ -115,7 +39,7 @@ under the License.
   </head>
   <body>
     <div class="container-fluid">
-      <br />
+      <h1 class="text-center">3rd Party Auditing Tool</h1>
       <div class="mdc-card mdc-card--outlined">
         <p>
           We will execute tests after removing identified 3rd party scripts, one
@@ -197,7 +121,7 @@ under the License.
           <div class="row">
             <div class="column col-6">
               <p>
-                <label for="cookies">Cookies (optional)</label><br />
+                <label for="cookies">Cookies (optional)</label><br>
                 <small
                   >Format expected to match the Chrome Network Tab, ';'
                   separated key=value pairs, e.g. _octo=HASH123;
@@ -219,7 +143,7 @@ under the License.
           </div>
           <div id="error"></div>
           <div class="text-center">
-            <br />
+            <br>
             <button
               class="mdc-button foo-button"
               name="action"
@@ -243,7 +167,7 @@ under the License.
           </div>
         </form>
       </div>
-      <br /><br />
+      <br><br>
       <div id="results" class="mdc-card results">
         <h3>Results</h3>
         <p>
