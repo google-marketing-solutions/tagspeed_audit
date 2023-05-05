@@ -35,7 +35,7 @@ export function printResult(result: AuditResponse, baseline: AuditResponse) {
   const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
   const isBaseline = baseline === result;
-  row.classList.add('result');
+  row.classList.add('mdc-data-table__row');
   const url = row.insertCell(0);
   if (result.blockedURL.length > 70) {
     url.innerText = result.blockedURL.substring(0, 70) + '...';
@@ -62,6 +62,9 @@ export function printResult(result: AuditResponse, baseline: AuditResponse) {
   row.insertCell(
     4
   ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px" onclick="screenshotClick(event)">`;
+  for (let i = 0; i < row.cells.length; i++) {
+    row.cells[i].classList.add('mdc-data-table__cell');
+  }
 }
 
 function showError(message: string) {
@@ -160,15 +163,13 @@ async function checkForResults(executionId: string): Promise<AuditExecution> {
  */
 export function submit(e: Event) {
   e.preventDefault();
+  const formData = new FormData(e.target as HTMLFormElement);
   const submitButton = document.getElementById('submit') as HTMLButtonElement;
-  const url = (document.getElementById('url') as HTMLFormElement).value;
-  const userAgent = (document.getElementById('agent') as HTMLFormElement).value;
-  const cookies = (document.getElementById('cookies') as HTMLFormElement).value;
-  const maxUrlsToTry = (document.getElementById('max') as HTMLFormElement)
-    .value;
-  const numberOfReports = (
-    document.getElementById('numberOfReports') as HTMLFormElement
-  ).value;
+  const url = formData.get('url').valueOf();
+  const userAgent = formData.get('agent').valueOf();
+  const cookies = formData.get('cookies').valueOf();
+  const maxUrlsToTry = formData.get('max').valueOf();
+  const numberOfReports = formData.get('numberOfReports').valueOf();
   const results = document.getElementById('results') as HTMLDivElement;
   results.style.display = 'none';
 
