@@ -38,7 +38,7 @@ describe('analysis should work end to end', function () {
   before(async function () {
     server.listen(8181);
     browser = await puppeteer.launch({
-      headless: true,
+      headless: "new",
       defaultViewport: null,
     });
   });
