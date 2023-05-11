@@ -39,7 +39,7 @@ export async function doAnalysis(
     // Use Puppeteer to launch headful Chrome and don't use its default 800x600
     // viewport.
     const browser = await puppeteer.launch({
-      headless: "new",
+      headless: 'new',
       defaultViewport: null,
     });
 
