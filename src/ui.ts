@@ -21,7 +21,7 @@ function enableSubmit() {
   if (globalTimeoutIdentifier) {
     clearTimeout(globalTimeoutIdentifier);
   }
-  
+
   (document.getElementById('submit') as HTMLButtonElement).disabled = false;
   (document.getElementById('cancel') as HTMLButtonElement).style.display =
     'none';
