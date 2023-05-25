@@ -58,7 +58,6 @@ under the License.
                   name="url"
                   autofocus
                   required
-                  id="url"
                 />
                 <span class="mdc-line-ripple"></span>
               </label>
@@ -78,7 +77,6 @@ under the License.
                   type="number"
                   aria-labelledby="numberOfReports"
                   name="numberOfReports"
-                  id="numberOfReports"
                   min="1"
                   max="10"
                   value="3"
@@ -96,7 +94,6 @@ under the License.
                   type="text"
                   aria-labelledby="agent"
                   name="agent"
-                  id="agent"
                 />
                 <span class="mdc-line-ripple"></span>
               </label>
@@ -113,7 +110,6 @@ under the License.
                   min="0"
                   aria-labelledby="max"
                   name="max"
-                  id="max"
                 />
                 <span class="mdc-line-ripple"></span>
               </label>
@@ -136,7 +132,26 @@ under the License.
                   type="text"
                   aria-labelledby="cookies"
                   name="cookies"
-                  id="cookies"
+                />
+                <span class="mdc-line-ripple"></span>
+              </label>
+            </div>
+            <div class="column col-6">
+              <p>
+                <label for="cookies">LocalStorage (optional)</label><br>
+                <small
+                  >Format expected to match Cookie format, ';'
+                  separated key=value pairs, e.g. _octo=HASH123;
+                  device_id=IDHERE</small
+                >
+              </p>
+              <label class="mdc-text-field mdc-text-field--filled">
+                <span class="mdc-text-field__ripple"></span>
+                <input
+                  class="mdc-text-field__input"
+                  type="text"
+                  aria-labelledby="localStorage"
+                  name="localStorage"
                 />
                 <span class="mdc-line-ripple"></span>
               </label>

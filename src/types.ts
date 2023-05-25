@@ -52,6 +52,7 @@ export type AuditExecution = {
   results: AuditResponse[];
   error?: string;
   cookies?: string;
+  localStorage?: string;
 };
 
 /**

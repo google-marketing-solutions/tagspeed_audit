@@ -47,11 +47,13 @@ export async function doAnalysis(
       browser,
       execution.userAgentOverride,
       execution.url,
-      execution.cookies
+      execution.cookies,
+      execution.localStorage
     );
 
     const baselineLHResult = await getPerformanceForURL(
       browser,
+      execution.userAgentOverride,
       execution.url,
       '',
       execution.numberOfReports
@@ -103,16 +105,26 @@ export async function doAnalysis(
  */
 async function getPerformanceForURL(
   browser: Browser,
+  userAgent: string,
   url: string,
   toBlock: string,
   numberOfReports: number,
-  cookies?: string
+  cookies?: string,
+  localStorage?: string
 ): Promise<AuditResponse> {
   const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
     const page = await (
       await browser.createIncognitoBrowserContext()
     ).newPage();
+
+    if (userAgent.length > 0) {
+      await page.setUserAgent(userAgent);
+    }
+
+    await page.goto(url);
+    await attachLocalstorageToPage(page, localStorage);
+
     await page.emulate(KnownDevices['iPhone 11']);
     await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
     await attachCookiesToPage(page, url, cookies);
@@ -127,7 +139,8 @@ async function getPerformanceForURL(
         }
       });
     }
-    await page.goto(url);
+
+    await page.reload();
 
     const LCP = await page.evaluate(() => {
       return new Promise<number>(resolve => {
@@ -201,21 +214,26 @@ export async function extractRequestsFromPage(
   browser: Browser,
   userAgent: string,
   url: string,
-  cookies?: string
+  cookies?: string,
+  localStorage?: string
 ) {
   const page = await browser.newPage();
   if (userAgent.length > 0) {
     await page.setUserAgent(userAgent);
   }
+  await page.setCacheEnabled(false);
+  await page.goto(url);
+  await page.setCacheEnabled(true);
+  await attachLocalstorageToPage(page, localStorage);
   attachCookiesToPage(page, url, cookies);
 
-  const requests = new Array<HTTPRequest>();
-
   await page.setRequestInterception(true);
-  await page.setUserAgent(userAgent);
+
   page.on('request', request => {
     request.continue();
   });
+
+  const requests = new Array<HTTPRequest>();
   page.on('requestfinished', request => {
     requests.push(request);
   });
@@ -301,6 +319,7 @@ export async function generateReports(
     console.log(`[${execution.id}] Blocking ${b}`);
     const lhResult = await getPerformanceForURL(
       browser,
+      execution.userAgentOverride,
       execution.url,
       b,
       execution.numberOfReports,
@@ -327,17 +346,7 @@ export async function generateReports(
  */
 async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
   if (cookies) {
-    const parsedCookies = cookies
-      .split(';')
-      .map(v => {
-        const i = v.indexOf('=');
-        return [v.substring(0, i), v.substring(i + 1)];
-      })
-      .reduce((acc, v) => {
-        acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-        return acc;
-      }, {});
-
+    const parsedCookies = splitOutData(cookies);
     for (const cookie of Object.keys(parsedCookies)) {
       await page.setCookie({
         name: cookie,
@@ -345,5 +354,33 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
         url: url,
       });
     }
+  }
+}
+
+function splitOutData(s: string) {
+  return s
+    .split(';')
+    .map(v => {
+      const i = v.indexOf('=');
+      return [v.substring(0, i), v.substring(i + 1)];
+    })
+    .reduce((acc, v) => {
+      acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+      return acc;
+    }, {});
+}
+
+async function attachLocalstorageToPage(page: Page, localStorageData?: string) {
+  if (localStorageData) {
+    const data = splitOutData(localStorageData);
+
+    await page.evaluate(data => {
+      return new Promise(resolve => {
+        for (const ls of Object.keys(data)) {
+          localStorage.setItem(ls, data[ls]);
+        }
+        resolve(null);
+      });
+    }, data);
   }
 }
