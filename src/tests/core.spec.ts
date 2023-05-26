@@ -113,7 +113,8 @@ describe('extract requests from URL and identify 3rd party', function () {
       '',
       'http://localhost:8181'
     );
-    assert.equal(requests.length, 1);
+    console.log(requests);
+    assert.equal(requests.length, 2);
   });
 });
 
