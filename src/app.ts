@@ -64,7 +64,7 @@ app.post('/test', async (req, res) => {
       (req.body.numberOfReports ?? '1').toString()
     );
     const userAgentOverride = req.body.userAgent
-      ? req.body.userAgent.toString()
+      ? req.body.userAgent.toString().trim()
       : '';
     const execution: AuditExecution = {
       id: uuidv4(),
