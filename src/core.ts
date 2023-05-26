@@ -360,7 +360,6 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
  * Creates a map of string to string from inputs in cookie format:
  * a=2;b=3
  * @param s input string to convert to map
- * @returns 
  */
 export function splitOutData(s: string) {
   return s
