@@ -361,8 +361,8 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
  * a=2;b=3
  * @param s input string to convert to map
  */
-export function splitOutData(s: string) {
-  return s
+export function splitOutData(s: string): {[key: string]: string} {
+  /*return s
     .split(';')
     .map(v => {
       const i = v.indexOf('=');
@@ -376,7 +376,57 @@ export function splitOutData(s: string) {
 
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(value);
       return acc;
-    }, {});
+    }, {});*/
+
+  const cookies: {[key: string]: string} = {};
+  let currentIndex = 0;
+  let currentKey = '';
+  let currentValue = null;
+  while (currentIndex < s.length) {
+    if (currentValue === null) {
+      if (s[currentIndex] === '=') {
+        currentValue = '';
+        currentKey = currentKey.trim();
+      } else {
+        currentKey += s[currentIndex];
+      }
+    } else {
+      if (
+        s[currentIndex] === ';' &&
+        (currentValue[0] !== '"' ||
+          currentValue[currentValue.length - 1] === '"')
+      ) {
+        currentKey = decodeURIComponent(currentKey);
+        cookies[currentKey] = decodeURIComponent(
+          cleanParsedValue(currentValue)
+        );
+        currentKey = '';
+        currentValue = null;
+      } else {
+        currentValue += s[currentIndex];
+      }
+    }
+
+    currentIndex++;
+  }
+
+  if (currentKey && currentValue) {
+    cookies[currentKey] = decodeURIComponent(cleanParsedValue(currentValue));
+  }
+
+  return cookies;
+}
+
+function cleanParsedValue(currentValue: string) {
+  currentValue = currentValue.trim();
+  if (
+    currentValue[0] === '"' &&
+    currentValue[currentValue.length - 1] === '"' &&
+    currentValue.length > 1
+  ) {
+    currentValue = currentValue.substring(1, currentValue.length - 1);
+  }
+  return currentValue;
 }
 
 async function attachLocalStorageToPage(page: Page, localStorageData?: string) {

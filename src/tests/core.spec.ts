@@ -113,7 +113,6 @@ describe('extract requests from URL and identify 3rd party', function () {
       '',
       'http://localhost:8181'
     );
-    console.log(requests);
     assert.equal(requests.length, 2);
   });
 });
@@ -165,16 +164,16 @@ describe('handle cookies and localstorage', () => {
     assert.equal(test['b'], '4');
   });
 
-  it('should parse input from UI when "" are used', () => {
+  it('should parse input from UI when "" encoded are used', () => {
     const test = splitOutData('a="%22test%22";b="4"');
-
+    console.log(test)
     assert.equal(test['a'], '"test"');
     assert.equal(test['b'], '4');
   });
 
-  /*it('should parse input from UI when ; are used', () => {
-    const test = splitOutData('a="test;test2";b=test;test3');
+  it('should parse input from UI when ; are used', () => {
+    const test = splitOutData('a="test;test2";b="test;test3"');
 
     assert.equal(test['b'], 'test;test3');
-  });*/
+  });
 });
