@@ -166,7 +166,7 @@ describe('handle cookies and localstorage', () => {
 
   it('should parse input from UI when "" encoded are used', () => {
     const test = splitOutData('a="%22test%22";b="4"');
-    console.log(test)
+    console.log(test);
     assert.equal(test['a'], '"test"');
     assert.equal(test['b'], '4');
   });
