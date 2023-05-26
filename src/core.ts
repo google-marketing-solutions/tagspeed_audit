@@ -362,22 +362,6 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
  * @param s input string to convert to map
  */
 export function splitOutData(s: string): {[key: string]: string} {
-  /*return s
-    .split(';')
-    .map(v => {
-      const i = v.indexOf('=');
-      return [v.substring(0, i), v.substring(i + 1)];
-    })
-    .reduce((acc, v) => {
-      let value = v[1].trim();
-      if (value[0] === '"' && value[value.length - 1] === '"') {
-        value = value.substring(1, value.length - 1);
-      }
-
-      acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(value);
-      return acc;
-    }, {});*/
-
   const cookies: {[key: string]: string} = {};
   let currentIndex = 0;
   let currentKey = '';
