@@ -1,5 +1,6 @@
 body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  padding: 20px;
 }
 h1 {
   margin-top: 40px;
@@ -29,50 +30,11 @@ h1 {
 .mdc-data-table {
   width: 100%;
 }
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.column {
-  flex: 1;
-  margin: 10px;
-}
-.col-1 {
-  max-width: calc(100% / 12);
-}
-.col-2 {
-  max-width: calc(100% / 12 * 2);
-}
-.col-3 {
-  max-width: calc(100% / 12 * 3);
-}
-.col-4 {
-  max-width: calc(100% / 12 * 4);
-}
-.col-5 {
-  max-width: calc(100% / 12 * 5);
-}
-.col-6 {
-  max-width: calc(100% / 2);
-}
-.col-7 {
-  max-width: calc(100% / 12 * 7);
-}
-.col-8 {
-  max-width: calc(100% / 12 * 8);
-}
-.col-9 {
-  max-width: calc(100% / 12 * 9);
-}
-.col-10 {
-  max-width: calc(100% / 12 * 10);
-}
-.col-11 {
-  max-width: calc(100% / 12 * 10);
-}
-.col-12 {
-  max-width: 100%;
-}
 button {
   margin: 15px;
+}
+.logo {
+  height: 70px;
+  vertical-align: middle;
+  margin-right: 20px;
 }
