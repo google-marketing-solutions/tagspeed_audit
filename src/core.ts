@@ -390,7 +390,7 @@ export function splitOutData(s: string): {[key: string]: string} {
       } else {
         currentKey += s[currentIndex];
       }
-    } else {
+    } else if (s[currentIndex] !== ' ' || currentValue.length > 0) {
       if (
         s[currentIndex] === ';' &&
         (currentValue[0] !== '"' ||

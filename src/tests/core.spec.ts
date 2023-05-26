@@ -174,6 +174,14 @@ describe('handle cookies and localstorage', () => {
   it('should parse input from UI when ; are used', () => {
     const test = splitOutData('a="test;test2";b="test;test3"');
 
+    assert.equal(test['a'], 'test;test2');
     assert.equal(test['b'], 'test;test3');
+  });
+
+  it('should parse when all casess are used at same time', () => {
+    const test = splitOutData('a= "test; test2";b = "%22test;test3%22"');
+
+    assert.equal(test['a'], 'test; test2');
+    assert.equal(test['b'], '"test;test3"');
   });
 });
