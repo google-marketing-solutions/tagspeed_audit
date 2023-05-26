@@ -58,7 +58,7 @@ app.get('/cancel/:id', (req, res) => {
 app.post('/test', async (req, res) => {
   try {
     const url = decodeURI(req.body.url);
-    console.log(`Testing ${url}`);
+    console.log(req.body);
     const maxUrlsToTry = parseInt((req.body.maxUrlsToTry ?? '-1').toString());
     const numberOfReports = parseInt(
       (req.body.numberOfReports ?? '1').toString()

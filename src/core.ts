@@ -34,7 +34,8 @@ import {Page} from 'puppeteer';
 export async function doAnalysis(
   execution: AuditExecution
 ): Promise<ExecutionResponse> {
-  console.log(`[${execution.id}] Started`);
+  console.log(`[${execution.id}] Started ${execution.url}`);
+
   try {
     // Use Puppeteer to launch headful Chrome and don't use its default 800x600
     // viewport.
@@ -56,7 +57,9 @@ export async function doAnalysis(
       execution.userAgentOverride,
       execution.url,
       '',
-      execution.numberOfReports
+      execution.numberOfReports,
+      execution.cookies,
+      execution.localStorage
     );
     execution.results.push(baselineLHResult);
 
@@ -122,12 +125,10 @@ async function getPerformanceForURL(
       await page.setUserAgent(userAgent);
     }
 
-    await page.goto(url);
-    await attachLocalstorageToPage(page, localStorage);
-
     await page.emulate(KnownDevices['iPhone 11']);
     await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
     await attachCookiesToPage(page, url, cookies);
+    await attachLocalStorageToPage(page, localStorage);
 
     if (toBlock.length > 0) {
       await page.setRequestInterception(true);
@@ -140,7 +141,7 @@ async function getPerformanceForURL(
       });
     }
 
-    await page.reload();
+    await page.goto(url);
 
     const LCP = await page.evaluate(() => {
       return new Promise<number>(resolve => {
@@ -221,11 +222,8 @@ export async function extractRequestsFromPage(
   if (userAgent.length > 0) {
     await page.setUserAgent(userAgent);
   }
-  await page.setCacheEnabled(false);
-  await page.goto(url);
-  await page.setCacheEnabled(true);
-  await attachLocalstorageToPage(page, localStorage);
-  attachCookiesToPage(page, url, cookies);
+  await attachCookiesToPage(page, url, cookies);
+  await attachLocalStorageToPage(page, localStorage);
 
   await page.setRequestInterception(true);
 
@@ -323,7 +321,8 @@ export async function generateReports(
       execution.url,
       b,
       execution.numberOfReports,
-      execution.cookies
+      execution.cookies,
+      execution.localStorage
     );
 
     execution.results.push(lhResult);
@@ -357,7 +356,13 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
   }
 }
 
-function splitOutData(s: string) {
+/**
+ * Creates a map of string to string from inputs in cookie format:
+ * a=2;b=3
+ * @param s input string to convert to map
+ * @returns 
+ */
+export function splitOutData(s: string) {
   return s
     .split(';')
     .map(v => {
@@ -370,16 +375,15 @@ function splitOutData(s: string) {
     }, {});
 }
 
-async function attachLocalstorageToPage(page: Page, localStorageData?: string) {
+async function attachLocalStorageToPage(page: Page, localStorageData?: string) {
   if (localStorageData) {
     const data = splitOutData(localStorageData);
-
-    await page.evaluate(data => {
-      return new Promise(resolve => {
+    await page.evaluateOnNewDocument(data => {
+      return new Promise<void>(resolve => {
         for (const ls of Object.keys(data)) {
           localStorage.setItem(ls, data[ls]);
         }
-        resolve(null);
+        resolve();
       });
     }, data);
   }

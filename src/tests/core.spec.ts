@@ -20,6 +20,7 @@ import {
   extractRequestsFromPage,
   generateReports,
   doAnalysis,
+  splitOutData,
 } from '../core';
 import {AuditExecution, AuditResponse} from '../types';
 import puppeteer, {Browser} from 'puppeteer';
@@ -96,7 +97,7 @@ describe('extract requests from URL and identify 3rd party', function () {
   before(async function () {
     server.listen(8181);
     browser = await puppeteer.launch({
-      headless: true,
+      headless: 'new',
       defaultViewport: null,
     });
   });
@@ -145,5 +146,14 @@ describe('process results of having run analysis', () => {
     assert.equal(result.scores.FCP, 3);
     assert.equal(result.scores.CLS, 3);
     assert.equal(result.scores.consoleErrors, 0);
+  });
+});
+
+describe('handle cookies and localstorage', () => {
+  it('should parse input from UI correctly', () => {
+    const test = splitOutData('a=2;b=4');
+
+    assert.equal(test['a'], "2");
+    assert.equal(test['b'], "4");
   });
 });
