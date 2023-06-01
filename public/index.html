@@ -16,6 +16,7 @@ under the License.
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>3rd Party Auditing Tool</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="icon.png" />
     <link href="main.css" rel="stylesheet" />
     <link
       href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
@@ -38,217 +39,225 @@ under the License.
     <script src="./ui.js"></script>
   </head>
   <body>
-    <div class="container-fluid">
-      <h1 class="text-center">3rd Party Auditing Tool</h1>
-      <div class="mdc-card mdc-card--outlined">
-        <p>
-          We will execute tests after removing identified 3rd party scripts, one
-          by one, in order to understand their performance impact.
-        </p>
-        <form enctype="multipart/form-data" method="post" id="form">
-          <div class="row">
-            <div class="column col-12">
-              <p><label for="url">URL</label></p>
-              <label class="mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <input
-                  class="mdc-text-field__input"
-                  type="text"
-                  aria-labelledby="url"
-                  name="url"
-                  autofocus
-                  required
-                />
-                <span class="mdc-line-ripple"></span>
-              </label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="column col-4">
-              <p>
-                <label for="numberOfReports"
-                  ># reports to run per 3rd party? (averaged stats)</label
-                >
-              </p>
-              <label class="mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <input
-                  class="mdc-text-field__input"
-                  type="number"
-                  aria-labelledby="numberOfReports"
-                  name="numberOfReports"
-                  min="1"
-                  max="10"
-                  value="3"
-                  required
-                />
-                <span class="mdc-line-ripple"></span>
-              </label>
-            </div>
-            <div class="column col-4">
-              <p><label for="agent">User Agent Override (optional)</label></p>
-              <label class="mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <input
-                  class="mdc-text-field__input"
-                  type="text"
-                  aria-labelledby="agent"
-                  name="agent"
-                />
-                <span class="mdc-line-ripple"></span>
-              </label>
-            </div>
-            <div class="column col-4">
-              <p>
-                <label for="max">Max URLs to attempt to block (optional)</label>
-              </p>
-              <label class="mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <input
-                  class="mdc-text-field__input"
-                  type="number"
-                  min="0"
-                  aria-labelledby="max"
-                  name="max"
-                />
-                <span class="mdc-line-ripple"></span>
-              </label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="column col-6">
-              <p>
-                <label for="cookies">Cookies (optional)</label><br>
-                <small
-                  >Format expected to be ';' separated key value pairs, e.g.
-                  _octo=HASH123;device_id="IDHERE"</small
-                >
-              </p>
-              <label class="mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <input
-                  class="mdc-text-field__input"
-                  type="text"
-                  aria-labelledby="cookies"
-                  name="cookies"
-                />
-                <span class="mdc-line-ripple"></span>
-              </label>
-            </div>
-            <div class="column col-6">
-              <p>
-                <label for="cookies">LocalStorage (optional)</label><br>
-                <small
-                  >Format expected to be ';' separated key value pairs, e.g.
-                  val1=test;device_id="IDHERE"</small
-                >
-              </p>
-              <label class="mdc-text-field mdc-text-field--filled">
-                <span class="mdc-text-field__ripple"></span>
-                <input
-                  class="mdc-text-field__input"
-                  type="text"
-                  aria-labelledby="localStorage"
-                  name="localStorage"
-                />
-                <span class="mdc-line-ripple"></span>
-              </label>
-            </div>
-          </div>
-          <div id="error"></div>
-          <div class="text-center">
-            <br>
-            <button
-              class="mdc-button foo-button"
-              name="action"
-              value="send"
-              type="submit"
-              id="submit"
-            >
-              <div class="mdc-button__ripple"></div>
-              <span class="mdc-button__label">Generate Report</span>
-            </button>
-            <button
-              class="mdc-button foo-button"
-              name="action"
-              value="cancel"
-              type="button"
-              id="cancel"
-            >
-              <div class="mdc-button__ripple"></div>
-              <span class="mdc-button__label">Cancel Analysis</span>
-            </button>
-          </div>
-        </form>
+    <div class="row">
+      <div class="col-12 text-center">
+        <h1>
+          <img
+            src="icon.png"
+            class="logo"
+            title="3rd party audit logo"
+            alt="3rd party audit logo"
+          />
+          3rd Party Audit
+        </h1>
       </div>
-      <br><br>
-      <div id="results" class="mdc-card results">
-        <h3>Results</h3>
-        <p>
-          Reports generated: <span id="results-so-far">0</span>/<span
-            id="results-expected"
-          ></span
-          >.
-        </p>
-        <div class="mdc-data-table">
-          <div class="mdc-data-table__table-container">
-            <table
-              class="mdc-data-table__table"
-              aria-label="Results"
-              id="results-table"
-            >
-              <thead>
-                <tr class="mdc-data-table__header-row">
-                  <th
-                    class="mdc-data-table__header-cell"
-                    role="columnheader"
-                    scope="col"
-                  >
-                    URL
-                  </th>
-                  <th
-                    class="mdc-data-table__header-cell"
-                    role="columnheader"
-                    scope="col"
-                  >
-                    LCP
-                  </th>
-                  <th
-                    class="mdc-data-table__header-cell"
-                    role="columnheader"
-                    scope="col"
-                  >
-                    FCP
-                  </th>
-                  <th
-                    class="mdc-data-table__header-cell"
-                    role="columnheader"
-                    scope="col"
-                  >
-                    CLS
-                  </th>
-                  <th
-                    class="mdc-data-table__header-cell"
-                    role="columnheader"
-                    scope="col"
-                  >
-                    Screenshot
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="mdc-data-table__content"></tbody>
-            </table>
+    </div>
+    <div class="mdc-card mdc-card--outlined">
+      <p>
+        We will execute tests after removing identified 3rd party scripts, one
+        by one, in order to understand their performance impact.
+      </p>
+      <form enctype="multipart/form-data" method="post" id="form">
+        <div class="row">
+          <div class="col-12">
+            <p><label for="url">URL</label></p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="text"
+                aria-labelledby="url"
+                name="url"
+                autofocus
+                required
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
           </div>
         </div>
-      </div>
-      <script>
-        document
-          .getElementById('form')
-          .addEventListener('submit', submit, false);
-        document
-          .getElementById('cancel')
-          .addEventListener('click', cancel, false);
-      </script>
+        <div class="row">
+          <div class="col-4">
+            <p>
+              <label for="numberOfReports"
+                ># reports to run per 3rd party? (averaged stats)</label
+              >
+            </p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="number"
+                aria-labelledby="numberOfReports"
+                name="numberOfReports"
+                min="1"
+                max="10"
+                value="3"
+                required
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+          <div class="col-4">
+            <p><label for="agent">User Agent Override (optional)</label></p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="text"
+                aria-labelledby="agent"
+                name="agent"
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+          <div class="col-4">
+            <p>
+              <label for="max">Max URLs to attempt to block (optional)</label>
+            </p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="number"
+                min="0"
+                aria-labelledby="max"
+                name="max"
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <p>
+              <label for="cookies">Cookies (optional)</label><br>
+              <small
+                >Format expected to be ';' separated key value pairs, e.g.
+                _octo=HASH123;device_id="IDHERE"</small
+              >
+            </p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="text"
+                aria-labelledby="cookies"
+                name="cookies"
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+          <div class="column col-6">
+            <p>
+              <label for="cookies">LocalStorage (optional)</label><br>
+              <small
+                >Format expected to be ';' separated key value pairs, e.g.
+                val1=test;device_id="IDHERE"</small
+              >
+            </p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="text"
+                aria-labelledby="localStorage"
+                name="localStorage"
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+        </div>
+        <div id="error"></div>
+        <div class="row text-center">
+          <br>
+          <button
+            class="mdc-button foo-button"
+            name="action"
+            value="send"
+            type="submit"
+            id="submit"
+          >
+            <div class="mdc-button__ripple"></div>
+            <span class="mdc-button__label">Generate Report</span>
+          </button>
+          <button
+            class="mdc-button foo-button"
+            name="action"
+            value="cancel"
+            type="button"
+            id="cancel"
+          >
+            <div class="mdc-button__ripple"></div>
+            <span class="mdc-button__label">Cancel Analysis</span>
+          </button>
+        </div>
+      </form>
     </div>
+    <br><br>
+    <div id="results" class="mdc-card results">
+      <h3>Results</h3>
+      <p>
+        Reports generated: <span id="results-so-far">0</span>/<span
+          id="results-expected"
+        ></span
+        >.
+      </p>
+      <div class="mdc-data-table">
+        <div class="mdc-data-table__table-container">
+          <table
+            class="mdc-data-table__table"
+            aria-label="Results"
+            id="results-table"
+          >
+            <thead>
+              <tr class="mdc-data-table__header-row">
+                <th
+                  class="mdc-data-table__header-cell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  URL
+                </th>
+                <th
+                  class="mdc-data-table__header-cell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  LCP
+                </th>
+                <th
+                  class="mdc-data-table__header-cell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  FCP
+                </th>
+                <th
+                  class="mdc-data-table__header-cell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  CLS
+                </th>
+                <th
+                  class="mdc-data-table__header-cell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  Screenshot
+                </th>
+              </tr>
+            </thead>
+            <tbody class="mdc-data-table__content"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.getElementById('form').addEventListener('submit', submit, false);
+      document
+        .getElementById('cancel')
+        .addEventListener('click', cancel, false);
+    </script>
   </body>
 </html>
