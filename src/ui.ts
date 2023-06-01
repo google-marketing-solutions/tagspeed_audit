@@ -18,6 +18,10 @@ let globalTimeoutIdentifier: NodeJS.Timeout = null;
 let globalExecutionId: string = null;
 
 function enableSubmit() {
+  if (globalTimeoutIdentifier) {
+    clearTimeout(globalTimeoutIdentifier);
+  }
+
   (document.getElementById('submit') as HTMLButtonElement).disabled = false;
   (document.getElementById('cancel') as HTMLButtonElement).style.display =
     'none';
@@ -34,7 +38,7 @@ function round(n: number) {
 export function printResult(result: AuditResponse, baseline: AuditResponse) {
   const table = document.getElementById('results-table') as HTMLTableElement;
   const row = table.insertRow(table.rows.length);
-  const isBaseline = baseline === result;
+  const isBaseline = baseline.id === result.id;
   row.classList.add('mdc-data-table__row');
   const url = row.insertCell(0);
   if (result.blockedURL.length > 70) {

@@ -1,78 +1,137 @@
+/** Copyright 2023 Google LLC
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy
+of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+*/
 body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  padding: 20px;
 }
+
 h1 {
   margin-top: 40px;
   margin-bottom: 40px;
 }
+
 #error,
 #cancel,
-.results {
+#results {
   display: none;
 }
+
 #error {
   margin: 5px;
   padding: 5px;
   font-weight: 300;
   color: red;
 }
+
 #results img {
   cursor: pointer;
 }
+
 .text-center {
   text-align: center;
 }
+
 .mdc-card {
   padding: 16px;
 }
+
 .mdc-text-field,
 .mdc-data-table {
   width: 100%;
 }
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.column {
-  flex: 1;
-  margin: 10px;
-}
-.col-1 {
-  max-width: calc(100% / 12);
-}
-.col-2 {
-  max-width: calc(100% / 12 * 2);
-}
-.col-3 {
-  max-width: calc(100% / 12 * 3);
-}
-.col-4 {
-  max-width: calc(100% / 12 * 4);
-}
-.col-5 {
-  max-width: calc(100% / 12 * 5);
-}
-.col-6 {
-  max-width: calc(100% / 2);
-}
-.col-7 {
-  max-width: calc(100% / 12 * 7);
-}
-.col-8 {
-  max-width: calc(100% / 12 * 8);
-}
-.col-9 {
-  max-width: calc(100% / 12 * 9);
-}
-.col-10 {
-  max-width: calc(100% / 12 * 10);
-}
-.col-11 {
-  max-width: calc(100% / 12 * 10);
-}
-.col-12 {
-  max-width: 100%;
-}
+
 button {
   margin: 15px;
+}
+
+.logo {
+  height: 70px;
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+.row {
+  position: relative;
+  width: 100%;
+}
+
+.row [class^='col'] {
+  float: left;
+  margin: 0.5rem 2%;
+  min-height: 0.125rem;
+}
+
+.col-1,
+.col-2,
+.col-3,
+.col-4,
+.col-5,
+.col-6,
+.col-7,
+.col-8,
+.col-9,
+.col-10,
+.col-11,
+.col-12 {
+  width: 96%;
+}
+
+@media only screen and (min-width: 45em) {
+  /* 720px */
+  .col-1 {
+    width: 4.33%;
+  }
+
+  .col-2 {
+    width: 12.66%;
+  }
+
+  .col-3 {
+    width: 21%;
+  }
+
+  .col-4 {
+    width: 29.33%;
+  }
+
+  .col-5 {
+    width: 37.66%;
+  }
+
+  .col-6 {
+    width: 46%;
+  }
+
+  .col-7 {
+    width: 54.33%;
+  }
+
+  .col-8 {
+    width: 62.66%;
+  }
+
+  .col-9 {
+    width: 71%;
+  }
+
+  .col-10 {
+    width: 79.33%;
+  }
+
+  .col-11 {
+    width: 87.66%;
+  }
+
+  .col-12 {
+    width: 96%;
+  }
 }
