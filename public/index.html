@@ -16,9 +16,7 @@ under the License.
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>3rd Party Auditing Tool</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" 
-      type="image/png" 
-      href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png" />
     <link href="main.css" rel="stylesheet" />
     <link
       href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
@@ -43,7 +41,15 @@ under the License.
   <body>
     <div class="row">
       <div class="col-12 text-center">
-        <h1><img src="icon.png" class="logo" title="3rd party audit logo" alt="3rd party audit logo"/> 3rd Party Audit</h1>
+        <h1>
+          <img
+            src="icon.png"
+            class="logo"
+            title="3rd party audit logo"
+            alt="3rd party audit logo"
+          />
+          3rd Party Audit
+        </h1>
       </div>
     </div>
     <div class="mdc-card mdc-card--outlined">
@@ -64,7 +70,6 @@ under the License.
                 name="url"
                 autofocus
                 required
-                id="url"
               />
               <span class="mdc-line-ripple"></span>
             </label>
@@ -84,7 +89,6 @@ under the License.
                 type="number"
                 aria-labelledby="numberOfReports"
                 name="numberOfReports"
-                id="numberOfReports"
                 min="1"
                 max="10"
                 value="3"
@@ -102,7 +106,6 @@ under the License.
                 type="text"
                 aria-labelledby="agent"
                 name="agent"
-                id="agent"
               />
               <span class="mdc-line-ripple"></span>
             </label>
@@ -119,7 +122,6 @@ under the License.
                 min="0"
                 aria-labelledby="max"
                 name="max"
-                id="max"
               />
               <span class="mdc-line-ripple"></span>
             </label>
@@ -130,9 +132,8 @@ under the License.
             <p>
               <label for="cookies">Cookies (optional)</label><br>
               <small
-                >Format expected to match the Chrome Network Tab, ';'
-                separated key=value pairs, e.g. _octo=HASH123;
-                device_id=IDHERE</small
+                >Format expected to be ';' separated key value pairs, e.g.
+                _octo=HASH123;device_id="IDHERE"</small
               >
             </p>
             <label class="mdc-text-field mdc-text-field--filled">
@@ -142,14 +143,32 @@ under the License.
                 type="text"
                 aria-labelledby="cookies"
                 name="cookies"
-                id="cookies"
+              />
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+          <div class="column col-6">
+            <p>
+              <label for="cookies">LocalStorage (optional)</label><br>
+              <small
+                >Format expected to be ';' separated key value pairs, e.g.
+                val1=test;device_id="IDHERE"</small
+              >
+            </p>
+            <label class="mdc-text-field mdc-text-field--filled">
+              <span class="mdc-text-field__ripple"></span>
+              <input
+                class="mdc-text-field__input"
+                type="text"
+                aria-labelledby="localStorage"
+                name="localStorage"
               />
               <span class="mdc-line-ripple"></span>
             </label>
           </div>
         </div>
         <div id="error"></div>
-        <div class="text-center">
+        <div class="row text-center">
           <br>
           <button
             class="mdc-button foo-button"
@@ -235,9 +254,7 @@ under the License.
       </div>
     </div>
     <script>
-      document
-        .getElementById('form')
-        .addEventListener('submit', submit, false);
+      document.getElementById('form').addEventListener('submit', submit, false);
       document
         .getElementById('cancel')
         .addEventListener('click', cancel, false);

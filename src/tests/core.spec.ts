@@ -20,6 +20,7 @@ import {
   extractRequestsFromPage,
   generateReports,
   doAnalysis,
+  splitOutData,
 } from '../core';
 import {AuditExecution, AuditResponse} from '../types';
 import puppeteer, {Browser} from 'puppeteer';
@@ -96,7 +97,7 @@ describe('extract requests from URL and identify 3rd party', function () {
   before(async function () {
     server.listen(8181);
     browser = await puppeteer.launch({
-      headless: true,
+      headless: 'new',
       defaultViewport: null,
     });
   });
@@ -112,7 +113,7 @@ describe('extract requests from URL and identify 3rd party', function () {
       '',
       'http://localhost:8181'
     );
-    assert.equal(requests.length, 1);
+    assert.equal(requests.length, 2);
   });
 });
 
@@ -145,5 +146,42 @@ describe('process results of having run analysis', () => {
     assert.equal(result.scores.FCP, 3);
     assert.equal(result.scores.CLS, 3);
     assert.equal(result.scores.consoleErrors, 0);
+  });
+});
+
+describe('handle cookies and localstorage', () => {
+  it('should parse input from UI correctly', () => {
+    const test = splitOutData('a=2;b=4');
+
+    assert.equal(test['a'], '2');
+    assert.equal(test['b'], '4');
+  });
+
+  it('should parse input from UI when "" are used', () => {
+    const test = splitOutData('a="2";b="4"');
+
+    assert.equal(test['a'], '2');
+    assert.equal(test['b'], '4');
+  });
+
+  it('should parse input from UI when "" encoded are used', () => {
+    const test = splitOutData('a="%22test%22";b="4"');
+    console.log(test);
+    assert.equal(test['a'], '"test"');
+    assert.equal(test['b'], '4');
+  });
+
+  it('should parse input from UI when ; are used', () => {
+    const test = splitOutData('a="test;test2";b="test;test3"');
+
+    assert.equal(test['a'], 'test;test2');
+    assert.equal(test['b'], 'test;test3');
+  });
+
+  it('should parse when all casess are used at same time', () => {
+    const test = splitOutData('a= "test; test2";b = "%22test;test3%22"');
+
+    assert.equal(test['a'], 'test; test2');
+    assert.equal(test['b'], '"test;test3"');
   });
 });

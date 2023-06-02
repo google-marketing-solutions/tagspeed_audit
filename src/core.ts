@@ -34,7 +34,8 @@ import {Page} from 'puppeteer';
 export async function doAnalysis(
   execution: AuditExecution
 ): Promise<ExecutionResponse> {
-  console.log(`[${execution.id}] Started`);
+  console.log(`[${execution.id}] Started ${execution.url}`);
+
   try {
     // Use Puppeteer to launch headful Chrome and don't use its default 800x600
     // viewport.
@@ -47,14 +48,18 @@ export async function doAnalysis(
       browser,
       execution.userAgentOverride,
       execution.url,
-      execution.cookies
+      execution.cookies,
+      execution.localStorage
     );
 
     const baselineLHResult = await getPerformanceForURL(
       browser,
+      execution.userAgentOverride,
       execution.url,
       '',
-      execution.numberOfReports
+      execution.numberOfReports,
+      execution.cookies,
+      execution.localStorage
     );
     execution.results.push(baselineLHResult);
 
@@ -103,19 +108,27 @@ export async function doAnalysis(
  */
 async function getPerformanceForURL(
   browser: Browser,
+  userAgent: string,
   url: string,
   toBlock: string,
   numberOfReports: number,
-  cookies?: string
+  cookies?: string,
+  localStorage?: string
 ): Promise<AuditResponse> {
   const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
     const page = await (
       await browser.createIncognitoBrowserContext()
     ).newPage();
+
+    if (userAgent.length > 0) {
+      await page.setUserAgent(userAgent);
+    }
+
     await page.emulate(KnownDevices['iPhone 11']);
     await page.emulateNetworkConditions(PredefinedNetworkConditions['Fast 3G']);
     await attachCookiesToPage(page, url, cookies);
+    await attachLocalStorageToPage(page, localStorage);
 
     if (toBlock.length > 0) {
       await page.setRequestInterception(true);
@@ -127,6 +140,7 @@ async function getPerformanceForURL(
         }
       });
     }
+
     await page.goto(url);
 
     const LCP = await page.evaluate(() => {
@@ -201,21 +215,23 @@ export async function extractRequestsFromPage(
   browser: Browser,
   userAgent: string,
   url: string,
-  cookies?: string
+  cookies?: string,
+  localStorage?: string
 ) {
   const page = await browser.newPage();
   if (userAgent.length > 0) {
     await page.setUserAgent(userAgent);
   }
-  attachCookiesToPage(page, url, cookies);
-
-  const requests = new Array<HTTPRequest>();
+  await attachCookiesToPage(page, url, cookies);
+  await attachLocalStorageToPage(page, localStorage);
 
   await page.setRequestInterception(true);
-  await page.setUserAgent(userAgent);
+
   page.on('request', request => {
     request.continue();
   });
+
+  const requests = new Array<HTTPRequest>();
   page.on('requestfinished', request => {
     requests.push(request);
   });
@@ -301,10 +317,12 @@ export async function generateReports(
     console.log(`[${execution.id}] Blocking ${b}`);
     const lhResult = await getPerformanceForURL(
       browser,
+      execution.userAgentOverride,
       execution.url,
       b,
       execution.numberOfReports,
-      execution.cookies
+      execution.cookies,
+      execution.localStorage
     );
 
     execution.results.push(lhResult);
@@ -327,17 +345,7 @@ export async function generateReports(
  */
 async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
   if (cookies) {
-    const parsedCookies = cookies
-      .split(';')
-      .map(v => {
-        const i = v.indexOf('=');
-        return [v.substring(0, i), v.substring(i + 1)];
-      })
-      .reduce((acc, v) => {
-        acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-        return acc;
-      }, {});
-
+    const parsedCookies = splitOutData(cookies);
     for (const cookie of Object.keys(parsedCookies)) {
       await page.setCookie({
         name: cookie,
@@ -345,5 +353,76 @@ async function attachCookiesToPage(page: Page, url: string, cookies?: string) {
         url: url,
       });
     }
+  }
+}
+
+/**
+ * Creates a map of string to string from inputs in cookie format:
+ * a=2;b=3
+ * @param s input string to convert to map
+ */
+export function splitOutData(s: string): {[key: string]: string} {
+  const cookies: {[key: string]: string} = {};
+  let currentIndex = 0;
+  let currentKey = '';
+  let currentValue = null;
+  while (currentIndex < s.length) {
+    if (currentValue === null) {
+      if (s[currentIndex] === '=') {
+        currentValue = '';
+        currentKey = currentKey.trim();
+      } else {
+        currentKey += s[currentIndex];
+      }
+    } else if (s[currentIndex] !== ' ' || currentValue.length > 0) {
+      if (
+        s[currentIndex] === ';' &&
+        (currentValue[0] !== '"' ||
+          currentValue[currentValue.length - 1] === '"')
+      ) {
+        currentKey = decodeURIComponent(currentKey);
+        cookies[currentKey] = decodeURIComponent(
+          cleanParsedValue(currentValue)
+        );
+        currentKey = '';
+        currentValue = null;
+      } else {
+        currentValue += s[currentIndex];
+      }
+    }
+
+    currentIndex++;
+  }
+
+  if (currentKey && currentValue) {
+    cookies[currentKey] = decodeURIComponent(cleanParsedValue(currentValue));
+  }
+
+  return cookies;
+}
+
+function cleanParsedValue(currentValue: string) {
+  currentValue = currentValue.trim();
+  if (
+    currentValue[0] === '"' &&
+    currentValue[currentValue.length - 1] === '"' &&
+    currentValue.length > 1
+  ) {
+    currentValue = currentValue.substring(1, currentValue.length - 1);
+  }
+  return currentValue;
+}
+
+async function attachLocalStorageToPage(page: Page, localStorageData?: string) {
+  if (localStorageData) {
+    const data = splitOutData(localStorageData);
+    await page.evaluateOnNewDocument(data => {
+      return new Promise<void>(resolve => {
+        for (const ls of Object.keys(data)) {
+          localStorage.setItem(ls, data[ls]);
+        }
+        resolve();
+      });
+    }, data);
   }
 }

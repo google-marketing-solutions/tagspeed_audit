@@ -172,6 +172,7 @@ export function submit(e: Event) {
   const url = formData.get('url').valueOf();
   const userAgent = formData.get('agent').valueOf();
   const cookies = formData.get('cookies').valueOf();
+  const localStorage = formData.get('localStorage').valueOf();
   const maxUrlsToTry = formData.get('max').valueOf();
   const numberOfReports = formData.get('numberOfReports').valueOf();
   const results = document.getElementById('results') as HTMLDivElement;
@@ -185,11 +186,12 @@ export function submit(e: Event) {
   error.style.display = 'none';
 
   const data = {
-    url: url,
-    cookies: cookies,
-    numberOfReports: numberOfReports,
-    maxUrlsToTry: maxUrlsToTry,
-    userAgent: userAgent,
+    url,
+    cookies,
+    localStorage,
+    numberOfReports,
+    maxUrlsToTry,
+    userAgent,
   };
 
   try {

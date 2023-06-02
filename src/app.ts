@@ -58,13 +58,13 @@ app.get('/cancel/:id', (req, res) => {
 app.post('/test', async (req, res) => {
   try {
     const url = decodeURI(req.body.url);
-    console.log(`Testing ${url}`);
+    console.log(req.body);
     const maxUrlsToTry = parseInt((req.body.maxUrlsToTry ?? '-1').toString());
     const numberOfReports = parseInt(
       (req.body.numberOfReports ?? '1').toString()
     );
     const userAgentOverride = req.body.userAgent
-      ? req.body.userAgent.toString()
+      ? req.body.userAgent.toString().trim()
       : '';
     const execution: AuditExecution = {
       id: uuidv4(),
@@ -75,6 +75,7 @@ app.post('/test', async (req, res) => {
       results: [],
       status: 'running',
       cookies: req.body.cookies,
+      localStorage: req.body.localStorage,
     };
     const analysisResponse = await doAnalysis(execution);
 
