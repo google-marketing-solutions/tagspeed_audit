@@ -74,7 +74,9 @@ describe('analysis should work end to end', function () {
       status: 'running',
       results: [],
     };
+    
     await doAnalysis(execution);
+    assert.equal(execution.status, 'running');
     await new Promise(resolve => {
       setTimeout(() => {
         assert.equal(execution.status, 'complete');

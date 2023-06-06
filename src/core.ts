@@ -16,6 +16,7 @@ import puppeteer, {
   HTTPRequest,
   KnownDevices,
   PredefinedNetworkConditions,
+  Puppeteer,
 } from 'puppeteer';
 import {getEntity} from 'third-party-web';
 import {v4 as uuidv4} from 'uuid';
@@ -30,6 +31,17 @@ export async function identifyThirdParties(
     defaultViewport: null,
   });
 
+  const results = identifyThirdPartiesWithBrowser(browser, execution);
+
+  await browser.close();
+
+  return results;
+}
+
+async function identifyThirdPartiesWithBrowser(
+  browser: Browser,
+  execution: AuditExecution
+): Promise<Set<string>> {
   const toBlockSet = new Set<string>();
 
   const requests = await extractRequestsFromPage(
@@ -90,7 +102,7 @@ export async function doAnalysis(
     let toBlockSet = new Set<string>(execution.blockSpecificUrls ?? []);
 
     if (toBlockSet.size === 0) {
-      toBlockSet = await identifyThirdParties(execution);
+      toBlockSet = await identifyThirdPartiesWithBrowser(browser, execution);
     }
 
     console.log(`[${execution.id}] Will block ${toBlockSet.size} URLs`);
