@@ -169,12 +169,14 @@ export function submit(e: SubmitEvent) {
   e.preventDefault();
   const formData = new FormData(e.target as HTMLFormElement);
 
-  const url = formData.get('url').valueOf();
-  const userAgentOverride = formData.get('agent').valueOf();
-  const cookies = formData.get('cookies').valueOf();
-  const localStorage = formData.get('localStorage').valueOf();
-  const maxUrlsToTry = formData.get('max').valueOf();
-  const numberOfReports = formData.get('numberOfReports').valueOf();
+  const url = formData.get('url').valueOf().toString();
+  const userAgentOverride = formData.get('agent').valueOf().toString();
+  const cookies = formData.get('cookies').valueOf().toString();
+  const localStorage = formData.get('localStorage').valueOf().toString();
+  const maxUrlsToTry = parseInt(formData.get('max').valueOf().toString());
+  const numberOfReports = parseInt(
+    formData.get('numberOfReports').valueOf().toString()
+  );
   const blockAll =
     formData.get('blockAll') && formData.get('blockAll').valueOf() === 'on';
   const blockSpecificUrls = Array.from(
@@ -184,7 +186,7 @@ export function submit(e: SubmitEvent) {
     .filter(i => i.checked)
     .map(i => i.value);
 
-  const data = {
+  const data: AuditExecution = {
     url,
     cookies,
     localStorage,
@@ -230,15 +232,7 @@ export function cancel() {
   }
 }
 
-function handleExtract(data: {
-  url: string | Object;
-  cookies: string | Object;
-  localStorage: string | Object;
-  numberOfReports: string | Object;
-  maxUrlsToTry: string | Object;
-  userAgentOverride: string | Object;
-  blockAll: boolean;
-}) {
+function handleExtract(data: AuditExecution) {
   document.querySelectorAll('.third-party').forEach(e => e.remove());
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function () {
@@ -274,15 +268,7 @@ function handleExtract(data: {
   xhr.send(JSON.stringify(data));
 }
 
-function handleSend(data: {
-  url: string | Object;
-  cookies: string | Object;
-  localStorage: string | Object;
-  numberOfReports: string | Object;
-  maxUrlsToTry: string | Object;
-  userAgentOverride: string | Object;
-  blockAll: boolean;
-}) {
+function handleSend(data: AuditExecution) {
   document.querySelectorAll('.mdc-data-table__row').forEach(e => e.remove());
 
   const submitButton = document.getElementById('submit') as HTMLButtonElement;

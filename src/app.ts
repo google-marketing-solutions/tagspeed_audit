@@ -109,25 +109,16 @@ app.listen(port, () => {
  * Extract an AuditExecution from a POST request.
  * @param body from a request
  */
-function extractFromRequest(body: any) {
-  const url = decodeURI(body.url);
-  const maxUrlsToTry = parseInt((body.maxUrlsToTry ?? '-1').toString());
-  const numberOfReports = parseInt((body.numberOfReports ?? '1').toString());
-  const userAgentOverride = body.userAgent
-    ? body.userAgent.toString().trim()
+function extractFromRequest(body: AuditExecution) {
+  body.id = uuidv4();
+  body.status = 'running';
+  body.results = [];
+  body.url = decodeURI(body.url);
+  body.maxUrlsToTry = !body.maxUrlsToTry ? -1 : body.maxUrlsToTry;
+  body.numberOfReports = !body.numberOfReports ? -1 : body.numberOfReports;
+  body.userAgentOverride = body.userAgentOverride
+    ? body.userAgentOverride.trim()
     : '';
-  const execution: AuditExecution = {
-    id: uuidv4(),
-    url: url,
-    numberOfReports: numberOfReports,
-    userAgentOverride: userAgentOverride,
-    maxUrlsToTry: isNaN(maxUrlsToTry) ? -1 : maxUrlsToTry,
-    results: [],
-    status: 'running',
-    cookies: body.cookies,
-    localStorage: body.localStorage,
-    blockAll: !!body.blockAll,
-    blockSpecificUrls: body.blockSpecificUrls,
-  };
-  return execution;
+
+  return body;
 }
