@@ -165,27 +165,24 @@ async function checkForResults(executionId: string): Promise<AuditExecution> {
  * @param e
  * @returns
  */
-export function submit(e: Event) {
+export function submit(e: SubmitEvent) {
   e.preventDefault();
   const formData = new FormData(e.target as HTMLFormElement);
-  const submitButton = document.getElementById('submit') as HTMLButtonElement;
+
   const url = formData.get('url').valueOf();
-  const userAgent = formData.get('agent').valueOf();
+  const userAgentOverride = formData.get('agent').valueOf();
   const cookies = formData.get('cookies').valueOf();
   const localStorage = formData.get('localStorage').valueOf();
   const maxUrlsToTry = formData.get('max').valueOf();
   const numberOfReports = formData.get('numberOfReports').valueOf();
   const blockAll =
     formData.get('blockAll') && formData.get('blockAll').valueOf() === 'on';
-  const results = document.getElementById('results') as HTMLDivElement;
-  results.style.display = 'none';
-
-  document.querySelectorAll('.mdc-data-table__row').forEach(e => e.remove());
-
-  submitButton.disabled = true;
-  const error = document.getElementById('error');
-  error.innerText = '';
-  error.style.display = 'none';
+  const blockSpecificUrls = Array.from(
+    document.querySelectorAll('[name="third-party"]')
+  )
+    .map(i => i as HTMLInputElement)
+    .filter(i => i.checked)
+    .map(i => i.value);
 
   const data = {
     url,
@@ -193,9 +190,109 @@ export function submit(e: Event) {
     localStorage,
     numberOfReports,
     maxUrlsToTry,
-    userAgent,
+    userAgentOverride,
     blockAll,
+    blockSpecificUrls:
+      blockSpecificUrls.length > 0 ? blockSpecificUrls : undefined,
   };
+
+  const action = e.submitter.getAttribute('value');
+
+  if (action === 'send') {
+    handleSend(data);
+  } else {
+    handleExtract(data);
+  }
+
+  return false;
+}
+
+export function cancel() {
+  if (globalTimeoutIdentifier) {
+    clearTimeout(globalTimeoutIdentifier);
+    globalTimeoutIdentifier = null;
+    const submitButton = document.getElementById('submit') as HTMLButtonElement;
+    submitButton.disabled = false;
+    (document.getElementById('cancel') as HTMLButtonElement).style.display =
+      'none';
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        if (this.status !== 200) {
+          showError('Unknow server state error');
+        }
+      }
+    };
+    xhr.open('GET', `/cancel/${globalExecutionId}`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+    globalExecutionId = null;
+  }
+}
+
+function handleExtract(data: {
+  url: string | Object;
+  cookies: string | Object;
+  localStorage: string | Object;
+  numberOfReports: string | Object;
+  maxUrlsToTry: string | Object;
+  userAgentOverride: string | Object;
+  blockAll: boolean;
+}) {
+  document.querySelectorAll('.third-party').forEach(e => e.remove());
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (this.readyState === 4) {
+      if (this.status === 200) {
+        const response: {identifiedThirdParties: string[]} = JSON.parse(
+          this.responseText
+        );
+        const thirdParties = document.getElementById('third-parties');
+        for (let i = 0; i < response.identifiedThirdParties.length; i++) {
+          const thirdParty = document.createElement('div');
+          thirdParty.className = 'third-party';
+
+          const thirdPartyCheckbox = document.createElement('input');
+          thirdPartyCheckbox.type = 'checkbox';
+          thirdPartyCheckbox.name = 'third-party';
+          thirdPartyCheckbox.value = response.identifiedThirdParties[i];
+
+          thirdParty.appendChild(thirdPartyCheckbox);
+          thirdParty.appendChild(
+            document.createTextNode(response.identifiedThirdParties[i])
+          );
+
+          thirdParties.appendChild(thirdParty);
+        }
+      } else {
+        showError('Unexpected server error');
+      }
+    }
+  };
+  xhr.open('POST', '/analyse-urls/');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify(data));
+}
+
+function handleSend(data: {
+  url: string | Object;
+  cookies: string | Object;
+  localStorage: string | Object;
+  numberOfReports: string | Object;
+  maxUrlsToTry: string | Object;
+  userAgentOverride: string | Object;
+  blockAll: boolean;
+}) {
+  document.querySelectorAll('.mdc-data-table__row').forEach(e => e.remove());
+
+  const submitButton = document.getElementById('submit') as HTMLButtonElement;
+  submitButton.disabled = true;
+  const error = document.getElementById('error');
+  error.innerText = '';
+  error.style.display = 'none';
+
+  const results = document.getElementById('results') as HTMLDivElement;
+  results.style.display = 'none';
 
   try {
     const xhr = new XMLHttpRequest();
@@ -230,29 +327,5 @@ export function submit(e: Event) {
     showError(e.message);
     console.error(e);
     throw new Error(e.message);
-  }
-  return false;
-}
-
-export function cancel() {
-  if (globalTimeoutIdentifier) {
-    clearTimeout(globalTimeoutIdentifier);
-    globalTimeoutIdentifier = null;
-    const submitButton = document.getElementById('submit') as HTMLButtonElement;
-    submitButton.disabled = false;
-    (document.getElementById('cancel') as HTMLButtonElement).style.display =
-      'none';
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (this.readyState === 4) {
-        if (this.status !== 200) {
-          showError('Unknow server state error');
-        }
-      }
-    };
-    xhr.open('GET', `/cancel/${globalExecutionId}`, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
-    globalExecutionId = null;
   }
 }

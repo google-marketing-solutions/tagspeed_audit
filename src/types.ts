@@ -54,6 +54,7 @@ export type AuditExecution = {
   cookies?: string;
   localStorage?: string;
   blockAll?: boolean;
+  blockSpecificUrls?: string[];
 };
 
 /**

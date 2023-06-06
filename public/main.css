@@ -135,3 +135,11 @@ button {
     width: 96%;
   }
 }
+
+.third-party {
+  padding: 10px;
+}
+
+.third-party input {
+  margin-right: 10px;
+}

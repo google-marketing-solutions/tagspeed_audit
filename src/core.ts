@@ -22,6 +22,37 @@ import {v4 as uuidv4} from 'uuid';
 import {AuditExecution, AuditResponse, ExecutionResponse} from './types';
 import {Page} from 'puppeteer';
 
+export async function identifyThirdParties(
+  execution: AuditExecution
+): Promise<Set<string>> {
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    defaultViewport: null,
+  });
+
+  const toBlockSet = new Set<string>();
+
+  const requests = await extractRequestsFromPage(
+    browser,
+    execution.userAgentOverride,
+    execution.url,
+    execution.cookies,
+    execution.localStorage
+  );
+
+  for (const request of requests) {
+    const url = request.url();
+    const headers = request.response().headers();
+    const isImage =
+      headers['content-type'] && !!headers['content-type'].match(/(image)+\//g);
+    if (!isImage && getEntity(url)) {
+      toBlockSet.add(url);
+    }
+  }
+
+  return toBlockSet;
+}
+
 /**
  * Identify all network requests done by a page, filter out those that are
  * 3rd parties, then block the 3rd party URLs one by one and run a perf
@@ -44,14 +75,6 @@ export async function doAnalysis(
       defaultViewport: null,
     });
 
-    const requests = await extractRequestsFromPage(
-      browser,
-      execution.userAgentOverride,
-      execution.url,
-      execution.cookies,
-      execution.localStorage
-    );
-
     const baselineLHResult = await getPerformanceForURL(
       browser,
       execution.userAgentOverride,
@@ -64,16 +87,10 @@ export async function doAnalysis(
     execution.results.push(baselineLHResult);
 
     // create list of blocking URLs
-    const toBlockSet = new Set<string>();
-    for (const request of requests) {
-      const url = request.url();
-      const headers = request.response().headers();
-      const isImage =
-        headers['content-type'] &&
-        !!headers['content-type'].match(/(image)+\//g);
-      if (!isImage && getEntity(url)) {
-        toBlockSet.add(url);
-      }
+    let toBlockSet = new Set<string>(execution.blockSpecificUrls ?? []);
+
+    if (toBlockSet.size === 0) {
+      toBlockSet = await identifyThirdParties(execution);
     }
 
     console.log(`[${execution.id}] Will block ${toBlockSet.size} URLs`);
@@ -319,12 +336,13 @@ export async function generateReports(
 
     execution.results.push(lhResult);
   } else {
+    const toBlockArray = Array.from(toBlock);
     for (let i = 0; i < limit; i++) {
       if (execution.status === 'canceled') {
         console.log(`[${execution.id}] Canceled`);
         break;
       }
-      const b = toBlock[i];
+      const b = toBlockArray[i];
       console.log(`[${execution.id}] Blocking ${b}`);
       const lhResult = await getPerformanceForURL(
         browser,

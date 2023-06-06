@@ -168,20 +168,30 @@ under the License.
           </div>
           <div class="col-4">
             <p>
-              <label for="blockAll">Block All 3rd parties in one test</label><br>
+              <label for="blockAll">Block All 3rd parties in one test</label
+              ><br>
             </p>
-            <input
-              type="checkbox"
-              aria-labelledby="blockAll"
-              name="blockAll"
-            />
+            <input type="checkbox" aria-labelledby="blockAll" name="blockAll" />
           </div>
         </div>
-        <br/>
+        <div class="row">
+          <div class="col-12" id="third-parties"></div>
+        </div>
+        <br>
         <div class="text-center row">
           <div id="error" class="col-12"></div>
           <div class="col-12">
             <br>
+            <button
+              class="mdc-button foo-button"
+              name="action"
+              value="extract"
+              type="submit"
+              id="extract"
+            >
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Extract 3rd Parties only</span>
+            </button>
             <button
               class="mdc-button foo-button"
               name="action"
@@ -202,6 +212,13 @@ under the License.
               <div class="mdc-button__ripple"></div>
               <span class="mdc-button__label">Cancel Analysis</span>
             </button>
+            <p>
+              <small
+                >Extracting 3rd parties first is useful if you want to block
+                specific ones only. You will be given the option to do so. To
+                run for all 3rd parties simply click Generate Report.</small
+              >
+            </p>
           </div>
         </div>
       </form>

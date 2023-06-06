@@ -13,7 +13,7 @@
 // under the License.
 import express from 'express';
 import path from 'path';
-import {doAnalysis} from './core';
+import {doAnalysis, identifyThirdParties} from './core';
 import {AuditExecution} from './types';
 import {v4 as uuidv4} from 'uuid';
 
@@ -24,10 +24,16 @@ const executions: AuditExecution[] = [];
 app.use(express.static('dist'));
 app.use(express.json()); // to support JSON-encoded bodies
 
+/**
+ * Static files.
+ */
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname + '/index.html'));
 });
 
+/**
+ * Poll for the status of an execution.
+ */
 app.get('/status/:id', async (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
   if (execution) {
@@ -37,6 +43,10 @@ app.get('/status/:id', async (req, res) => {
   }
 });
 
+/**
+ * Cancel an execution which the should kill the
+ * browser in the background with the next tests that would be run.
+ */
 app.get('/cancel/:id', (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
   if (execution) {
@@ -48,36 +58,39 @@ app.get('/cancel/:id', (req, res) => {
 });
 
 /**
+ * Returns a list of 3rd parties identified given:
+ * url: string;
+ */
+app.post('/analyse-urls', async (req, res) => {
+  try {
+    console.log(req.body);
+    const execution = extractFromRequest(req.body);
+
+    const identifiedThirdParties = await identifyThirdParties(execution);
+    res.send({
+      identifiedThirdParties: Array.from(identifiedThirdParties),
+    });
+  } catch (ex) {
+    console.error(ex);
+    res.send({error: ex.message});
+  }
+});
+
+/**
  * Run analysys request containing:
- * url: required
- * maxUrlsToTry: optional
- * numberOfReports: optional
- * userAgent: optional
- * cookies: optional
+ * url: string;
+ * userAgent: string;
+ * maxUrlsToTry?: number;
+ * numberOfReports: number;
+ * cookies?: string;
+ * localStorage?: string;
+ * blockAll?: boolean;
+ * blockSpecificUrls?: string[]
  */
 app.post('/test', async (req, res) => {
   try {
-    const url = decodeURI(req.body.url);
     console.log(req.body);
-    const maxUrlsToTry = parseInt((req.body.maxUrlsToTry ?? '-1').toString());
-    const numberOfReports = parseInt(
-      (req.body.numberOfReports ?? '1').toString()
-    );
-    const userAgentOverride = req.body.userAgent
-      ? req.body.userAgent.toString().trim()
-      : '';
-    const execution: AuditExecution = {
-      id: uuidv4(),
-      url: url,
-      numberOfReports: numberOfReports,
-      userAgentOverride: userAgentOverride,
-      maxUrlsToTry: isNaN(maxUrlsToTry) ? -1 : maxUrlsToTry,
-      results: [],
-      status: 'running',
-      cookies: req.body.cookies,
-      localStorage: req.body.localStorage,
-      blockAll: !!req.body.blockAll,
-    };
+    const execution = extractFromRequest(req.body);
     const analysisResponse = await doAnalysis(execution);
 
     executions.push(execution);
@@ -91,3 +104,30 @@ app.post('/test', async (req, res) => {
 app.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);
 });
+
+/**
+ * Extract an AuditExecution from a POST request.
+ * @param body from a request
+ */
+function extractFromRequest(body: any) {
+  const url = decodeURI(body.url);
+  const maxUrlsToTry = parseInt((body.maxUrlsToTry ?? '-1').toString());
+  const numberOfReports = parseInt((body.numberOfReports ?? '1').toString());
+  const userAgentOverride = body.userAgent
+    ? body.userAgent.toString().trim()
+    : '';
+  const execution: AuditExecution = {
+    id: uuidv4(),
+    url: url,
+    numberOfReports: numberOfReports,
+    userAgentOverride: userAgentOverride,
+    maxUrlsToTry: isNaN(maxUrlsToTry) ? -1 : maxUrlsToTry,
+    results: [],
+    status: 'running',
+    cookies: body.cookies,
+    localStorage: body.localStorage,
+    blockAll: !!body.blockAll,
+    blockSpecificUrls: body.blockSpecificUrls,
+  };
+  return execution;
+}
