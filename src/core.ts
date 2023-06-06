@@ -129,14 +129,14 @@ async function getPerformanceForURL(
     await attachCookiesToPage(page, url, cookies);
     await attachLocalStorageToPage(page, localStorage);
 
-      await page.setRequestInterception(true);
-      page.on('request', request => {
-        if (toBlock.has(request.url())) {
-          request.abort();
-        } else {
-          request.continue();
-        }
-      });
+    await page.setRequestInterception(true);
+    page.on('request', request => {
+      if (toBlock.has(request.url())) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    });
 
     await page.goto(url);
 

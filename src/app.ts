@@ -76,7 +76,7 @@ app.post('/test', async (req, res) => {
       status: 'running',
       cookies: req.body.cookies,
       localStorage: req.body.localStorage,
-      blockAll: !!req.body.blockAll
+      blockAll: !!req.body.blockAll,
     };
     const analysisResponse = await doAnalysis(execution);
 
