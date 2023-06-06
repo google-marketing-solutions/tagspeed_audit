@@ -128,7 +128,7 @@ under the License.
           </div>
         </div>
         <div class="row">
-          <div class="col-6">
+          <div class="col-4">
             <p>
               <label for="cookies">Cookies (optional)</label><br>
               <small
@@ -147,9 +147,9 @@ under the License.
               <span class="mdc-line-ripple"></span>
             </label>
           </div>
-          <div class="column col-6">
+          <div class="col-4">
             <p>
-              <label for="cookies">LocalStorage (optional)</label><br>
+              <label for="localStorage">LocalStorage (optional)</label><br>
               <small
                 >Format expected to be ';' separated key value pairs, e.g.
                 val1=test;device_id="IDHERE"</small
@@ -166,30 +166,43 @@ under the License.
               <span class="mdc-line-ripple"></span>
             </label>
           </div>
+          <div class="col-4">
+            <p>
+              <label for="blockAll">Block All 3rd parties in one test</label><br>
+            </p>
+            <input
+              type="checkbox"
+              aria-labelledby="blockAll"
+              name="blockAll"
+            />
+          </div>
         </div>
-        <div id="error"></div>
-        <div class="row text-center">
-          <br>
-          <button
-            class="mdc-button foo-button"
-            name="action"
-            value="send"
-            type="submit"
-            id="submit"
-          >
-            <div class="mdc-button__ripple"></div>
-            <span class="mdc-button__label">Generate Report</span>
-          </button>
-          <button
-            class="mdc-button foo-button"
-            name="action"
-            value="cancel"
-            type="button"
-            id="cancel"
-          >
-            <div class="mdc-button__ripple"></div>
-            <span class="mdc-button__label">Cancel Analysis</span>
-          </button>
+        <br/>
+        <div class="text-center row">
+          <div id="error" class="col-12"></div>
+          <div class="col-12">
+            <br>
+            <button
+              class="mdc-button foo-button"
+              name="action"
+              value="send"
+              type="submit"
+              id="submit"
+            >
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Generate Report</span>
+            </button>
+            <button
+              class="mdc-button foo-button"
+              name="action"
+              value="cancel"
+              type="button"
+              id="cancel"
+            >
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Cancel Analysis</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>

@@ -56,7 +56,7 @@ export async function doAnalysis(
       browser,
       execution.userAgentOverride,
       execution.url,
-      '',
+      new Set<string>(),
       execution.numberOfReports,
       execution.cookies,
       execution.localStorage
@@ -76,18 +76,17 @@ export async function doAnalysis(
       }
     }
 
-    const toBlock = Array.from(toBlockSet);
-    console.log(`[${execution.id}] Will block ${toBlock.length} URLs`);
+    console.log(`[${execution.id}] Will block ${toBlockSet.size} URLs`);
     const limit =
       execution.maxUrlsToTry === -1
-        ? toBlock.length
-        : Math.min(execution.maxUrlsToTry, toBlock.length);
+        ? toBlockSet.size
+        : Math.min(execution.maxUrlsToTry, toBlockSet.size);
 
-    generateReports(browser, toBlock, limit, execution);
+    generateReports(browser, toBlockSet, limit, execution);
 
     return {
       executionId: execution.id,
-      expectedResults: limit + 1,
+      expectedResults: execution.blockAll ? 2 : limit + 1,
     } as ExecutionResponse;
   } catch (ex) {
     execution.status = 'error';
@@ -110,7 +109,7 @@ async function getPerformanceForURL(
   browser: Browser,
   userAgent: string,
   url: string,
-  toBlock: string,
+  toBlock: Set<string>,
   numberOfReports: number,
   cookies?: string,
   localStorage?: string
@@ -130,16 +129,14 @@ async function getPerformanceForURL(
     await attachCookiesToPage(page, url, cookies);
     await attachLocalStorageToPage(page, localStorage);
 
-    if (toBlock.length > 0) {
       await page.setRequestInterception(true);
       page.on('request', request => {
-        if (request.url().indexOf(toBlock) !== -1) {
+        if (toBlock.has(request.url())) {
           request.abort();
         } else {
           request.continue();
         }
       });
-    }
 
     await page.goto(url);
 
@@ -185,7 +182,7 @@ async function getPerformanceForURL(
     responses.push({
       id: uuidv4(),
       reportUrl: '',
-      blockedURL: toBlock,
+      blockedURL: Array.from(toBlock).join(', '),
       screenshot: await page.screenshot({encoding: 'base64'}),
       scores: {
         LCP: LCP / 1000.0,
@@ -304,28 +301,43 @@ export function averageCrossReportMetrics(
  */
 export async function generateReports(
   browser: Browser,
-  toBlock: string[],
+  toBlock: Set<string>,
   limit: number,
   execution: AuditExecution
 ) {
-  for (let i = 0; i < limit; i++) {
-    if (execution.status === 'canceled') {
-      console.log(`[${execution.id}] Canceled`);
-      break;
-    }
-    const b = toBlock[i];
-    console.log(`[${execution.id}] Blocking ${b}`);
+  if (execution.blockAll) {
+    console.log(`[${execution.id}] Blocking all`);
     const lhResult = await getPerformanceForURL(
       browser,
       execution.userAgentOverride,
       execution.url,
-      b,
+      toBlock,
       execution.numberOfReports,
       execution.cookies,
       execution.localStorage
     );
 
     execution.results.push(lhResult);
+  } else {
+    for (let i = 0; i < limit; i++) {
+      if (execution.status === 'canceled') {
+        console.log(`[${execution.id}] Canceled`);
+        break;
+      }
+      const b = toBlock[i];
+      console.log(`[${execution.id}] Blocking ${b}`);
+      const lhResult = await getPerformanceForURL(
+        browser,
+        execution.userAgentOverride,
+        execution.url,
+        new Set<string>([b]),
+        execution.numberOfReports,
+        execution.cookies,
+        execution.localStorage
+      );
+
+      execution.results.push(lhResult);
+    }
   }
 
   await browser.close();

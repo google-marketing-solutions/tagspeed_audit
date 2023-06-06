@@ -175,10 +175,12 @@ export function submit(e: Event) {
   const localStorage = formData.get('localStorage').valueOf();
   const maxUrlsToTry = formData.get('max').valueOf();
   const numberOfReports = formData.get('numberOfReports').valueOf();
+  const blockAll =
+    formData.get('blockAll') && formData.get('blockAll').valueOf() === 'on';
   const results = document.getElementById('results') as HTMLDivElement;
   results.style.display = 'none';
 
-  document.querySelectorAll('.result').forEach(e => e.remove());
+  document.querySelectorAll('.mdc-data-table__row').forEach(e => e.remove());
 
   submitButton.disabled = true;
   const error = document.getElementById('error');
@@ -192,6 +194,7 @@ export function submit(e: Event) {
     numberOfReports,
     maxUrlsToTry,
     userAgent,
+    blockAll,
   };
 
   try {

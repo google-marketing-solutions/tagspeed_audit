@@ -50,7 +50,7 @@ describe('analysis should work end to end', function () {
   });
 
   it('should return results', async function () {
-    const toBlock = ['test'];
+    const toBlock = new Set<string>(['test']);
     const limit = 1;
     const execution: AuditExecution = {
       id: 'test',
