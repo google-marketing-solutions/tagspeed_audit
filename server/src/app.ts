@@ -27,13 +27,6 @@ app.use(express.json()); // to support JSON-encoded bodies
 app.use(cors());
 
 /**
- * Static files.
- */
-app.get('/', (_, res) => {
-  res.sendFile(path.join(__dirname + '/index.html'));
-});
-
-/**
  * Poll for the status of an execution.
  */
 app.get('/status/:id', async (req, res) => {

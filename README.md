@@ -34,14 +34,27 @@ Vitals](https://web.dev/vitals/) metrics.
 
 ## Building and Deploying
 
+The tool has a client server architecture, hence the existence of the `server` and `ui` folders.
+
+The server is in NodeJS, and the UI is built in Angular.
+
 ### Building
 ```
+cd server
+npm install
+npm run build
+
+cd ui
 npm install
 npm run build
 ```
 
 ### Running 
 ```
+cd server
+npm run start
+
+cd ui
 npm run start
 ```
 
