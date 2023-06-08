@@ -18,7 +18,11 @@ import {
   tap,
   timer,
 } from 'rxjs';
-import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
+import {
+  DomSanitizer,
+  SafeResourceUrl,
+  SafeUrl,
+} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -129,9 +133,18 @@ export class AppComponent {
   checkProgress() {
     const server: string = this.formGroup.get('server')?.value;
 
-    return this.http.get<AuditExecution>(
-      `${server}/status/${this.currentExecution?.executionId}`
-    );
+    return this.http
+      .get<AuditExecution | null>(
+        `${server}/status/${this.currentExecution?.executionId}`
+      )
+      .pipe(
+        catchError((err) => {
+          console.error(err);
+
+          this.stopPolling.next({});
+          return of(null);
+        })
+      );
   }
 
   generateReport() {
@@ -166,6 +179,9 @@ export class AppComponent {
             .subscribe((response) => {
               if (response) {
                 this.results = response;
+                if (this.results.status === 'complete') {
+                  this.stopPolling.next({});
+                }
               }
             });
         }
