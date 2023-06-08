@@ -5,6 +5,7 @@ body {
   height: 100%;
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #ebebeb;
 }
 
 .row {
@@ -83,4 +84,28 @@ body {
   .col-12 {
     width: 96%;
   }
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.container {
+  padding: 50px;
+}
+
+button {
+  margin: 5px!important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mat-checkbox-label {
+  white-space: normal;
+}
+
+mat-card {
+    margin: 20px 30px 20px 30px;
 }

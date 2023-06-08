@@ -14,8 +14,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install modules
-      run: npm install
+      run: cd server && npm install
     - name: Run ESLint
-      run: npm run lint
+      run: cd server && npm run lint
     - name: Run Tests
-      run: npm run test
+      run: cd server && npm run test
+    - name: Install modules
+      run: cd ui && npm install
+    - name: Run ESLint
+      run: cd ui && npm run lint
+    - name: Run Tests
+      run: cd ui && npm run test

@@ -15,7 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
+import { MatTableModule } from '@angular/material/table';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -25,6 +25,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    MatTableModule,
     MatDialogModule,
     MatCheckboxModule,
     HttpClientModule,

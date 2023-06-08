@@ -1,9 +1,40 @@
 <div class="container">
+  <div class="row">
+    <div class="col-12 text-center">
+      <h1>
+        <img
+          src="assets/icon.png"
+          class="logo"
+          title="3rd party audit logo"
+          alt="3rd party audit logo"
+        />
+        3rd Party Audit
+      </h1>
+    </div>
+  </div>
   <mat-card>
     <mat-card-header><h3>Configuration</h3></mat-card-header>
     <mat-card-content>
       <form [formGroup]="formGroup">
         <div class="row">
+          <div class="col-6"></div>
+          <div class="col-6">
+            <mat-form-field appearance="fill">
+              <mat-label>Tool Server Host</mat-label>
+              <input
+                type="text"
+                aria-label="Tool Server Host"
+                matInput
+                placeholder="Tool Server Host"
+                formControlName="server"
+              />
+              <mat-hint
+                >Specificy the exact URL, including parameters that could bypass
+                cookie banners or set A/B tests.</mat-hint
+              >
+            </mat-form-field>
+          </div>
+
           <div class="col-12">
             <mat-form-field appearance="fill">
               <mat-label>URL</mat-label>
@@ -95,14 +126,27 @@
           </div>
           <div class="col-4">
             <mat-checkbox
-              aria-label="Block all selected 3rd parties"
+              aria-label="Bulk block all selected 3rd parties"
               formControlName="blockAll"
-              >Block all in-scope 3rd parties and generate one performance
+              >Bulk block all in-scope 3rd parties and generate one performance
               report instead of split reports</mat-checkbox
             >
           </div>
         </div>
       </form>
+      <mat-card *ngIf="thirdPartyResults.length > 0">
+        <mat-card-header><h3>Identified 3rd Parties</h3></mat-card-header>
+        <mat-card-content>
+          <button mat-flat-button color="primary" (click)="toggleSelectAll()">
+            Select All
+          </button>
+          <br />
+          <br />
+          <div *ngFor="let p of thirdPartyResults">
+            <mat-checkbox [checked]="p.selected">{{ p.name }}</mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </mat-card-content>
     <mat-card-actions align="end">
       <button
@@ -110,6 +154,7 @@
         type="button"
         color="primary"
         (click)="extractThirdParties()"
+        [disabled]="isLoading || !formGroup.valid"
       >
         Extract 3rd party requests
       </button>
@@ -117,10 +162,76 @@
         mat-flat-button
         type="button"
         color="primary"
+        [disabled]="isLoading || !formGroup.valid"
         (click)="generateReport()"
       >
         Generate report
       </button>
+      <button
+        mat-flat-button
+        type="button"
+        color="primary"
+        [disabled]="!isLoading || !currentExecution"
+        (click)="cancel()"
+      >
+        Cancel execution
+      </button>
     </mat-card-actions>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header><h3>Results</h3></mat-card-header>
+    <mat-card-content>
+      <p *ngIf="!results">No results to display.</p>
+      <div *ngIf="results && results.results">
+        <table
+          mat-table
+          [dataSource]="results.results"
+          class="mat-elevation-z8"
+        >
+          <ng-container matColumnDef="urls">
+            <th mat-header-cell *matHeaderCellDef>URLs</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.blockedURL ?? "BASELINE" }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="lcp">
+            <th mat-header-cell *matHeaderCellDef>LCP</th>
+            <td mat-cell *matCellDef="let element">{{ element.scores.LCP }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fcp">
+            <th mat-header-cell *matHeaderCellDef>FCP</th>
+            <td mat-cell *matCellDef="let element">{{ element.scores.FCP }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="cls">
+            <th mat-header-cell *matHeaderCellDef>CLS</th>
+            <td mat-cell *matCellDef="let element">{{ element.scores.CLS }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="screen">
+            <th mat-header-cell *matHeaderCellDef>Screen</th>
+            <td mat-cell *matCellDef="let element">
+              <img
+                src="{{
+                  domSanitizer.bypassSecurityTrustHtml(
+                    'data:image/png;base64, ' + element.screenshot
+                  )
+                }}"
+                alt="Screenshot with {{ element.blockedURL }} blocked"
+                width="70px"
+                height="128px"
+                onclick="screenshotClick(event)"
+              />
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
   </mat-card>
 </div>

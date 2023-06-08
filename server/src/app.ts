@@ -16,6 +16,7 @@ import path from 'path';
 import {doAnalysis, identifyThirdParties} from './core';
 import {AuditExecution} from './types';
 import {v4 as uuidv4} from 'uuid';
+import cors from 'cors';
 
 const app = express();
 const port = 3000;
@@ -23,6 +24,7 @@ const executions: AuditExecution[] = [];
 
 app.use(express.static('dist'));
 app.use(express.json()); // to support JSON-encoded bodies
+app.use(cors());
 
 /**
  * Static files.
@@ -51,7 +53,7 @@ app.get('/cancel/:id', (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
   if (execution) {
     execution.status = 'canceled';
-    res.sendStatus(200);
+    res.send(execution);
   } else {
     res.sendStatus(404);
   }
