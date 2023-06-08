@@ -1,0 +1,126 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header><h3>Configuration</h3></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formGroup">
+        <div class="row">
+          <div class="col-12">
+            <mat-form-field appearance="fill">
+              <mat-label>URL</mat-label>
+              <input
+                type="text"
+                aria-label="URL"
+                matInput
+                cdkFocusInitial
+                placeholder="URL"
+                formControlName="url"
+              />
+              <mat-hint
+                >Specificy the exact URL, including parameters that could bypass
+                cookie banners or set A/B tests.</mat-hint
+              >
+            </mat-form-field>
+          </div>
+          <div class="col-4">
+            <mat-form-field appearance="fill">
+              <mat-label
+                >How many perf. checks to run per 3rd party and average (for
+                variance mitigation)?</mat-label
+              >
+              <input
+                type="number"
+                aria-label="Number of performance checks per 3rd party"
+                matInput
+                formControlName="numberOfReports"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-4">
+            <mat-form-field appearance="fill">
+              <mat-label>User Agent Override (optional)</mat-label>
+              <input
+                type="text"
+                aria-label="User Agent Override"
+                matInput
+                placeholder="OPTIONAL"
+                formControlName="userAgentOverride"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-4">
+            <mat-form-field appearance="fill">
+              <mat-label
+                >Max URLs to attempt to block, for performance (optional, empty
+                means no limit)</mat-label
+              >
+              <input
+                type="number"
+                aria-label="Max number of urls to block, empty means no limit"
+                matInput
+                formControlName="max"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-4">
+            <mat-form-field appearance="fill">
+              <mat-label>Cookies (optional)</mat-label>
+              <input
+                type="text"
+                aria-label="Cookies"
+                matInput
+                placeholder="OPTIONAL"
+                formControlName="cookies"
+              />
+              <mat-hint>
+                Format expected to be ';' separated key value pairs, e.g.
+                _octo=HASH123;device_id="IDHERE"
+              </mat-hint>
+            </mat-form-field>
+          </div>
+          <div class="col-4">
+            <mat-form-field appearance="fill">
+              <mat-label>Local Storage (optional)</mat-label>
+              <input
+                type="text"
+                aria-label="Local Storage"
+                matInput
+                placeholder="OPTIONAL"
+                formControlName="localStorage"
+              />
+              <mat-hint>
+                Format expected to be ';' separated key value pairs, e.g.
+                _octo=HASH123;device_id="IDHERE"
+              </mat-hint>
+            </mat-form-field>
+          </div>
+          <div class="col-4">
+            <mat-checkbox
+              aria-label="Block all selected 3rd parties"
+              formControlName="blockAll"
+              >Block all in-scope 3rd parties and generate one performance
+              report instead of split reports</mat-checkbox
+            >
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button
+        mat-flat-button
+        type="button"
+        color="primary"
+        (click)="extractThirdParties()"
+      >
+        Extract 3rd party requests
+      </button>
+      <button
+        mat-flat-button
+        type="button"
+        color="primary"
+        (click)="generateReport()"
+      >
+        Generate report
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
