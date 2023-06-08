@@ -60,6 +60,10 @@ npm run start
 
 ### Tests 
 ```
+cd server
+npm test
+
+cd ui
 npm test
 ```
  

@@ -1,3 +1,16 @@
+// Copyright 2023 Google LLC
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License. You may obtain a copy
+// of the License at
+
+//   http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
+
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -142,7 +155,6 @@ export class AppComponent {
     const server: string = this.formGroup.get('server')?.value;
     this.isLoading = true;
 
-    this.thirdPartyResults = [];
     firstValueFrom(
       this.http.post<ExecutionResponse>(`${server}/test/`, data)
     ).then(
@@ -168,8 +180,17 @@ export class AppComponent {
             )
             .subscribe((response) => {
               if (response) {
+                response.results = response.results?.map((r) => {
+                  r.screenshotSafe = this.domSanitizer.bypassSecurityTrustHtml(
+                    '<img src="data:image/png;base64, ' +
+                      r.screenshot! +
+                      '" height="128px"/>'
+                  );
+                  return r;
+                });
                 this.results = response;
                 if (this.results.status === 'complete') {
+                  this.isLoading = false;
                   this.stopPolling.next({});
                 }
               }
@@ -179,6 +200,7 @@ export class AppComponent {
       (err) => {
         console.error(err);
         this.error = JSON.stringify(err);
+        this.currentExecution = undefined;
         this.isLoading = false;
       }
     );
@@ -201,11 +223,11 @@ export class AppComponent {
     );
   }
 
-  screenshotClick(event: { target: { src: string } }) {
+  screenshotClick(imageData: string) {
     const w = window.open('');
     if (w) {
       const image = new Image();
-      image.src = event.target.src;
+      image.src = 'data:image/png;base64, ' + imageData;
 
       w.document.write(image.outerHTML);
     }
