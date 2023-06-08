@@ -1,13 +1,8 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuditExecution, ExecutionResponse } from './types';
 import {
-  AuditExecution,
-  AuditResponse,
-  ExecutionResponse,
-} from '../../../server/src/types';
-import {
-  Observable,
   Subject,
   catchError,
   firstValueFrom,
@@ -15,14 +10,9 @@ import {
   share,
   switchMap,
   takeUntil,
-  tap,
   timer,
 } from 'rxjs';
-import {
-  DomSanitizer,
-  SafeResourceUrl,
-  SafeUrl,
-} from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -167,7 +157,7 @@ export class AppComponent {
                 return this.checkProgress();
               }),
               share(),
-              catchError((err: any) => {
+              catchError((err) => {
                 console.error(err);
                 this.error = JSON.stringify(err);
                 this.isLoading = false;

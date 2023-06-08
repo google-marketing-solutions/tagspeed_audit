@@ -1,0 +1,16 @@
+{
+  "extends": "./node_modules/gts/",
+  "overrides": [
+    {
+      "files": "*.spec.ts",
+      "rules": {
+        "node/no-unpublished-import": [
+          "error",
+          {
+            "allowModules": ["mocha", "chai"]
+          }
+        ]
+      }
+    }
+  ]
+}
