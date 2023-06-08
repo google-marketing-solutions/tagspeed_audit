@@ -30,7 +30,7 @@ export async function identifyThirdParties(
     defaultViewport: null,
   });
 
-  const results = identifyThirdPartiesWithBrowser(browser, execution);
+  const results = await identifyThirdPartiesWithBrowser(browser, execution);
 
   await browser.close();
 
