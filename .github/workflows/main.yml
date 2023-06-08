@@ -5,23 +5,21 @@ name: ESLint
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Install modules
-      run: cd server && npm install
-    - name: Run ESLint
-      run: cd server && npm run lint
-    - name: Run Tests
-      run: cd server && npm run test
-    - name: Install modules
-      run: cd ui && npm install
-    - name: Run ESLint
-      run: cd ui && npm run lint
-    - name: Run Tests
-      run: cd ui && npm run test
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: cd server && npm install
+      - name: Run ESLint
+        run: cd server && npm run lint
+      - name: Run Tests
+        run: cd server && npm run test
+      - name: Install modules
+        run: cd ui && npm install
+      - name: Run ESLint
+        run: cd ui && npm run lint
