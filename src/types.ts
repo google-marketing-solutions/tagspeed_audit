@@ -43,16 +43,18 @@ export type Report = {
  * Represents an analysis request against an URL.
  */
 export type AuditExecution = {
-  id: string;
-  status: string;
+  id?: string;
+  status?: string;
   url: string;
   userAgentOverride: string;
   maxUrlsToTry?: number;
   numberOfReports: number;
-  results: AuditResponse[];
+  results?: AuditResponse[];
   error?: string;
   cookies?: string;
   localStorage?: string;
+  blockAll?: boolean;
+  blockSpecificUrls?: string[];
 };
 
 /**

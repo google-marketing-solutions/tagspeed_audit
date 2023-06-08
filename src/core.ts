@@ -22,6 +22,48 @@ import {v4 as uuidv4} from 'uuid';
 import {AuditExecution, AuditResponse, ExecutionResponse} from './types';
 import {Page} from 'puppeteer';
 
+export async function identifyThirdParties(
+  execution: AuditExecution
+): Promise<Set<string>> {
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    defaultViewport: null,
+  });
+
+  const results = await identifyThirdPartiesWithBrowser(browser, execution);
+
+  await browser.close();
+
+  return results;
+}
+
+async function identifyThirdPartiesWithBrowser(
+  browser: Browser,
+  execution: AuditExecution
+): Promise<Set<string>> {
+  const toBlockSet = new Set<string>();
+
+  const requests = await extractRequestsFromPage(
+    browser,
+    execution.userAgentOverride,
+    execution.url,
+    execution.cookies,
+    execution.localStorage
+  );
+
+  for (const request of requests) {
+    const url = request.url();
+    const headers = request.response().headers();
+    const isImage =
+      headers['content-type'] && !!headers['content-type'].match(/(image)+\//g);
+    if (!isImage && getEntity(url)) {
+      toBlockSet.add(url);
+    }
+  }
+
+  return toBlockSet;
+}
+
 /**
  * Identify all network requests done by a page, filter out those that are
  * 3rd parties, then block the 3rd party URLs one by one and run a perf
@@ -44,19 +86,11 @@ export async function doAnalysis(
       defaultViewport: null,
     });
 
-    const requests = await extractRequestsFromPage(
-      browser,
-      execution.userAgentOverride,
-      execution.url,
-      execution.cookies,
-      execution.localStorage
-    );
-
     const baselineLHResult = await getPerformanceForURL(
       browser,
       execution.userAgentOverride,
       execution.url,
-      '',
+      new Set<string>(),
       execution.numberOfReports,
       execution.cookies,
       execution.localStorage
@@ -64,30 +98,23 @@ export async function doAnalysis(
     execution.results.push(baselineLHResult);
 
     // create list of blocking URLs
-    const toBlockSet = new Set<string>();
-    for (const request of requests) {
-      const url = request.url();
-      const headers = request.response().headers();
-      const isImage =
-        headers['content-type'] &&
-        !!headers['content-type'].match(/(image)+\//g);
-      if (!isImage && getEntity(url)) {
-        toBlockSet.add(url);
-      }
+    let toBlockSet = new Set<string>(execution.blockSpecificUrls ?? []);
+
+    if (toBlockSet.size === 0) {
+      toBlockSet = await identifyThirdPartiesWithBrowser(browser, execution);
     }
 
-    const toBlock = Array.from(toBlockSet);
-    console.log(`[${execution.id}] Will block ${toBlock.length} URLs`);
+    console.log(`[${execution.id}] Will block ${toBlockSet.size} URLs`);
     const limit =
       execution.maxUrlsToTry === -1
-        ? toBlock.length
-        : Math.min(execution.maxUrlsToTry, toBlock.length);
+        ? toBlockSet.size
+        : Math.min(execution.maxUrlsToTry, toBlockSet.size);
 
-    generateReports(browser, toBlock, limit, execution);
+    generateReports(browser, toBlockSet, limit, execution);
 
     return {
       executionId: execution.id,
-      expectedResults: limit + 1,
+      expectedResults: execution.blockAll ? 2 : limit + 1,
     } as ExecutionResponse;
   } catch (ex) {
     execution.status = 'error';
@@ -110,7 +137,7 @@ async function getPerformanceForURL(
   browser: Browser,
   userAgent: string,
   url: string,
-  toBlock: string,
+  toBlock: Set<string>,
   numberOfReports: number,
   cookies?: string,
   localStorage?: string
@@ -130,16 +157,14 @@ async function getPerformanceForURL(
     await attachCookiesToPage(page, url, cookies);
     await attachLocalStorageToPage(page, localStorage);
 
-    if (toBlock.length > 0) {
-      await page.setRequestInterception(true);
-      page.on('request', request => {
-        if (request.url().indexOf(toBlock) !== -1) {
-          request.abort();
-        } else {
-          request.continue();
-        }
-      });
-    }
+    await page.setRequestInterception(true);
+    page.on('request', request => {
+      if (toBlock.has(request.url())) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    });
 
     await page.goto(url);
 
@@ -185,7 +210,7 @@ async function getPerformanceForURL(
     responses.push({
       id: uuidv4(),
       reportUrl: '',
-      blockedURL: toBlock,
+      blockedURL: Array.from(toBlock).join(', '),
       screenshot: await page.screenshot({encoding: 'base64'}),
       scores: {
         LCP: LCP / 1000.0,
@@ -304,28 +329,44 @@ export function averageCrossReportMetrics(
  */
 export async function generateReports(
   browser: Browser,
-  toBlock: string[],
+  toBlock: Set<string>,
   limit: number,
   execution: AuditExecution
 ) {
-  for (let i = 0; i < limit; i++) {
-    if (execution.status === 'canceled') {
-      console.log(`[${execution.id}] Canceled`);
-      break;
-    }
-    const b = toBlock[i];
-    console.log(`[${execution.id}] Blocking ${b}`);
+  if (execution.blockAll) {
+    console.log(`[${execution.id}] Blocking all`);
     const lhResult = await getPerformanceForURL(
       browser,
       execution.userAgentOverride,
       execution.url,
-      b,
+      toBlock,
       execution.numberOfReports,
       execution.cookies,
       execution.localStorage
     );
 
     execution.results.push(lhResult);
+  } else {
+    const toBlockArray = Array.from(toBlock);
+    for (let i = 0; i < limit; i++) {
+      if (execution.status === 'canceled') {
+        console.log(`[${execution.id}] Canceled`);
+        break;
+      }
+      const b = toBlockArray[i];
+      console.log(`[${execution.id}] Blocking ${b}`);
+      const lhResult = await getPerformanceForURL(
+        browser,
+        execution.userAgentOverride,
+        execution.url,
+        new Set<string>([b]),
+        execution.numberOfReports,
+        execution.cookies,
+        execution.localStorage
+      );
+
+      execution.results.push(lhResult);
+    }
   }
 
   await browser.close();
