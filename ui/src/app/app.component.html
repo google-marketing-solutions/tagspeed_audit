@@ -27,17 +27,34 @@
     </div>
   </div>
   <mat-card>
-    <mat-card-header><h3>Configuration</h3></mat-card-header>
+    <mat-card-header><h3>Welcome!</h3></mat-card-header>
     <mat-card-content>
       <form [formGroup]="formGroup">
         <fieldset [disabled]="isLoading">
           <div class="row">
-            <div class="col-6"></div>
+            <div class="col-6">
+              <p><strong>Entering an URL is enough to get started!</strong></p>
+              <p>
+                Extracting 3rd parties is not a pre-requisite, you can start
+                directly with generating a report.
+              </p>
+              <p>
+                The report will contain a baseline, with nothing blocked, then
+                one line per 3rd party network request, where the request is
+                blocked and performance checked.
+              </p>
+              <p>
+                We primarely leverage
+                <a href="https://web.dev/vitals" target="_blank"
+                  >Core Web Vitals for the performance checks</a
+                >.
+              </p>
+            </div>
             <div class="col-6">
               <mat-form-field appearance="fill">
                 <mat-label>Tool Server Host</mat-label>
                 <input
-                  type="text"
+                  type="url"
                   aria-label="Tool Server Host"
                   matInput
                   placeholder="Tool Server Host"
@@ -48,13 +65,11 @@
                   bypass cookie banners or set A/B tests.</mat-hint
                 >
               </mat-form-field>
-            </div>
-
-            <div class="col-12">
+              <br /><br />
               <mat-form-field appearance="fill">
                 <mat-label>URL</mat-label>
                 <input
-                  type="text"
+                  type="url"
                   aria-label="URL"
                   matInput
                   cdkFocusInitial
@@ -67,6 +82,8 @@
                 >
               </mat-form-field>
             </div>
+          </div>
+          <div class="row">
             <div class="col-4">
               <mat-form-field appearance="fill">
                 <mat-label
@@ -143,13 +160,17 @@
               <mat-checkbox
                 aria-label="Bulk block all selected 3rd parties"
                 formControlName="blockAll"
-                >Bulk block all in-scope 3rd parties and generate one
-                performance report instead of split reports</mat-checkbox
+                >Block in-scope 3rd parties in <strong>bulk</strong>, generating
+                a single line, alongside the baseline, instead of split
+                lines</mat-checkbox
               >
             </div>
           </div>
         </fieldset>
       </form>
+      <div class="row error" *ngIf="error">
+        <div class="col-12">{{ error }}</div>
+      </div>
       <mat-card *ngIf="thirdPartyResults.length > 0">
         <mat-card-header><h3>Identified 3rd Parties</h3></mat-card-header>
         <mat-card-content>
@@ -169,34 +190,40 @@
         </mat-card-content>
       </mat-card>
     </mat-card-content>
-    <mat-card-actions align="end">
-      <button
-        mat-flat-button
-        type="button"
-        color="primary"
-        (click)="extractThirdParties()"
-        [disabled]="isLoading || !formGroup.valid"
-      >
-        Extract 3rd party requests
-      </button>
-      <button
-        mat-flat-button
-        type="button"
-        color="primary"
-        [disabled]="isLoading || !formGroup.valid"
-        (click)="generateReport()"
-      >
-        Generate report
-      </button>
-      <button
-        mat-flat-button
-        type="button"
-        color="primary"
-        [disabled]="!isLoading || !currentExecution"
-        (click)="cancel()"
-      >
-        Cancel execution
-      </button>
+    <mat-card-actions>
+      <div class="row">
+        <div class="col-5">
+          <button
+            mat-flat-button
+            type="button"
+            color="primary"
+            (click)="extractThirdParties()"
+            [disabled]="isLoading || !formGroup.valid"
+          >
+            Extract 3rd party requests
+          </button>
+        </div>
+        <div class="col-7 text-right">
+          <button
+            mat-flat-button
+            type="button"
+            color="primary"
+            [disabled]="isLoading || !formGroup.valid"
+            (click)="generateReport()"
+          >
+            Generate report
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            color="primary"
+            [disabled]="!isLoading || !currentExecution"
+            (click)="cancel()"
+          >
+            Cancel execution
+          </button>
+        </div>
+      </div>
     </mat-card-actions>
   </mat-card>
 
