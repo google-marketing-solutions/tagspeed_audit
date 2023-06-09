@@ -12,7 +12,6 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 import express from 'express';
-import path from 'path';
 import {doAnalysis, identifyThirdParties} from './core';
 import {AuditExecution} from './types';
 import {v4 as uuidv4} from 'uuid';
