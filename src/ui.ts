@@ -54,12 +54,16 @@ export function printResult(result: LHResponse, baseline: LHResponse) {
   const CLSImproved = !isBaseline
     ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
     : '';
+  const TBTImproved = !isBaseline
+    ? ` (${round(100 - result.scores.TBT / (baseline.scores.TBT / 100))}%)`
+    : '';
   row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
   row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
-  row.insertCell(4).innerText = `${result.scores.consoleErrors}`;
+  row.insertCell(4).innerText = `${result.scores.TBT} ms${TBTImproved}`;
+  row.insertCell(5).innerText = `${result.scores.consoleErrors}`;
   row.insertCell(
-    5
+    6
   ).innerHTML = `<a href='${result.reportUrl}' target='_blank'>LINK</a>`;
 }
 
