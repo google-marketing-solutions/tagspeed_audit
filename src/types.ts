@@ -23,6 +23,7 @@ export type LHResponse = {
     LCP: number;
     FCP: number;
     CLS: number;
+    TBT: number;
     consoleErrors: number;
   };
   error?: string;

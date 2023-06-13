@@ -101,7 +101,13 @@ async function runLHForURL(
       port: new URL(browser.wsEndpoint()).port,
       output: 'html',
       logLevel: 'error',
-      onlyCategories: ['performance', 'best-practices'],
+      onlyAudits: [
+        'first-contentful-paint',
+        'largest-contentful-paint',
+        'cumulative-layout-shift',
+        'total-blocking-time',
+        'errors-in-console',
+      ],
       blockedUrlPatterns: toBlock && toBlock.length > 0 ? [`*${toBlock}*`] : [],
     });
     responses.push(await processLighthouseReport(toBlock, lhr));
@@ -180,14 +186,15 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
         100
     ) / 100;
 
-  const consoleErrors =
-    Math.round(
-      (responses
-        .map(r => r.scores.consoleErrors)
-        .reduce((r1, r2) => r1 + r2, 0) /
-        responses.length) *
-        100
-    ) / 100;
+  const TBT = Math.round(
+    responses.map(r => r.scores.TBT).reduce((r1, r2) => r1 + r2, 0) /
+      responses.length
+  );
+
+  const consoleErrors = Math.round(
+    responses.map(r => r.scores.consoleErrors).reduce((r1, r2) => r1 + r2, 0) /
+      responses.length
+  );
 
   return {
     id: responses[0].id,
@@ -197,6 +204,7 @@ export function averageCrossReportMetrics(responses: LHResponse[]): LHResponse {
       FCP: FCP,
       LCP: LCP,
       CLS: CLS,
+      TBT: TBT,
       consoleErrors: consoleErrors,
     },
   };
@@ -231,6 +239,8 @@ export function processLighthouseReport(
   const cls = parseFloat(
     lhr.lhr.audits['cumulative-layout-shift'].displayValue
   );
+  const tbt = lhr.lhr.audits['total-blocking-time'].numericValue;
+
   const consoleErrors =
     lhr.lhr.audits['errors-in-console'].details.items.length;
   return {
@@ -241,6 +251,7 @@ export function processLighthouseReport(
       FCP: fcp,
       LCP: lcp,
       CLS: cls,
+      TBT: tbt,
       consoleErrors: consoleErrors,
     },
   };
