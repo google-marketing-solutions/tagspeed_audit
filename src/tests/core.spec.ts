@@ -35,6 +35,10 @@ describe('core lighthouse report processing', () => {
             displayValue: '0.1',
             scoreDisplayMode: 'ok',
           },
+          'total-blocking-time': {
+            numericValue: 200,
+            scoreDisplayMode: 'ok',
+          },
           'errors-in-console': {
             details: {
               items: [],
@@ -47,6 +51,7 @@ describe('core lighthouse report processing', () => {
     expect(response.scores.FCP).to.equal(1.0);
     expect(response.scores.LCP).to.equal(2.0);
     expect(response.scores.CLS).to.equal(0.1);
+    expect(response.scores.TBT).to.equal(200);
     expect(response.scores.consoleErrors).to.equal(0);
   });
 });
