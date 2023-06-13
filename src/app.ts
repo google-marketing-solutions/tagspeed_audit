@@ -13,7 +13,7 @@
 // under the License.
 import express from 'express';
 import path from 'path';
-import {doAnalysis} from './core';
+import {doAnalysis, identifyThirdParties} from './core';
 import {AuditExecution} from './types';
 import {v4 as uuidv4} from 'uuid';
 
@@ -22,11 +22,18 @@ const port = 3000;
 const executions: AuditExecution[] = [];
 
 app.use(express.static('dist'));
+app.use(express.json()); // to support JSON-encoded bodies
 
+/**
+ * Static files.
+ */
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname + '/index.html'));
 });
 
+/**
+ * Poll for the status of an execution.
+ */
 app.get('/status/:id', async (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
   if (execution) {
@@ -36,6 +43,10 @@ app.get('/status/:id', async (req, res) => {
   }
 });
 
+/**
+ * Cancel an execution which the should kill the
+ * browser in the background with the next tests that would be run.
+ */
 app.get('/cancel/:id', (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
   if (execution) {
@@ -46,27 +57,42 @@ app.get('/cancel/:id', (req, res) => {
   }
 });
 
-app.get('/test/:url', async (req, res) => {
+/**
+ * Returns a list of 3rd parties identified given:
+ * url: string;
+ */
+app.post('/analyse-urls', async (req, res) => {
   try {
-    const url = decodeURI(req.params.url);
-    console.log(`Testing ${url}`);
-    const maxUrlsToTry = parseInt((req.query.maxUrlsToTry ?? '-1').toString());
-    const numberOfReports = parseInt(
-      (req.query.numberOfReports ?? '1').toString()
-    );
-    const userAgentOverride = req.query.userAgent
-      ? req.query.userAgent.toString()
-      : '';
-    const execution: AuditExecution = {
-      id: uuidv4(),
-      url: url,
-      numberOfReports: numberOfReports,
-      userAgentOverride: userAgentOverride,
-      maxUrlsToTry: maxUrlsToTry,
-      results: [],
-      status: 'running',
-    };
+    console.log(req.body);
+    const execution = extractFromRequest(req.body);
+
+    const identifiedThirdParties = await identifyThirdParties(execution);
+    res.send({
+      identifiedThirdParties: Array.from(identifiedThirdParties),
+    });
+  } catch (ex) {
+    console.error(ex);
+    res.send({error: ex.message});
+  }
+});
+
+/**
+ * Run analysys request containing:
+ * url: string;
+ * userAgent: string;
+ * maxUrlsToTry?: number;
+ * numberOfReports: number;
+ * cookies?: string;
+ * localStorage?: string;
+ * blockAll?: boolean;
+ * blockSpecificUrls?: string[]
+ */
+app.post('/test', async (req, res) => {
+  try {
+    console.log(req.body);
+    const execution = extractFromRequest(req.body);
     const analysisResponse = await doAnalysis(execution);
+
     executions.push(execution);
     res.send(analysisResponse);
   } catch (ex) {
@@ -78,3 +104,21 @@ app.get('/test/:url', async (req, res) => {
 app.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);
 });
+
+/**
+ * Extract an AuditExecution from a POST request.
+ * @param body from a request
+ */
+function extractFromRequest(body: AuditExecution) {
+  body.id = uuidv4();
+  body.status = 'running';
+  body.results = [];
+  body.url = decodeURI(body.url);
+  body.maxUrlsToTry = !body.maxUrlsToTry ? -1 : body.maxUrlsToTry;
+  body.numberOfReports = !body.numberOfReports ? -1 : body.numberOfReports;
+  body.userAgentOverride = body.userAgentOverride
+    ? body.userAgentOverride.trim()
+    : '';
+
+  return body;
+}

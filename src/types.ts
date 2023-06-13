@@ -13,9 +13,9 @@
 // under the License.
 
 /**
- * Simplified Lighthouse response with only the fields required.
+ * Simplified response with only the fields required.
  */
-export type LHResponse = {
+export type AuditResponse = {
   id: string;
   blockedURL: string;
   reportUrl: string;
@@ -27,12 +27,13 @@ export type LHResponse = {
     consoleErrors: number;
   };
   error?: string;
+  screenshot?: string;
 };
 
 /**
- * Lighthouse report type for stricter checking.
+ * Report with scores.
  */
-export type LHReport = {
+export type Report = {
   lhr: {
     audits: object;
   };
@@ -43,14 +44,18 @@ export type LHReport = {
  * Represents an analysis request against an URL.
  */
 export type AuditExecution = {
-  id: string;
-  status: string;
+  id?: string;
+  status?: string;
   url: string;
   userAgentOverride: string;
   maxUrlsToTry?: number;
   numberOfReports: number;
-  results: LHResponse[];
+  results?: AuditResponse[];
   error?: string;
+  cookies?: string;
+  localStorage?: string;
+  blockAll?: boolean;
+  blockSpecificUrls?: string[];
 };
 
 /**
