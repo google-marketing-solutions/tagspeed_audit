@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "rm -rf dist && tsc && cp -R public/** dist",
+    "build": "rm -rf dist && tsc",
     "start": "npm run build && node dist/app.js",
     "test": "mocha -r ts-node/register src/**/*.spec.ts",
     "lint": "gts lint src"
