@@ -217,6 +217,9 @@ async function getPerformanceForURL(
           resolve(totalBlockingTimeScore);
         });
         observer.observe({type: 'longtask', buffered: true});
+        // in a test environment / no TBT at all environment
+        // the observer is never called hence timing it out
+        setTimeout(() => resolve(totalBlockingTimeScore), 2000);
       });
     });
 

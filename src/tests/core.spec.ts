@@ -27,7 +27,7 @@ import puppeteer, {Browser} from 'puppeteer';
 import {createServer} from 'http';
 
 describe('analysis should work end to end', function () {
-  this.timeout(10000);
+  this.timeout(15000);
   const server = createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end(
