@@ -39,7 +39,7 @@ export class AppComponent {
   currentExecution?: ExecutionResponse;
   results?: AuditExecution;
   isLoading = false;
-  displayedColumns: string[] = ['urls', 'lcp', 'fcp', 'cls', 'screen'];
+  displayedColumns: string[] = ['urls', 'lcp', 'fcp', 'cls', 'tbt', 'screen'];
 
   private stopPolling = new Subject();
 
