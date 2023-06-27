@@ -27,7 +27,7 @@ import puppeteer, {Browser} from 'puppeteer';
 import {createServer} from 'http';
 
 describe('analysis should work end to end', function () {
-  this.timeout(10000);
+  this.timeout(15000);
   const server = createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end(
@@ -129,6 +129,7 @@ describe('process results of having run analysis', () => {
         LCP: 3,
         FCP: 3,
         CLS: 3,
+        TBT: 300,
         consoleErrors: 0,
       },
     };
@@ -140,6 +141,7 @@ describe('process results of having run analysis', () => {
         LCP: 5,
         FCP: 3,
         CLS: 3,
+        TBT: 500,
         consoleErrors: 0,
       },
     };
@@ -147,6 +149,7 @@ describe('process results of having run analysis', () => {
     assert.equal(result.scores.LCP, 4);
     assert.equal(result.scores.FCP, 3);
     assert.equal(result.scores.CLS, 3);
+    assert.equal(result.scores.TBT, 400);
     assert.equal(result.scores.consoleErrors, 0);
   });
 });

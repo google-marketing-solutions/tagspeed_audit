@@ -23,6 +23,7 @@ export type AuditResponse = {
     LCP: number;
     FCP: number;
     CLS: number;
+    TBT: number;
     consoleErrors: number;
   };
   error?: string;

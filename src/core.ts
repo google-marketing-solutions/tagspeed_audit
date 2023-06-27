@@ -207,6 +207,22 @@ async function getPerformanceForURL(
       });
     });
 
+    const TBT = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        let totalBlockingTimeScore = 0;
+        const observer = new PerformanceObserver(list => {
+          for (const entry of list.getEntries()) {
+            totalBlockingTimeScore += entry.duration - 50;
+          }
+          resolve(totalBlockingTimeScore);
+        });
+        observer.observe({type: 'longtask', buffered: true});
+        // in a test environment / no TBT at all environment
+        // the observer is never called hence timing it out
+        setTimeout(() => resolve(totalBlockingTimeScore), 2000);
+      });
+    });
+
     responses.push({
       id: uuidv4(),
       reportUrl: '',
@@ -216,6 +232,7 @@ async function getPerformanceForURL(
         LCP: LCP / 1000.0,
         FCP: FCP / 1000.0,
         CLS: CLS,
+        TBT: TBT,
         consoleErrors: 0,
       },
     });
@@ -297,14 +314,15 @@ export function averageCrossReportMetrics(
         100
     ) / 100;
 
-  const consoleErrors =
-    Math.round(
-      (responses
-        .map(r => r.scores.consoleErrors)
-        .reduce((r1, r2) => r1 + r2, 0) /
-        responses.length) *
-        100
-    ) / 100;
+  const TBT = Math.round(
+    responses.map(r => r.scores.TBT).reduce((r1, r2) => r1 + r2, 0) /
+      responses.length
+  );
+
+  const consoleErrors = Math.round(
+    responses.map(r => r.scores.consoleErrors).reduce((r1, r2) => r1 + r2, 0) /
+      responses.length
+  );
 
   return {
     id: responses[0].id,
@@ -315,6 +333,7 @@ export function averageCrossReportMetrics(
       FCP: FCP,
       LCP: LCP,
       CLS: CLS,
+      TBT: TBT,
       consoleErrors: consoleErrors,
     },
   };

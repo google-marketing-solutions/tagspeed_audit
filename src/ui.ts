@@ -60,11 +60,16 @@ export function printResult(result: AuditResponse, baseline: AuditResponse) {
     !isBaseline && baseline.scores.CLS > 0
       ? ` (${round(100 - result.scores.CLS / (baseline.scores.CLS / 100))}%)`
       : '';
+  const TBTImproved = !isBaseline
+    ? ` (${round(100 - result.scores.TBT / (baseline.scores.TBT / 100))}%)`
+    : '';
+
   row.insertCell(1).innerText = `${result.scores.LCP} s${LCPImproved}`;
   row.insertCell(2).innerText = `${result.scores.FCP} s${FCPImproved}`;
   row.insertCell(3).innerText = `${result.scores.CLS}${CLSImproved}`;
+  row.insertCell(4).innerText = `${result.scores.TBT} ms${TBTImproved}`;
   row.insertCell(
-    4
+    5
   ).innerHTML = `<img src="data:image/png;base64, ${result.screenshot}" alt="Screenshot with ${result.blockedURL} blocked" width="70px" height="128px" onclick="screenshotClick(event)">`;
   for (let i = 0; i < row.cells.length; i++) {
     row.cells[i].classList.add('mdc-data-table__cell');
