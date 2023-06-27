@@ -257,8 +257,10 @@
             <th mat-header-cell *matHeaderCellDef>LCP</th>
             <td mat-cell *matCellDef="let element">
               {{ element.scores.LCP
-              }}<span *ngIf="element.deltaBaseline">
-                ({{ element.deltaBaseline.LCP }}%)</span
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.LCP"
+              >
+                ({{ element.deltaBaseline.LCP * -1 | number : ".2-2" }}%)</span
               >
             </td>
           </ng-container>
@@ -267,8 +269,10 @@
             <th mat-header-cell *matHeaderCellDef>FCP</th>
             <td mat-cell *matCellDef="let element">
               {{ element.scores.FCP
-              }}<span *ngIf="element.deltaBaseline">
-                ({{ element.deltaBaseline.FCP }}%)</span
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.FCP"
+              >
+                ({{ element.deltaBaseline.FCP * -1 | number : ".2-2" }}%)</span
               >
             </td>
           </ng-container>
@@ -277,8 +281,10 @@
             <th mat-header-cell *matHeaderCellDef>CLS</th>
             <td mat-cell *matCellDef="let element">
               {{ element.scores.CLS
-              }}<span *ngIf="element.deltaBaseline">
-                ({{ element.deltaBaseline.CLS }}%)</span
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.CLS"
+              >
+                ({{ element.deltaBaseline.CLS * -1 | number : ".2-2" }}%)</span
               >
             </td>
           </ng-container>
@@ -287,8 +293,10 @@
             <th mat-header-cell *matHeaderCellDef>TBT</th>
             <td mat-cell *matCellDef="let element">
               {{ element.scores.TBT
-              }}<span *ngIf="element.deltaBaseline">
-                ({{ element.deltaBaseline.TBT }}%)</span
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.TBT"
+              >
+                ({{ element.deltaBaseline.TBT * -1 | number : ".2-2" }}%)</span
               >
             </td>
           </ng-container>
