@@ -27,6 +27,12 @@ export type AuditResponse = {
     TBT: number;
     consoleErrors: number;
   };
+  deltaBaseline?: {
+    LCP: number;
+    FCP: number;
+    CLS: number;
+    TBT: number;
+  };
   error?: string;
   screenshot?: string;
   screenshotSafe?: SafeHtml;

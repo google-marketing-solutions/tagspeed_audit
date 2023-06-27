@@ -140,7 +140,8 @@ async function getPerformanceForURL(
   toBlock: Set<string>,
   numberOfReports: number,
   cookies?: string,
-  localStorage?: string
+  localStorage?: string,
+  baseline?: AuditResponse
 ): Promise<AuditResponse> {
   const responses: AuditResponse[] = [];
   for (let i = 0; i < numberOfReports; i++) {
@@ -223,7 +224,7 @@ async function getPerformanceForURL(
       });
     });
 
-    responses.push({
+    const response: AuditResponse = {
       id: uuidv4(),
       reportUrl: '',
       blockedURL: Array.from(toBlock).join(', '),
@@ -235,12 +236,39 @@ async function getPerformanceForURL(
         TBT: TBT,
         consoleErrors: 0,
       },
-    });
+    };
+
+    responses.push(response);
 
     await page.close();
   }
 
   const averagedResponse = averageCrossReportMetrics(responses);
+
+  if (baseline) {
+    averagedResponse.deltaBaseline = {
+      LCP:
+        (((baseline.scores.LCP - averagedResponse.scores.LCP) /
+          (baseline.scores.LCP / 100)) *
+          100) /
+        100,
+      FCP:
+        (((baseline.scores.FCP - averagedResponse.scores.FCP) /
+          (baseline.scores.FCP / 100)) *
+          100) /
+        100,
+      CLS:
+        (((baseline.scores.CLS - averagedResponse.scores.CLS) /
+          (baseline.scores.CLS / 100)) *
+          100) /
+        100,
+      TBT:
+        (((baseline.scores.TBT - averagedResponse.scores.TBT) /
+          (baseline.scores.TBT / 100)) *
+          100) /
+        100,
+    };
+  }
 
   return averagedResponse;
 }
@@ -361,7 +389,8 @@ export async function generateReports(
       toBlock,
       execution.numberOfReports,
       execution.cookies,
-      execution.localStorage
+      execution.localStorage,
+      execution.results[0]
     );
 
     execution.results.push(lhResult);
@@ -381,7 +410,8 @@ export async function generateReports(
         new Set<string>([b]),
         execution.numberOfReports,
         execution.cookies,
-        execution.localStorage
+        execution.localStorage,
+        execution.results[0]
       );
 
       execution.results.push(lhResult);

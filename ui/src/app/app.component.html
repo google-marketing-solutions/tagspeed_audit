@@ -255,22 +255,42 @@
 
           <ng-container matColumnDef="lcp">
             <th mat-header-cell *matHeaderCellDef>LCP</th>
-            <td mat-cell *matCellDef="let element">{{ element.scores.LCP }}</td>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.LCP
+              }}<span *ngIf="element.deltaBaseline">
+                ({{ element.deltaBaseline.LCP }}%)</span
+              >
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="fcp">
             <th mat-header-cell *matHeaderCellDef>FCP</th>
-            <td mat-cell *matCellDef="let element">{{ element.scores.FCP }}</td>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.FCP
+              }}<span *ngIf="element.deltaBaseline">
+                ({{ element.deltaBaseline.FCP }}%)</span
+              >
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="cls">
             <th mat-header-cell *matHeaderCellDef>CLS</th>
-            <td mat-cell *matCellDef="let element">{{ element.scores.CLS }}</td>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.CLS
+              }}<span *ngIf="element.deltaBaseline">
+                ({{ element.deltaBaseline.CLS }}%)</span
+              >
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="tbt">
             <th mat-header-cell *matHeaderCellDef>TBT</th>
-            <td mat-cell *matCellDef="let element">{{ element.scores.TBT }}</td>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.TBT
+              }}<span *ngIf="element.deltaBaseline">
+                ({{ element.deltaBaseline.TBT }}%)</span
+              >
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="screen">

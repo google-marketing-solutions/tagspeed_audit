@@ -154,6 +154,7 @@ export class AppComponent {
     const data = this.extractRequest();
     const server: string = this.formGroup.get('server')?.value;
     this.isLoading = true;
+    this.results = undefined;
 
     firstValueFrom(
       this.http.post<ExecutionResponse>(`${server}/test/`, data)
@@ -174,6 +175,7 @@ export class AppComponent {
                 this.error = JSON.stringify(err);
                 this.isLoading = false;
                 this.currentExecution = undefined;
+                this.cancel();
                 return of(null);
               }),
               takeUntil(this.stopPolling)
@@ -190,9 +192,9 @@ export class AppComponent {
                 });
                 this.results = response;
                 if (this.results.status === 'complete') {
-                  this.isLoading = false;
                   this.stopPolling.next({});
                 }
+                this.isLoading = false;
               }
             });
         }
