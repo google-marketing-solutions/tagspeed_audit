@@ -8,3 +8,5 @@ build
 
 #Webpack gitignore
 dist
+
+**/.vscode/**

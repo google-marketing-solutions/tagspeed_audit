@@ -1,0 +1,321 @@
+<!--
+// Copyright 2023 Google LLC
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License. You may obtain a copy
+// of the License at
+
+//   http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
+-->
+<div class="container">
+  <div class="row">
+    <div class="col-12 text-center">
+      <h1>
+        <img
+          src="assets/icon.png"
+          class="logo"
+          title="3rd party audit logo"
+          alt="3rd party audit logo"
+        />
+        3rd Party Audit
+      </h1>
+    </div>
+  </div>
+  <mat-card>
+    <mat-card-header><h3>Welcome!</h3></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formGroup">
+        <fieldset [disabled]="isLoading">
+          <div class="row">
+            <div class="col-6">
+              <p><strong>Entering an URL is enough to get started!</strong></p>
+              <p>
+                Extracting 3rd parties is not a pre-requisite, you can start
+                directly with generating a report.
+              </p>
+              <p>
+                The report will contain a baseline, with nothing blocked, then
+                one line per 3rd party network request, where the request is
+                blocked and performance checked.
+              </p>
+              <p>
+                We primarely leverage
+                <a href="https://web.dev/vitals" target="_blank"
+                  >Core Web Vitals for the performance checks</a
+                >.
+              </p>
+            </div>
+            <div class="col-6">
+              <mat-form-field appearance="fill">
+                <mat-label>Tool Server Host</mat-label>
+                <input
+                  type="url"
+                  aria-label="Tool Server Host"
+                  matInput
+                  placeholder="Tool Server Host"
+                  formControlName="server"
+                />
+                <mat-hint
+                  >Specificy the exact URL, including parameters that could
+                  bypass cookie banners or set A/B tests.</mat-hint
+                >
+              </mat-form-field>
+              <br /><br />
+              <mat-form-field appearance="fill">
+                <mat-label>URL</mat-label>
+                <input
+                  type="url"
+                  aria-label="URL"
+                  matInput
+                  cdkFocusInitial
+                  placeholder="URL"
+                  formControlName="url"
+                />
+                <mat-hint
+                  >Specificy the exact URL, including parameters that could
+                  bypass cookie banners or set A/B tests.</mat-hint
+                >
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <mat-form-field appearance="fill">
+                <mat-label
+                  >How many perf. checks to run per 3rd party and average (for
+                  variance mitigation)?</mat-label
+                >
+                <input
+                  type="number"
+                  aria-label="Number of performance checks per 3rd party"
+                  matInput
+                  formControlName="numberOfReports"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-4">
+              <mat-form-field appearance="fill">
+                <mat-label>User Agent Override (optional)</mat-label>
+                <input
+                  type="text"
+                  aria-label="User Agent Override"
+                  matInput
+                  placeholder="OPTIONAL"
+                  formControlName="userAgentOverride"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-4">
+              <mat-form-field appearance="fill">
+                <mat-label
+                  >Max URLs to attempt to block, for performance (optional,
+                  empty means no limit)</mat-label
+                >
+                <input
+                  type="number"
+                  aria-label="Max number of urls to block, empty means no limit"
+                  matInput
+                  formControlName="max"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-4">
+              <mat-form-field appearance="fill">
+                <mat-label>Cookies (optional)</mat-label>
+                <input
+                  type="text"
+                  aria-label="Cookies"
+                  matInput
+                  placeholder="OPTIONAL"
+                  formControlName="cookies"
+                />
+                <mat-hint>
+                  Format expected to be ';' separated key value pairs, e.g.
+                  _octo=HASH123;device_id="IDHERE"
+                </mat-hint>
+              </mat-form-field>
+            </div>
+            <div class="col-4">
+              <mat-form-field appearance="fill">
+                <mat-label>Local Storage (optional)</mat-label>
+                <input
+                  type="text"
+                  aria-label="Local Storage"
+                  matInput
+                  placeholder="OPTIONAL"
+                  formControlName="localStorage"
+                />
+                <mat-hint>
+                  Format expected to be ';' separated key value pairs, e.g.
+                  _octo=HASH123;device_id="IDHERE"
+                </mat-hint>
+              </mat-form-field>
+            </div>
+            <div class="col-4">
+              <mat-checkbox
+                aria-label="Bulk block all selected 3rd parties"
+                formControlName="blockAll"
+                >Block in-scope 3rd parties in <strong>bulk</strong>, generating
+                a single line, alongside the baseline, instead of split
+                lines</mat-checkbox
+              >
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div class="row error" *ngIf="error">
+        <div class="col-12">{{ error }}</div>
+      </div>
+      <mat-card *ngIf="thirdPartyResults.length > 0">
+        <mat-card-header><h3>Identified 3rd Parties</h3></mat-card-header>
+        <mat-card-content>
+          <p>
+            Select from this list and Generating a report will inform the tool
+            to block only the selected rows. If none are selected, all are
+            blocked. This works with the Bulk option.
+          </p>
+          <button mat-flat-button color="primary" (click)="toggleSelectAll()">
+            Select All
+          </button>
+          <br />
+          <br />
+          <div *ngFor="let p of thirdPartyResults" class="third-party">
+            <mat-checkbox [checked]="p.selected">{{ p.name }}</mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-card-content>
+    <mat-card-actions>
+      <div class="row">
+        <div class="col-5">
+          <button
+            mat-flat-button
+            type="button"
+            color="primary"
+            (click)="extractThirdParties()"
+            [disabled]="isLoading || !formGroup.valid"
+          >
+            Extract 3rd party requests
+          </button>
+        </div>
+        <div class="col-7 text-right">
+          <button
+            mat-flat-button
+            type="button"
+            color="primary"
+            [disabled]="isLoading || !formGroup.valid"
+            (click)="generateReport()"
+          >
+            Generate report
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            color="primary"
+            [disabled]="!isLoading || !currentExecution"
+            (click)="cancel()"
+          >
+            Cancel execution
+          </button>
+        </div>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header><h3>Results</h3></mat-card-header>
+    <mat-card-content>
+      <p *ngIf="!results">No results to display.</p>
+      <div *ngIf="results">
+        <p>
+          Processed {{ results.results?.length || 0 }}/{{
+            currentExecution?.expectedResults
+          }}.
+        </p>
+        <table
+          *ngIf="results.results"
+          mat-table
+          [dataSource]="results.results"
+          class="mat-elevation-z8"
+        >
+          <ng-container matColumnDef="urls">
+            <th mat-header-cell *matHeaderCellDef>URLs</th>
+            <td mat-cell *matCellDef="let element" [title]="element.blockedURL">
+              {{
+                (element.blockedURL ? element.blockedURL : "BASELINE")
+                  | slice : 0 : 50
+              }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="lcp">
+            <th mat-header-cell *matHeaderCellDef>LCP</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.LCP
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.LCP"
+              >
+                ({{ element.deltaBaseline.LCP * -1 | number : ".2-2" }}%)</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fcp">
+            <th mat-header-cell *matHeaderCellDef>FCP</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.FCP
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.FCP"
+              >
+                ({{ element.deltaBaseline.FCP * -1 | number : ".2-2" }}%)</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cls">
+            <th mat-header-cell *matHeaderCellDef>CLS</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.CLS
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.CLS"
+              >
+                ({{ element.deltaBaseline.CLS * -1 | number : ".2-2" }}%)</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tbt">
+            <th mat-header-cell *matHeaderCellDef>TBT</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.scores.TBT
+              }}<span
+                *ngIf="element.deltaBaseline && element.deltaBaseline.TBT"
+              >
+                ({{ element.deltaBaseline.TBT * -1 | number : ".2-2" }}%)</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="screen">
+            <th mat-header-cell *matHeaderCellDef>Screen</th>
+            <td mat-cell *matCellDef="let element" class="text-center">
+              <div
+                class="screen"
+                [innerHTML]="element.screenshotSafe"
+                (click)="screenshotClick(element.screenshot)"
+              ></div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -12,10 +12,10 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 import express from 'express';
-import path from 'path';
 import {doAnalysis, identifyThirdParties} from './core';
 import {AuditExecution} from './types';
 import {v4 as uuidv4} from 'uuid';
+import cors from 'cors';
 
 const app = express();
 const port = 3000;
@@ -23,13 +23,7 @@ const executions: AuditExecution[] = [];
 
 app.use(express.static('dist'));
 app.use(express.json()); // to support JSON-encoded bodies
-
-/**
- * Static files.
- */
-app.get('/', (_, res) => {
-  res.sendFile(path.join(__dirname + '/index.html'));
-});
+app.use(cors());
 
 /**
  * Poll for the status of an execution.
@@ -51,7 +45,7 @@ app.get('/cancel/:id', (req, res) => {
   const execution = executions.find(e => e.id === req.params.id);
   if (execution) {
     execution.status = 'canceled';
-    res.sendStatus(200);
+    res.send(execution);
   } else {
     res.sendStatus(404);
   }
