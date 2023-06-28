@@ -185,7 +185,7 @@
           <br />
           <br />
           <div *ngFor="let p of thirdPartyResults" class="third-party">
-            <mat-checkbox [checked]="p.selected">{{ p.name }}</mat-checkbox>
+            <mat-checkbox [checked]="p.selected" (change)="p.selected = $event.checked">{{ p.name }}</mat-checkbox>
           </div>
         </mat-card-content>
       </mat-card>
@@ -232,11 +232,20 @@
     <mat-card-content>
       <p *ngIf="!results">No results to display.</p>
       <div *ngIf="results">
-        <p>
-          Processed {{ results.results?.length || 0 }}/{{
-            currentExecution?.expectedResults
-          }}.
-        </p>
+        <div class="row">
+          <div class="col-6">
+            <p>
+              Processed {{ results.results?.length || 0 }}/{{
+                currentExecution?.expectedResults
+              }}.
+            </p>
+          </div>
+          <div class="col-6">
+            <button mat-flat-button color="primary" (click)="export()">
+              Export
+            </button>
+          </div>
+        </div>
         <table
           *ngIf="results.results"
           mat-table
