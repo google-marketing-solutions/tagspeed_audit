@@ -22,7 +22,7 @@
 }
 
 .text-right {
-    text-align: right;
+  text-align: right;
 }
 
 fieldset {
@@ -31,6 +31,12 @@ fieldset {
 
 .screen {
   cursor: pointer;
+}
+
+.error {
+  font-weight: bold;
+  padding: 10px;
+  color: red;
 }
 
 table {

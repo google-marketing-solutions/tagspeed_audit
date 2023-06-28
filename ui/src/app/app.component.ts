@@ -12,7 +12,7 @@
 // under the License.
 
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuditExecution, ExecutionResponse } from './types';
 import {
@@ -141,9 +141,9 @@ export class AppComponent {
         `${server}/status/${this.currentExecution?.executionId}`
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: HttpErrorResponse) => {
           console.error(err);
-
+          this.error = err.message;
           this.stopPolling.next({});
           return of(null);
         })
