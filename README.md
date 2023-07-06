@@ -26,11 +26,11 @@ management systems make it easy for non-technical people to deploy complex
 measurement features to websites, they don't often provide any insights into
 what impact those features are having on overall performance. This can lead to
 tens of megabytes of JavaScript being added to sites, resulting in slower
-load times and poor interactivity. 
+load times and poor interactivity.
 
 Tagspeed Audit provides a way for non-technical users to measure the performance
 impact of individual scripts on a page, based on the [Core Web
-Vitals](https://web.dev/vitals/) metrics. 
+Vitals](https://web.dev/vitals/) metrics.
 
 ## Building and Deploying
 
@@ -49,7 +49,7 @@ npm install
 npm run build
 ```
 
-### Running 
+### Running
 ```
 cd server
 npm run start
@@ -58,7 +58,12 @@ cd ui
 npm run start
 ```
 
-### Tests 
+Alternatively you can run the helper script
+```
+bash run.sh
+```
+
+### Tests
 ```
 cd server
 npm test
@@ -66,4 +71,3 @@ npm test
 cd ui
 npm test
 ```
- 
