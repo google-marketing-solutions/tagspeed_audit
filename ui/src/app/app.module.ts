@@ -49,7 +49,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatListModule,
     MatOptionModule,
     MatSelectModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
