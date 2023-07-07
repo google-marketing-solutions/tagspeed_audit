@@ -245,7 +245,7 @@
         >
           <ng-container matColumnDef="urls">
             <th mat-header-cell *matHeaderCellDef>URLs</th>
-            <td mat-cell *matCellDef="let element" [title]="element.blockedURL">
+            <td mat-cell *matCellDef="let element" [matTooltip]="element.blockedURL">
               {{
                 (element.blockedURL ? element.blockedURL : "BASELINE")
                   | slice : 0 : 50
