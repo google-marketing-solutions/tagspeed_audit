@@ -15,6 +15,7 @@ import { Component } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuditExecution, ExecutionResponse } from './types';
+import { ExportToCsv } from 'export-to-csv';
 import {
   Subject,
   catchError,
@@ -42,6 +43,17 @@ export class AppComponent {
   displayedColumns: string[] = ['urls', 'lcp', 'fcp', 'cls', 'tbt', 'screen'];
 
   private stopPolling = new Subject();
+  private csvOptions = {
+    fieldSeparator: ',',
+    quoteStrings: '"',
+    decimalSeparator: '.',
+    showLabels: true,
+    useBom: true,
+    useKeysAsHeaders: false,
+    headers: this.displayedColumns.map((c) => c),
+  };
+
+  private csvExporter = new ExportToCsv(this.csvOptions);
 
   constructor(
     private http: HttpClient,
@@ -62,6 +74,8 @@ export class AppComponent {
       blockAll: [false, []],
     });
   }
+
+  export() {}
 
   private extractRequest() {
     const url: string = this.formGroup.get('url')?.value ?? '';
@@ -88,13 +102,22 @@ export class AppComponent {
       blockAll,
     };
 
+    if (
+      this.thirdPartyResults.find((p) => p.selected) &&
+      !this.areAllSelected()
+    ) {
+      data.blockSpecificUrls = this.thirdPartyResults
+        .filter((p) => p.selected)
+        .map((p) => p.name);
+    }
+
     return data;
   }
 
   extractThirdParties() {
     const data = this.extractRequest();
     const server: string = this.formGroup.get('server')?.value;
-
+    this.error = undefined;
     this.thirdPartyResults = [];
     this.isLoading = true;
     firstValueFrom(
@@ -155,6 +178,8 @@ export class AppComponent {
     const server: string = this.formGroup.get('server')?.value;
     this.isLoading = true;
     this.results = undefined;
+    this.currentExecution = undefined;
+    this.error = undefined;
 
     firstValueFrom(
       this.http.post<ExecutionResponse>(`${server}/test/`, data)
@@ -162,7 +187,15 @@ export class AppComponent {
       (response) => {
         if (response.error) {
           this.error = response.error;
+          this.isLoading = false;
+          this.stopPolling.next({});
+          console.error(response.error);
         } else {
+          if (
+            this.currentExecution &&
+            this.currentExecution.executionId !== response.executionId
+          )
+            return;
           this.currentExecution = response;
           timer(1, 5000)
             .pipe(
@@ -190,11 +223,15 @@ export class AppComponent {
                   );
                   return r;
                 });
+                if (this.results && this.results?.id !== response.id) {
+                  this.stopPolling.next({});
+                  return;
+                }
                 this.results = response;
                 if (this.results.status === 'complete') {
                   this.stopPolling.next({});
+                  this.isLoading = false;
                 }
-                this.isLoading = false;
               }
             });
         }
@@ -204,13 +241,14 @@ export class AppComponent {
         this.error = JSON.stringify(err);
         this.currentExecution = undefined;
         this.isLoading = false;
+        this.stopPolling.next({});
       }
     );
   }
 
   cancel() {
     const server: string = this.formGroup.get('server')?.value;
-
+    this.stopPolling.next({});
     firstValueFrom(
       this.http.get(`${server}/cancel/${this.currentExecution?.executionId}`)
     ).then(
