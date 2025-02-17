@@ -1,3 +1,7 @@
+> [!CAUTION]
+> Please note that this solution has been archived as of February 2025. 
+> No further development or updates will be made to the solution.
+
 Copyright 2022 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
